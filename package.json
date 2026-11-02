@@ -8,6 +8,11 @@
   },
   "scripts": {
     "test": "playwright test",
+    "test:local": "node scripts/app.mjs test",
+    "app:up": "node scripts/app.mjs up",
+    "app:down": "node scripts/app.mjs down",
+    "app:status": "node scripts/app.mjs status",
+    "app:logs": "node scripts/app.mjs logs",
     "postinstall": "node -e \"import('playwright-pom-harness/scripts/postinstall.mjs').catch(()=>{})\""
   },
   "devDependencies": {

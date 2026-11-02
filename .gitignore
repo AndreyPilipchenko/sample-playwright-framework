@@ -75,3 +75,6 @@ ctrf/
 /.claude/skills/validation-methods
 /.agents/skills/ROOTS.md
 /.claude/skills/ROOTS.md
+
+# Local application-under-test stack (scripts/app.mjs)
+/.app/

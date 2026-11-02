@@ -50,11 +50,54 @@ npm test                # runs the suite headless; opens the HTML/Allure report 
 Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
 conventions with `npx --no pom-harness check-conventions`.
 
+## Running the app locally
+
+By default the suite runs against the shared public instance. You can instead run the
+application under test on your own machine in Docker — useful for a clean, freshly
+seeded dataset, for offline work, and for avoiding interference from other users of
+the public instance.
+
+Requires Docker and free ports `4200`, `8091`, `3306`.
+
+```sh
+npm run app:up        # start and seed the stack (first run pulls ~1.5 GB of images)
+npm run test:local    # run the suite against http://localhost:4200
+npm run app:status    # readiness and container state
+npm run app:logs      # container logs
+npm run app:down      # stop it (add -- --volumes to drop the data too)
+```
+
+`scripts/app.mjs` backs these — it downloads the upstream project's
+`docker-compose.prod.yml` into a gitignored `.app/` directory and runs the prebuilt
+images, so no application source is cloned. Useful options:
+
+```sh
+node scripts/app.mjs up --variant sprint5 --timeout 900   # a different upstream build
+node scripts/app.mjs test -- --headed --project=chromium  # pass args through to Playwright
+```
+
+The local instance is pointed at by overriding `APP_URL`, which
+`src/config/targets.ts` resolves ahead of the committed target — no config file is
+edited. Any Playwright invocation honours it:
+
+```sh
+APP_URL=http://localhost:4200 npx playwright test
+```
+
 ## CI
 
 `.github/workflows/playwright.yml` runs on every push/PR to `main` (and on manual
-dispatch): installs dependencies and Chromium, checks conventions, runs the suite
-headless, and publishes the HTML and Allure reports as build artifacts.
+dispatch) with two independent jobs:
+
+| Job | What it does |
+|---|---|
+| `test` | Runs the suite against the hosted public instance |
+| `local-app` | Brings the application up on the runner with Docker, seeds it, and runs the suite against that private instance |
+
+Both check conventions, run headless, and publish HTML and Allure reports as
+artifacts (the `local-app` job suffixes its artifact names, and also uploads container
+logs when the run does not pass). They are deliberately separate so a hosted-instance
+outage cannot mask a genuine suite failure, and so the two run in parallel.
 
 ## Tests
 

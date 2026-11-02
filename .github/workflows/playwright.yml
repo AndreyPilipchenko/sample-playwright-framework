@@ -77,3 +77,76 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
+  # Separate job: brings the application under test up on the runner itself and runs
+  # the suite against that private instance instead of the shared public one.
+  #
+  # Why a second job rather than a step in the one above: the two runs answer
+  # different questions (is the hosted target healthy vs does the suite pass against
+  # a known-good, freshly seeded instance), they must not share a failure, and this
+  # one carries a much heavier setup cost. Running them in parallel also keeps total
+  # wall-clock down. Artifact names are suffixed so they cannot collide with the
+  # hosted job's uploads — upload-artifact@v4 rejects duplicate names across jobs.
+  local-app:
+    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start the application under test
+        run: node scripts/app.mjs up --timeout 900
+
+      - name: Run Playwright specs against the local instance
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never node scripts/app.mjs test -- --project=chromium
+        continue-on-error: true # reporting and teardown below must run even when tests fail
+
+      # Container logs are the only way to diagnose an application-side failure after
+      # the runner is torn down, so capture them whenever the run did not pass.
+      - name: Capture application logs
+        if: always() && steps.run_specs.outcome != 'success'
+        run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
+
+      - name: Publish application logs
+        if: always() && steps.run_specs.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs-local
+          path: app-logs.txt
+          retention-days: 30
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-local
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-local
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      - name: Stop the application under test
+        if: always()
+        run: node scripts/app.mjs down --volumes || true
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
