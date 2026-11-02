@@ -204,6 +204,7 @@ export class ApiActions {
     }
     if (failure) {
       entry.error = {
+        // oxlint-disable-next-line typescript/no-base-to-string -- non-Error throwables are stringified as-is
         message: failure instanceof Error ? failure.message : String(failure),
         stack: failure instanceof Error ? failure.stack : undefined,
       };

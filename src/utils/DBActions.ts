@@ -42,7 +42,8 @@ export interface DBTypedParam {
   value: unknown;
 }
 
-export type DBParams = Record<string, unknown | DBTypedParam>;
+/** Param values: a plain value (type inferred) or a DBTypedParam. */
+export type DBParams = Record<string, unknown>;
 
 export interface DBQueryResult<T = Record<string, unknown>> {
   /** Rows of the first recordset; [] for non-SELECT statements. */

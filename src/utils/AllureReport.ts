@@ -59,6 +59,7 @@ export default class AllureReport extends AllureReporter {
   }
 
   /** Native onExit runs after all onEnd hooks, including Allure's environment output. */
+  // oxlint-disable-next-line typescript/no-misused-promises -- Playwright's Reporter.onExit may return a Promise; allure-playwright types it void.
   async onExit(): Promise<void> {
     this.reportJob ??= this.finishReport();
     await this.reportJob;
@@ -67,7 +68,7 @@ export default class AllureReport extends AllureReporter {
   /** Preserve evidence and publish completed HTML; reporting errors never replace native test outcomes. */
   private async finishReport(): Promise<void> {
     try {
-      await super.onExit();
+      super.onExit(); // synchronous in allure-playwright; results are already flushed in onEnd
       const helper = await import(pathToFileURL(require.resolve('playwright-pom-harness/scripts/lib/reporting/allure.mjs')).href);
       const roots = {projectRoot: process.cwd()};
       const run = helper.reserveAllureReport(roots, {historyRoot: process.env.HARNESS_ALLURE_HISTORY ?? allureConfig.historyDir});

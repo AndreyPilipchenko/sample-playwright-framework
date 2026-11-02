@@ -13,7 +13,10 @@
     "app:down": "node scripts/app.mjs down",
     "app:status": "node scripts/app.mjs status",
     "app:logs": "node scripts/app.mjs logs",
-    "postinstall": "node -e \"import('playwright-pom-harness/scripts/postinstall.mjs').catch(()=>{})\""
+    "postinstall": "node -e \"import('playwright-pom-harness/scripts/postinstall.mjs').catch(()=>{})\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
+    "test:smoke": "playwright test --grep @smoke"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
@@ -23,7 +26,10 @@
     "allure-js-commons": "3.13.0",
     "allure-playwright": "3.13.0",
     "dotenv": "17.4.2",
+    "eslint-plugin-playwright": "2.12.2",
     "mssql": "12.7.2",
+    "oxlint": "1.90.0",
+    "oxlint-tsgolint": "7.0.2005",
     "playwright": "1.63.0",
     "playwright-ctrf-json-reporter": "0.0.29",
     "playwright-pom-harness": "file:.harness/vendor/playwright-pom-harness-4.3.2.tgz",

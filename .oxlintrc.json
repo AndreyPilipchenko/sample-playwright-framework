@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "options": {
+    "typeAware": true
+  },
+  "plugins": ["typescript"],
+  "jsPlugins": ["eslint-plugin-playwright"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "typescript/no-floating-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-misused-promises": "error",
+    "playwright/missing-playwright-await": "error",
+    "playwright/no-focused-test": "error",
+    "playwright/no-wait-for-timeout": "error",
+    "playwright/no-page-pause": "error",
+    "playwright/no-useless-await": "error",
+    "playwright/valid-expect": "error"
+  },
+  "overrides": [
+    {
+      "files": ["src/utils/UiControls.ts"],
+      "rules": {
+        "playwright/no-wait-for-timeout": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["node_modules", "reports", "test-results", ".harness", ".app", ".tmp-chaosengine", ".claude", ".agents"]
+}

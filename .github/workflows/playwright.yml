@@ -46,6 +46,13 @@ jobs:
       - name: Check POM conventions
         run: npx --no pom-harness check-conventions
 
+      # Static checks run once, here only; the local-app job exercises the same code.
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint (floating promises, missing awaits, focused tests)
+        run: npm run lint
+
       - name: Run Playwright specs
         id: run_specs
         run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=chromium

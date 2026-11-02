@@ -44,7 +44,7 @@ function fmt(value: unknown): string {
       const json = JSON.stringify(value);
       return json.length > 120 ? `${json.slice(0, 120)}…` : json;
     } catch {
-      return String(value);
+      return '<unserializable object>';
     }
   }
   return String(value);
