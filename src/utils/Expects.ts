@@ -301,3 +301,8 @@ export async function expectToHaveSecretValue(
 export async function expectToHaveURL(page: Page, expected: string | RegExp, options?: RetryOptions): Promise<void> {
   await expect(page, `Expect the page URL to be ${fmt(expected)}`).toHaveURL(expected, options);
 }
+
+/** Auto-retrying page-title assertion — `Expect the page title to be <expected>`. */
+export async function expectToHaveTitle(page: Page, expected: string | RegExp, options?: RetryOptions): Promise<void> {
+  await expect(page, `Expect the page title to be ${fmt(expected)}`).toHaveTitle(expected, options);
+}
