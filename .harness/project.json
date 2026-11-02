@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "defaultEnvironment": "practice",
+  "environments": {
+    "practice": {
+      "environmentMode": "test",
+      "browserTargets": ["app"],
+      "apiTargets": [],
+      "databaseTargets": []
+    }
+  }
+}

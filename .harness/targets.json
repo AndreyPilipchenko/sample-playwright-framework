@@ -1,0 +1,9 @@
+{
+  "browser": {
+    "app": {
+      "origins": ["https://with-bugs.practicesoftwaretesting.com"]
+    }
+  },
+  "api": {},
+  "databases": {}
+}
