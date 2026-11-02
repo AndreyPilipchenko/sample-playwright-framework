@@ -1,7 +1,7 @@
 # sample-playwright-framework
 
 A sample Playwright + TypeScript test automation framework, built for training and
-interview practice. It follows the Page Object Model conventions and, with
+interview practice. It follows Page Object Model conventions, with
 Allure/HTML/JSON/JUnit reporting and a CI pipeline.
 
 ## Application under test
@@ -27,6 +27,16 @@ resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (te
 
 See `AGENTS.md` / `CLAUDE.md` for the AI-agent skill routing, and the harness's own
 `node_modules/playwright-pom-harness/docs/` for the full conventions reference.
+
+## Test documentation
+
+[`docs/`](docs/README.md) holds the test documentation for the application under test,
+compiled from the upstream Practice Software Testing docs:
+
+- [Test plan](docs/test-plan.md) — scope, environment, approach, risks, and the
+  expected-failure policy for a deliberately broken target
+- [Test cases](docs/test-cases.md) — test conditions per feature area, traced to
+  upstream acceptance criteria
 
 ## Getting started
 
