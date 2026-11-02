@@ -59,10 +59,6 @@ the public instance.
 
 Requires Docker and free ports `4200`, `8091`, `3306`.
 
-> On Windows, Docker Desktop may install per-user (under
-> `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin`). It is added to your PATH, but
-> terminals opened *before* the install will not see it — open a new one if `docker` is
-> reported as not found.
 
 ```sh
 npm run app:up        # start and seed the stack (first run pulls ~1.5 GB of images)
