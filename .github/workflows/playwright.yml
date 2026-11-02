@@ -1,0 +1,79 @@
+# Adapted from node_modules/playwright-pom-harness/examples/github-actions-playwright.yml
+#
+# SCOPE — CI validation only: the harness's delivery scripts
+# (scripts/fetch-ado-suite.mjs, scripts/ado-pr.mjs, scripts/publish-ado-results.mjs)
+# speak the Azure DevOps REST API. On this GitHub-hosted project this workflow runs
+# the specs and publishes the report artifacts; ADO delivery is not configured here.
+#
+# RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
+# fine since it's a public site — no self-hosted runner needed.
+#
+# SECRETS: none required yet — the current suite has no DB target and no login test,
+# so APP_LOGIN_*/DB_* stay unset. Add the corresponding GitHub Actions secrets and
+# uncomment the env mapping below once a test needs them.
+#
+# Deliberately headless & non-interactive: AUTO_ALLURE_OPEN=false suppresses the
+# Allure auto-open, PW_TEST_HTML_REPORT_OPEN=never suppresses the HTML report
+# server (both would hang a CI runner).
+
+name: Playwright tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Check POM conventions
+        run: npx --no pom-harness check-conventions
+
+      - name: Run Playwright specs
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=chromium
+        continue-on-error: true # reporting below must run even when tests fail
+        # env:                  # uncomment after adding the repo secrets
+        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #   SQLCMDPASSWORD: ${{ secrets.SQLCMDPASSWORD }}
+        #   APP_LOGIN_PASSWORD: ${{ secrets.APP_LOGIN_PASSWORD }}
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      # Fail the job if the run step failed (kept explicit because the run step
+      # uses continue-on-error so the artifacts above always publish):
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
