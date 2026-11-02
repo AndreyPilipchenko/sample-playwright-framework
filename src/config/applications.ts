@@ -19,9 +19,16 @@ export const applications = {
   app: {
     name: 'app',
     url: appUrl('app'),
-    login: {
-      username: process.env.APP_LOGIN_USERNAME ?? '',
-      password: process.env.APP_LOGIN_PASSWORD ?? '',
+    /** Pre-existing accounts per role; setup/auth.setup.ts signs each one in once per run. */
+    accounts: {
+      customer: {
+        username: process.env.APP_CUSTOMER_USERNAME ?? '',
+        password: process.env.APP_CUSTOMER_PASSWORD ?? '',
+      },
+      admin: {
+        username: process.env.APP_ADMIN_USERNAME ?? '',
+        password: process.env.APP_ADMIN_PASSWORD ?? '',
+      },
     },
   },
 };

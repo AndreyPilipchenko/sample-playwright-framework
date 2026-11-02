@@ -69,8 +69,18 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    /* Signs each role in once per run and saves its session (setup/auth.setup.ts);
+     * specs opt in with `test.use({ role: 'customer' })` from src/fixtures/test.ts. */
+    {
+      name: 'setup',
+      testDir: './setup',
+      testMatch: /.*\.setup\.ts/,
+      retries: 0, // an account locks after ONE failed login (known defect #21) — never retry
+      use: { ...devices['Desktop Chrome'] },
+    },
     {
       name: 'chromium',
+      dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
     },
 

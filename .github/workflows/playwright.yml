@@ -9,7 +9,7 @@
 # fine since it's a public site — no self-hosted runner needed.
 #
 # SECRETS: none required yet — the current suite has no DB target and no login test,
-# so APP_LOGIN_*/DB_* stay unset. Add the corresponding GitHub Actions secrets and
+# so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset (the auth setup skips unset roles). Add the corresponding GitHub Actions secrets and
 # uncomment the env mapping below once a test needs them.
 #
 # Deliberately headless & non-interactive: AUTO_ALLURE_OPEN=false suppresses the
@@ -60,7 +60,10 @@ jobs:
         # env:                  # uncomment after adding the repo secrets
         #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         #   SQLCMDPASSWORD: ${{ secrets.SQLCMDPASSWORD }}
-        #   APP_LOGIN_PASSWORD: ${{ secrets.APP_LOGIN_PASSWORD }}
+        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish HTML report
         if: always()

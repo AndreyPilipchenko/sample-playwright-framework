@@ -8,10 +8,13 @@ export class HeaderPage {
 
   // Locators
   private readonly navHome_link: Locator;
+  /** The signed-in account menu — `nav-user-menu` for customers, `nav-admin-menu` for admins. */
+  private readonly accountMenu_button: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.navHome_link = page.locator('[data-test="nav-home"]');
+    this.accountMenu_button = page.locator('[data-test="nav-user-menu"], [data-test="nav-admin-menu"]');
   }
 
   ///// Actions
@@ -27,6 +30,12 @@ export class HeaderPage {
   async verifyNavigationVisible() {
     await step('Verify the navigation bar is visible', async () => {
       await expectToBeVisible('the Home navigation link', this.navHome_link);
+    });
+  }
+
+  async verifySignedIn() {
+    await step('Verify the user is signed in', async () => {
+      await expectToBeVisible('the signed-in account menu', this.accountMenu_button);
     });
   }
 }

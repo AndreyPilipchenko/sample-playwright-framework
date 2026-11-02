@@ -20,7 +20,9 @@ src/apis/     API business layer (not used yet — created on first need)
 src/dbs/      DB business layer (not used yet — created on first need)
 src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
 src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
+src/fixtures/ The suite's `test` with the `role` option (signed-in sessions)
 tests/        Spec files — orchestrate business flows, carry Allure metadata only
+setup/        Setup project — signs each role in once per run
 resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (team libraries)
 .harness/     Harness-managed project config, targets and the vendored package
 ```
@@ -49,6 +51,23 @@ npm test                # runs the suite headless; opens the HTML/Allure report 
 
 Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
 conventions with `npx --no pom-harness check-conventions`.
+
+## Signed-in tests
+
+The `setup` project (`setup/auth.setup.ts`) signs each role in once per run and saves
+its session to the gitignored `playwright/.auth/`. The app keeps its token in
+sessionStorage, which Playwright's `storageState` does not capture, so specs opt in through
+the `role` fixture instead:
+
+```ts
+import { test } from '../src/fixtures/test';
+
+test.use({ role: 'customer' }); // or 'admin'
+```
+
+Credentials come from `.env` (`APP_CUSTOMER_*`, `APP_ADMIN_*`, see `.env.example`); an unset
+role is skipped. The setup never retries, because this target locks an account after **one**
+failed login (known defect #21).
 
 ## Running the app locally
 

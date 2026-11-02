@@ -50,7 +50,7 @@ Published, shared, non-confidential demo credentials:
 | user | `pass123` user — `customer3@practicesoftwaretesting.com` | `pass123` |
 
 Even though these are public, keep them out of committed code and step titles: put
-them in the git-ignored `.env` under `APP_LOGIN_USERNAME` / `APP_LOGIN_PASSWORD`, per
+them in the git-ignored `.env` under `APP_CUSTOMER_*` / `APP_ADMIN_*` (see `.env.example`), per
 this framework's secrets rule. The values above are documentation, not configuration.
 
 > **Shared-state warning.** This is a public instance used concurrently by other
