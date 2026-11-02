@@ -59,6 +59,11 @@ the public instance.
 
 Requires Docker and free ports `4200`, `8091`, `3306`.
 
+> On Windows, Docker Desktop may install per-user (under
+> `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin`). It is added to your PATH, but
+> terminals opened *before* the install will not see it — open a new one if `docker` is
+> reported as not found.
+
 ```sh
 npm run app:up        # start and seed the stack (first run pulls ~1.5 GB of images)
 npm run test:local    # run the suite against http://localhost:4200
@@ -83,6 +88,13 @@ edited. Any Playwright invocation honours it:
 ```sh
 APP_URL=http://localhost:4200 npx playwright test
 ```
+
+The stack starts the UI on `4200`, the REST API on `8091` (Swagger at
+`:8091/api/documentation`) and MariaDB on `3306`. Note that the upstream `web` (nginx)
+and `cron` images are published for **linux/arm64 only** — Docker Desktop emulates
+them transparently, but a bare amd64 Linux host needs binfmt handlers registered
+(`docker run --privileged --rm tonistiigi/binfmt --install arm64`), which is what the
+CI job's QEMU step does.
 
 ## CI
 

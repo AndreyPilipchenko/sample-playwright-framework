@@ -104,6 +104,16 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      # The upstream `web` (nginx) and `cron` images are published for linux/arm64
+      # only, while this runner is amd64. Docker Desktop emulates arm64 out of the
+      # box; a GitHub-hosted runner does not, so without binfmt handlers the `web`
+      # container — the proxy that serves the API on 8091 — fails to start and the
+      # stack never becomes ready. Verified locally: web/cron are arm64, ui/api amd64.
+      - name: Enable arm64 emulation for the upstream nginx/cron images
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Start the application under test
         run: node scripts/app.mjs up --timeout 900
 
