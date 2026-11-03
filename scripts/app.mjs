@@ -19,7 +19,7 @@
  * and is not reproduced here.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
@@ -40,9 +40,21 @@ const defaultVariant = 'sprint5-with-bugs';
 const composeRef = process.env.APP_COMPOSE_REF || 'main';
 const composeUrl = `https://raw.githubusercontent.com/testsmith-io/practice-software-testing/${composeRef}/${composeFile}`;
 
-/** Where the local instance listens once up — these are fixed by the upstream compose file. */
-const appUrl = 'http://localhost:4200';
-const apiUrl = 'http://localhost:8091';
+/**
+ * The harness environment that describes this stack. Its addresses (fixed by the
+ * upstream compose file) live in `.harness/targets.json` like every other environment's,
+ * and `test` selects it through TEST_ENV — the same switch src/config/targets.ts reads.
+ */
+const localEnvironment = 'local';
+const readHarness = (name) => JSON.parse(readFileSync(path.join(projectRoot, '.harness', name), 'utf8'));
+const harnessTargets = readHarness('targets.json');
+const localProfile = readHarness('project.json').environments?.[localEnvironment];
+const appUrl = harnessTargets.browser?.[localProfile?.browserTargets?.[0]]?.origins?.[0];
+const apiUrl = harnessTargets.api?.[localProfile?.apiTargets?.[0]]?.baseUrl?.replace(/\/+$/, '');
+if (!appUrl || !apiUrl) {
+  console.error(`app.mjs: the '${localEnvironment}' environment in .harness/project.json needs a browser target and an API target.`);
+  process.exit(1);
+}
 /** Cheap always-200 endpoint used as the API readiness probe (the API root returns 404). */
 const apiProbe = `${apiUrl}/products`;
 
@@ -193,7 +205,7 @@ async function commandUp(args) {
 
   console.log('\nApplication is ready.');
   console.log(`  Point the suite at it with:  node scripts/app.mjs test`);
-  console.log(`  or set APP_URL=${appUrl} for any Playwright invocation.`);
+  console.log(`  or set TEST_ENV=${localEnvironment} for any Playwright invocation.`);
 }
 
 function commandDown(args) {
@@ -230,9 +242,9 @@ function commandLogs(args) {
 }
 
 /**
- * Runs the Playwright suite against the local instance by overriding the browser
- * target's address. `src/config/targets.ts` resolves APP_URL ahead of the committed
- * target in .harness/targets.json, so no configuration file is edited.
+ * Runs the Playwright suite against the local instance by selecting the `local`
+ * harness environment: `src/config/targets.ts` then resolves every browser and API
+ * address from that environment's targets, so no configuration file is edited.
  */
 function commandTest(args) {
   const passThrough = args[0] === '--' ? args.slice(1) : args;
@@ -246,7 +258,7 @@ function commandTest(args) {
   process.exit(
     run(process.execPath, [cli, 'test', ...passThrough], {
       cwd: projectRoot,
-      env: { ...process.env, APP_URL: appUrl },
+      env: { ...process.env, TEST_ENV: localEnvironment },
     }),
   );
 }

@@ -1,4 +1,5 @@
 import * as os from 'node:os';
+import { environmentName } from './targets';
 
 /**
  * Single source for the Allure report plumbing — consumed by `playwright.config.ts`
@@ -26,6 +27,7 @@ export const allureConfig = {
  * HTML during onExit, after that flush, without duplicating environment files.
  */
 export const allureEnvironmentInfo: Record<string, string> = {
+  test_environment: environmentName,
   os_platform: os.platform(),
   os_release: os.release(),
   os_version: os.version(),

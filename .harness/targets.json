@@ -2,11 +2,17 @@
   "browser": {
     "app": {
       "origins": ["https://with-bugs.practicesoftwaretesting.com"]
+    },
+    "app-local": {
+      "origins": ["http://localhost:4200"]
     }
   },
   "api": {
     "app": {
       "baseUrl": "https://api-with-bugs.practicesoftwaretesting.com"
+    },
+    "app-local": {
+      "baseUrl": "http://localhost:8091"
     }
   },
   "databases": {}

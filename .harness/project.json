@@ -4,8 +4,22 @@
   "environments": {
     "practice": {
       "environmentMode": "test",
-      "browserTargets": ["app"],
-      "apiTargets": ["app"],
+      "browserTargets": [
+        "app"
+      ],
+      "apiTargets": [
+        "app"
+      ],
+      "databaseTargets": []
+    },
+    "local": {
+      "environmentMode": "test",
+      "browserTargets": [
+        "app-local"
+      ],
+      "apiTargets": [
+        "app-local"
+      ],
       "databaseTargets": []
     }
   }

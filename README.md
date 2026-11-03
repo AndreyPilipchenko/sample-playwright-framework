@@ -96,13 +96,19 @@ node scripts/app.mjs up --variant sprint5 --timeout 900   # a different upstream
 node scripts/app.mjs test -- --headed --project=chromium  # pass args through to Playwright
 ```
 
-The local instance is pointed at by overriding `APP_URL`, which
-`src/config/targets.ts` resolves ahead of the committed target — no config file is
-edited. Any Playwright invocation honours it:
+The local instance is a harness environment, `local`, defined in
+`.harness/project.json`. Its browser and API targets are `app-local` in
+`.harness/targets.json`. `TEST_ENV` selects the environment, and
+`src/config/targets.ts` resolves every address from it; without `TEST_ENV` the
+default environment, `practice` (the public instance), is used. Any Playwright
+invocation honours it:
 
 ```sh
-APP_URL=http://localhost:4200 npx playwright test
+TEST_ENV=local npx playwright test
 ```
+
+To point a single run at another address without adding an environment, override it
+per name: `APP_URL` for the UI, `APP_API_URL` for the API.
 
 The stack starts the UI on `4200`, the REST API on `8091` (Swagger at
 `:8091/api/documentation`) and MariaDB on `3306`. Note that the upstream `web` (nginx)
