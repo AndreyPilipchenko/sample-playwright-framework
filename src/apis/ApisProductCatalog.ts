@@ -9,6 +9,12 @@ interface ProductPage {
   data: { name: string; category: { slug: string } }[];
 }
 
+/** One category listing as the API returned it — names and each product's own category, from the same response. */
+export interface CategoryListing {
+  productNames: string[];
+  categorySlugs: string[];
+}
+
 export class ApisProductCatalog {
   readonly apiActions: ApiActions;
 
@@ -21,39 +27,37 @@ export class ApisProductCatalog {
   ///// Actions
 
   /**
-   * Names of the products in one category — the first page only (9 per page), which is
-   * what the product grid shows. Public endpoint, no token.
+   * The first page of one category's products (9 per page), which is what the product
+   * grid shows. Public endpoint, no token. The price window the UI sends is not mirrored:
+   * defect #27 drops the max price, and every Hammer is within the UI's default window.
    */
-  async getProductNamesInCategory(categorySlug: string): Promise<string[]> {
-    return await allure.step(`Get the product names in category: ${categorySlug}`, async () => {
-      const { data } = await this.getCategoryPage(categorySlug);
-      return data.map((product) => product.name);
+  async getCategoryListing(categorySlug: string): Promise<CategoryListing> {
+    return await allure.step(`Get the product listing of category: ${categorySlug}`, async () => {
+      const response = await this.apiActions.get(this.products_serviceName, {
+        params: { by_category_slug: categorySlug },
+      });
+      expectToBe('the product list response status', response.status(), 200);
+      const { data } = (await response.json()) as ProductPage;
+      return {
+        productNames: data.map((product) => product.name),
+        categorySlugs: data.map((product) => product.category.slug),
+      };
     });
   }
 
   ///// Validations
 
-  async verifyProductNamesInclude(productNames: string[], knownNames: string[]) {
+  async verifyProductNamesInclude(listing: CategoryListing, knownNames: string[]) {
     await allure.step(`Verify the category product list includes the known products: ${knownNames.join(', ')}`, async () => {
-      expectToContainAll('the product names in the API response', productNames, knownNames);
+      expectToContainAll('the product names in the API response', listing.productNames, knownNames);
     });
   }
 
   /** Checks each listed product's own category, independently of the filter that selected it. */
-  async verifyAllProductsInCategory(categorySlug: string) {
+  async verifyAllProductsInCategory(listing: CategoryListing, categorySlug: string) {
     await allure.step(`Verify every product listed for category ${categorySlug} belongs to it`, async () => {
-      const { data } = await this.getCategoryPage(categorySlug);
-      const categorySlugs = data.map((product) => product.category.slug);
-      expectToBeGreaterThan('the number of products in the category', categorySlugs.length, 0);
-      expectToEqual('the category of every listed product', categorySlugs, categorySlugs.map(() => categorySlug));
+      expectToBeGreaterThan('the number of products in the category', listing.categorySlugs.length, 0);
+      expectToEqual('the category of every listed product', listing.categorySlugs, listing.categorySlugs.map(() => categorySlug));
     });
-  }
-
-  private async getCategoryPage(categorySlug: string): Promise<ProductPage> {
-    const response = await this.apiActions.get(this.products_serviceName, {
-      params: { by_category_slug: categorySlug },
-    });
-    expectToBe('the product list response status', response.status(), 200);
-    return (await response.json()) as ProductPage;
   }
 }

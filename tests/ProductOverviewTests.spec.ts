@@ -37,13 +37,13 @@ test.describe('Product Overview', () => {
     await allure.feature('Product Overview');
     await allure.testCaseId('TC-PO-8');
 
-    const categoryProductNames = await apisProductCatalog.getProductNamesInCategory(testData.tcPO8.categorySlug);
-    await apisProductCatalog.verifyAllProductsInCategory(testData.tcPO8.categorySlug);
-    await apisProductCatalog.verifyProductNamesInclude(categoryProductNames, testData.tcPO8.knownProductNames);
+    const categoryListing = await apisProductCatalog.getCategoryListing(testData.tcPO8.categorySlug);
+    await apisProductCatalog.verifyAllProductsInCategory(categoryListing, testData.tcPO8.categorySlug);
+    await apisProductCatalog.verifyProductNamesInclude(categoryListing, testData.tcPO8.knownProductNames);
     await homePage.navigate();
     await homePage.verifyProductCatalogVisible();
     await homePage.filterByCategory(testData.tcPO8.categoryName);
-    await homePage.verifyProductNamesShown(categoryProductNames);
+    await homePage.verifyProductNamesShown(categoryListing.productNames);
     await homePage.verifyProductNamesInclude(testData.tcPO8.knownProductNames);
   });
 
