@@ -31,8 +31,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : 3,
+  /* Two workers on CI: the hosted target is a shared public site, so stay modest. Raise it or
+   * shard (`--shard=i/n`) once the suite grows. */
+  workers: process.env.CI ? 2 : 3,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],

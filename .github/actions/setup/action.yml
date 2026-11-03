@@ -1,0 +1,38 @@
+name: Set up the project
+description: Node, npm dependencies and Playwright browsers (cached by Playwright version). Run after actions/checkout.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: npm
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Read the Playwright version
+      id: playwright
+      shell: bash
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    # Browser binaries are large and change only with the Playwright version.
+    - name: Cache Playwright browsers
+      id: browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+    - name: Install browsers and system dependencies
+      if: steps.browsers.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install --with-deps chromium firefox webkit
+
+    # System packages (apt) are not part of the cache, so install them even on a hit.
+    - name: Install system dependencies only
+      if: steps.browsers.outputs.cache-hit == 'true'
+      shell: bash
+      run: npx playwright install-deps chromium firefox webkit

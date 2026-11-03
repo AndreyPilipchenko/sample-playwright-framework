@@ -8,9 +8,12 @@
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
 #
-# SECRETS: none required yet — the current suite has no DB target and no login test,
-# so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset (the auth setup skips unset roles). Add the corresponding GitHub Actions secrets and
-# uncomment the env mapping below once a test needs them.
+# SECRETS: none configured yet, so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset: the auth
+# setup and the login specs skip, and everything else runs. Add the corresponding GitHub
+# Actions secrets and uncomment the env mapping below to run the login specs here.
+#
+# WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
+# this low; raise it, or add `--shard=i/n` through a matrix, once the suite grows.
 #
 # Deliberately headless & non-interactive: AUTO_ALLURE_OPEN=false suppresses the
 # Allure auto-open, PW_TEST_HTML_REPORT_OPEN=never suppresses the HTML report
@@ -32,16 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Set up Node, dependencies and browsers
+        uses: ./.github/actions/setup
 
       - name: Check POM conventions
         run: npx --no pom-harness check-conventions
@@ -103,16 +98,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Set up Node, dependencies and browsers
+        uses: ./.github/actions/setup
 
       # The upstream `web` (nginx) and `cron` images are published for linux/arm64
       # only, while this runner is amd64. Docker Desktop emulates arm64 out of the
