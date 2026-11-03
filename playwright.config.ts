@@ -60,7 +60,8 @@ export default defineConfig({
     /* Sized to measured slow-environment page loads. */
     navigationTimeout: NAVIGATION_DEFAULT_MS,
     /* Native traces, screenshots, videos and report details may contain credentials; restrict artifact access and retention. */
-    trace: 'on-first-retry',
+    /* CI retries, so the retry records the trace; local runs never retry, so keep the failing attempt's trace. */
+    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
     headless: true,
     // viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
