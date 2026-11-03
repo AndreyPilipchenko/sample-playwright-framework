@@ -1,5 +1,6 @@
 import { test, type TestInfo } from '@playwright/test';
 import * as sql from 'mssql';
+import { REDACTED_KEYS } from './RedactedKeys';
 
 /** Connection settings for one SQL Server database. The password never appears in any log or attachment. */
 export interface DBConnectionConfig {
@@ -72,10 +73,6 @@ interface DbQueryLog {
   durationMs: number;
   error?: { message: string; code?: string; phase: 'connect' | 'query' | 'close'; stack?: string };
 }
-
-const REDACTED_KEYS = new Set([
-  'password', 'token', 'access_token', 'refresh_token', 'client_secret', 'secret', 'apikey', 'api_key',
-]);
 
 /**
  * Logging facade over an mssql ConnectionPool — the database sibling of ApiActions.

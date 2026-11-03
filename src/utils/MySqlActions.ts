@@ -1,5 +1,6 @@
 import { test, type TestInfo } from '@playwright/test';
 import { createPool, type Pool, type PoolOptions, type QueryOptions, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
+import { REDACTED_KEYS } from './RedactedKeys';
 
 /** One bindable value, as the driver types it (string, number, Date, Buffer, null, ...). */
 type QueryValue = QueryOptions['values'];
@@ -65,10 +66,6 @@ interface MySqlQueryLog {
   durationMs: number;
   error?: { message: string; code?: string; phase: 'connect' | 'query' | 'close'; stack?: string };
 }
-
-const REDACTED_KEYS = new Set([
-  'password', 'token', 'access_token', 'refresh_token', 'client_secret', 'secret', 'apikey', 'api_key',
-]);
 
 /**
  * Logging facade over a mysql2 Pool — the MySQL / MariaDB sibling of DBActions,

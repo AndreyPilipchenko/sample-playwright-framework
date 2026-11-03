@@ -1,4 +1,5 @@
 import { test, type APIRequestContext, type APIResponse, type TestInfo } from '@playwright/test';
+import { REDACTED_HEADERS, REDACTED_KEYS } from './RedactedKeys';
 
 type FetchOptions = NonNullable<Parameters<APIRequestContext['fetch']>[1]>;
 
@@ -47,12 +48,6 @@ export interface ApiActionsOptions {
   bearerTokenProvider?: () => Promise<string>;
 }
 
-const REDACTED_HEADERS = new Set([
-  'authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'x-api-key', 'api-key', 'x-auth-token',
-]);
-const REDACTED_BODY_KEYS = new Set([
-  'password', 'token', 'access_token', 'refresh_token', 'client_secret', 'secret', 'apikey', 'api_key',
-]);
 const TEXTUAL_CONTENT = /json|text|xml|html|x-www-form-urlencoded|csv|javascript/i;
 
 /**
@@ -302,7 +297,7 @@ export class ApiActions {
     if (Object.getPrototypeOf(value) !== Object.prototype) return value;
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>).map(([k, v]) =>
-        [k, REDACTED_BODY_KEYS.has(k.toLowerCase()) ? '***' : this.redactDeep(v, depth + 1)],
+        [k, REDACTED_KEYS.has(k.toLowerCase()) ? '***' : this.redactDeep(v, depth + 1)],
       ),
     );
   }
