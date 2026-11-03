@@ -46,8 +46,13 @@ compiled from the upstream Practice Software Testing docs:
 npm ci
 npx playwright install --with-deps chromium
 cp .env.example .env   # fill in any values a test needs (none required yet)
-npm test                # runs the suite headless; opens the HTML/Allure report after
+npm test                # runs the suite headless; opens the Allure report after
 ```
+
+Allure (`reports/allure-report/index.html`) is the main report and opens after a local
+run (`AUTO_ALLURE_OPEN=false` turns that off). The Playwright HTML report is still
+written to `reports/playwright-report/`; open it with
+`npx playwright show-report reports/playwright-report`.
 
 Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
 conventions with `npx --no pom-harness check-conventions`.

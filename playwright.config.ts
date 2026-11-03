@@ -36,6 +36,8 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],
+    /* On GitHub Actions, failures also show as inline annotations on the PR diff. */
+    ...(process.env.GITHUB_ACTIONS ? [['github'] as const] : []),
     // Finish Allure before the HTML viewer's onExit can keep an interactive run open.
     // Paths and environmentInfo are shared with setup and the post-flush report job.
     ['./src/utils/AllureReport.ts', { // conventions-ok: illustrative IDs have no destination; remove this exemption when configuring real links.
@@ -43,9 +45,12 @@ export default defineConfig({
       environmentInfo: allureEnvironmentInfo,
       // Configure literal links.tms / links.issue templates when linking is requested (harness-setup).
     }],
-    ['html', { open: 'always', outputFolder: 'reports/playwright-report' }],
+    // Allure is the report that opens after a local run; the HTML report stays on disk
+    // (`npx playwright show-report reports/playwright-report`) and is a CI artifact.
+    ['html', { open: 'never', outputFolder: 'reports/playwright-report' }],
     ['json', { outputFile: 'reports/json-report/test-results.json' }],
-    // consumed by Azure Pipelines' PublishTestResults task — feeds the run's Tests tab
+    // Machine-readable outcomes for CI test-result ingestion. GitHub has no built-in
+    // Tests tab; a checks action (e.g. dorny/test-reporter) can consume this file.
     ['junit', { outputFile: 'reports/junit/results.xml' }],
     ['playwright-ctrf-json-reporter', {}]
   ],
