@@ -27,5 +27,5 @@
       }
     }
   ],
-  "ignorePatterns": ["node_modules", "reports", "test-results", ".harness", ".app", ".tmp-chaosengine", ".claude", ".agents"]
+  "ignorePatterns": ["node_modules", "reports", "test-results", ".harness", ".app", "tools", ".claude", ".agents"]
 }
