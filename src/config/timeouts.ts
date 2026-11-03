@@ -1,30 +1,30 @@
 /**
- * The suite's timing tiers — single source (2026-09-08 Timeout policy ruling;
- * same single-source pattern as reporting.ts, utility-classes practice 17).
- * `playwright.config.ts` imports the four defaults; page classes import the
- * slow-surface tier. The linter's EXPECT_DEFAULT_MS in check-conventions.mjs
- * mirrors EXPECT_DEFAULT_MS here in lockstep (a .mjs script cannot import TS).
+ * The suite's timing tiers — single source (same single-source pattern as reporting.ts,
+ * utility-classes practice 17). `playwright.config.ts` imports the four defaults; page
+ * classes import the slow-surface tier. The conventions linter hardcodes
+ * EXPECT_DEFAULT_MS (check-conventions.mjs, harness package — a .mjs script cannot import
+ * TS), so that value must not change here on its own.
  *
- *  1. Defaults (consumed by playwright.config.ts) — govern every call with NO
- *     inline timeout.
- *  2. SLOW_SURFACE_MS — the documented slow-QC-surface tier for waits that
- *     measurably exceed the assertion default (first-card renders after
- *     navigation, post-approval redirects, the requests-list fetch, document
- *     downloads). One place to tune the whole tier.
- *  3. `expect.poll` pipeline budgets in `src/dbs` — measured per-flow application
- *     facts (issuance 150s, weekly batch 180s, …), welded to their failure
- *     messages; always pinned inline, never named here.
- * Utils retry-ladder budgets (below the defaults) are mechanism, not tier —
- * they stay inline where the ladder lives.
+ * Measured against the Toolshop target (2026-11-03): a cold home-page load takes ~0.5s,
+ * a warm one ~50ms, the first product card renders within ~0.6s, and the smoke test runs
+ * in ~1s. The budgets below are failure ceilings with wide margin for a busy shared
+ * instance or a cold local stack — not expected durations.
+ *
+ *  1. Defaults (consumed by playwright.config.ts) — govern every call with NO inline timeout.
+ *  2. SLOW_SURFACE_MS — for a wait that measurably exceeds the assertion default. The
+ *     linter requires a named tier for any inline timeout above EXPECT_DEFAULT_MS, so a
+ *     slow surface uses this instead of a numeric literal. Nothing needs it yet.
+ * Utils retry-ladder budgets (below the defaults) are mechanism, not tier — they stay
+ * inline where the ladder lives.
  */
 
-/** Whole-test budget (config `timeout`) — external registry wizard journeys exceed Playwright's 30s default; long pipeline journeys raise it per-test via `test.setTimeout`. */
+/** Whole-test budget (config `timeout`) — kept well above EXPECT_DEFAULT_MS, so a failing assertion reports its own message instead of an opaque "test timeout". Raise per test with `test.setTimeout` for a genuinely long journey. */
 export const TEST_DEFAULT_MS = 60_000;
-/** Assertion budget (expect.timeout) — the de-facto QC tier. */
+/** Assertion budget (expect.timeout) — lockstep with the conventions linter; see above. */
 export const EXPECT_DEFAULT_MS = 30_000;
 /** Action budget (use.actionTimeout) — a hung click/fill/waitFor fails as itself. */
 export const ACTION_DEFAULT_MS = 30_000;
-/** Navigation budget (use.navigationTimeout) — sized to the measured QC gotos. */
-export const NAVIGATION_DEFAULT_MS = 60_000;
+/** Navigation budget (use.navigationTimeout) — ~60x the measured cold page load. */
+export const NAVIGATION_DEFAULT_MS = 30_000;
 /** The slow-surface tier — inline on waits that measurably exceed the assertion default. */
 export const SLOW_SURFACE_MS = 60_000;

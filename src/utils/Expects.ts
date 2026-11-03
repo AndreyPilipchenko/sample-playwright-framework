@@ -12,7 +12,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
  *
  * These generic wrappers implement the canonical grammar ONCE:
  * `Expect <subject> to <verb phrase> <formatted expected>`. Business layers pass a
- * business subject phrase ("the quote response status") and the same values the
+ * business subject phrase ("the login response status") and the same values the
  * matcher receives — the facade knows verbs, never domain nouns (practice 1 litmus).
  * Direct locator wrappers end the message with " →"; AllureReport appends the public
  * Playwright locator parameter, yielding `<business clause> → <selector tail>`.

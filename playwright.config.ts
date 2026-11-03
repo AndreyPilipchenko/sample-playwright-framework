@@ -19,11 +19,11 @@ export default defineConfig({
   /* Default testMatch already recurses into subfolders — a one-folder-deep spec
    * layout (tests/<Suite Folder>/<Feature>Tests.spec.ts, design-conventions.md
    * spec-folder ruling) needs no extra config. */
-  /* Multi-step wizard journeys (page load + step transitions) exceed the 30s default. */
+  /* Budgets and their measurements live in src/config/timeouts.ts. The test budget stays
+   * above the assertion budget, so a failing assertion reports its own message. */
   timeout: TEST_DEFAULT_MS,
-  /* Assertion budget for slow environments — the de-facto 30s tier (2026-09-08 timeout
-   * ruling). An inline { timeout } on an assertion now means: this spot deviates
-   * deliberately (hotspots above it; utils retry-ladder budgets below it). */
+  /* An inline { timeout } on an assertion means this spot deviates deliberately
+   * (slow surfaces above it via SLOW_SURFACE_MS; utils retry-ladder budgets below it). */
   expect: { timeout: EXPECT_DEFAULT_MS },
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -56,13 +56,13 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* No baseURL — every journey navigates to an absolute URL from src/config (e.g. the partner portal quote URL). */
+    /* No baseURL — every page navigates to an absolute URL from src/config (e.g. LoginPage's `${applications.app.url}/#/auth/login`). */
     ignoreHTTPSErrors: true,
     /* The app tags its controls with `data-test`, so page classes locate them with page.getByTestId('nav-home'). */
     testIdAttribute: 'data-test',
     /* A hung click/fill/waitFor fails as itself after 30s, never as an opaque "test timed out". */
     actionTimeout: ACTION_DEFAULT_MS,
-    /* Sized to measured slow-environment page loads. */
+    /* A page that does not load fails as a navigation error, well before the test budget. */
     navigationTimeout: NAVIGATION_DEFAULT_MS,
     /* Native traces, screenshots, videos and report details may contain credentials; restrict artifact access and retention. */
     /* CI retries, so the retry records the trace; local runs never retry, so keep the failing attempt's trace. */
