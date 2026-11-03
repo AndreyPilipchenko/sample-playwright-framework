@@ -40,8 +40,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Check POM conventions
         run: npx --no pom-harness check-conventions
@@ -55,7 +55,7 @@ jobs:
 
       - name: Run Playwright specs
         id: run_specs
-        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=chromium
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test
         continue-on-error: true # reporting below must run even when tests fail
         # env:                  # uncomment after adding the repo secrets
         #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -111,8 +111,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       # The upstream `web` (nginx) and `cron` images are published for linux/arm64
       # only, while this runner is amd64. Docker Desktop emulates arm64 out of the
@@ -129,7 +129,7 @@ jobs:
 
       - name: Run Playwright specs against the local instance
         id: run_specs
-        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never node scripts/app.mjs test -- --project=chromium
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never node scripts/app.mjs test
         continue-on-error: true # reporting and teardown below must run even when tests fail
 
       # Container logs are the only way to diagnose an application-side failure after

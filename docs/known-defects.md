@@ -97,9 +97,9 @@ between the UI and accessibility blocks). Defect IDs are referenced from test ca
 ### Notes on the UI block
 
 - **Browser-specific defects** (5, 6, 18–20, 22–24, 26, 35, 44, 45, 48, 49, 53,
-  55–58, 61, 63–67) cannot be found by a Chromium-only run. The framework currently
-  enables Chromium only; Firefox and WebKit are commented out in
-  `playwright.config.ts`. Note also that these defects name **Edge**, which Playwright
+  55–58, 61, 63–67) are found only on the critical paths the `@smoke` subset covers on Firefox and
+  WebKit (the full suite runs on Chromium only; projects in
+  `playwright.config.ts`). Note also that these defects name **Edge**, which Playwright
   reaches via the `msedge` channel on a Chromium project rather than a separate engine.
 - **Defects 68–70 contradict the specification.** The acceptance criterion says the
   attachment must be a `.txt` file that is *exactly 0 KB*; on that reading, refusing

@@ -127,8 +127,9 @@ Layered, matching this framework's architecture:
 Browser coverage matters more than usual here: a large share of the intentional
 defects are **browser-specific** (Chrome vs Firefox vs Edge layout, padding, tab order,
 font and image-loading differences). A Chromium-only suite will structurally miss them.
-The framework currently runs Chromium only; Firefox and WebKit projects are commented
-out in `playwright.config.ts`.
+The framework runs the full suite on Chromium and the `@smoke` subset on Firefox and WebKit
+(projects in `playwright.config.ts`), so browser-specific defects are only caught on those
+critical paths.
 
 ---
 

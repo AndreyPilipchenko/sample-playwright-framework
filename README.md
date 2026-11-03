@@ -45,7 +45,7 @@ compiled from the upstream Practice Software Testing docs:
 
 ```sh
 npm ci
-npx playwright install --with-deps chromium
+npx playwright install --with-deps chromium firefox webkit
 cp .env.example .env   # fill in any values a test needs (none required yet)
 npm test                # runs the suite headless; opens the Allure report after
 ```

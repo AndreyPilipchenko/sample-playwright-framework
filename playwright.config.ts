@@ -95,15 +95,21 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
     },
 
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'], viewport: { width: 1920, height: 1080 } },
-    // },
+    /* Cross-browser coverage is limited to the critical-path `@smoke` subset; the full
+     * functional suite runs on chromium only. */
+    {
+      name: 'firefox',
+      dependencies: ['setup'],
+      grep: /@smoke/,
+      use: { ...devices['Desktop Firefox'], viewport: { width: 1920, height: 1080 } },
+    },
 
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'], viewport: { width: 1920, height: 1080 } },
-    // },
+    {
+      name: 'webkit',
+      dependencies: ['setup'],
+      grep: /@smoke/,
+      use: { ...devices['Desktop Safari'], viewport: { width: 1920, height: 1080 } },
+    },
   ],
 
 });
