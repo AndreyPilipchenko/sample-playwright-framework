@@ -40,10 +40,13 @@ export default defineConfig({
     ...(process.env.GITHUB_ACTIONS ? [['github'] as const] : []),
     // Finish Allure before the HTML viewer's onExit can keep an interactive run open.
     // Paths and environmentInfo are shared with setup and the post-flush report job.
-    ['./src/utils/AllureReport.ts', { // conventions-ok: illustrative IDs have no destination; remove this exemption when configuring real links.
+    ['./src/utils/AllureReport.ts', {
       resultsDir: allureConfig.resultsDir,
       environmentInfo: allureEnvironmentInfo,
-      // Configure literal links.tms / links.issue templates when linking is requested (harness-setup).
+      // No link templates yet: specs identify cases with `allure.testCaseId` (docs/test-cases.md IDs),
+      // which Allure does not turn into links, and no spec uses `allure.issue` or `allure.tms`.
+      // When defects are filed in a tracker, add literal `links.issue` / `links.tms` templates
+      // here (harness-setup); the conventions check warns if a spec uses one without its template.
     }],
     // Allure is the report that opens after a local run; the HTML report stays on disk
     // (`npx playwright show-report reports/playwright-report`) and is a CI artifact.
