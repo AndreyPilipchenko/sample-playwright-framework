@@ -54,6 +54,11 @@ run (`AUTO_ALLURE_OPEN=false` turns that off). The Playwright HTML report is sti
 written to `reports/playwright-report/`; open it with
 `npx playwright show-report reports/playwright-report`.
 
+Run Playwright from the repository root. Specs load their test data from
+repo-root-relative paths (`./resources/testData/...`, the harness test-data
+convention, which `check-conventions` verifies), so launching from a subfolder with
+`-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
+
 Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
 conventions with `npx --no pom-harness check-conventions`.
 
