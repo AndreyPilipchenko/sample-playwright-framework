@@ -5,7 +5,7 @@
     "practice": {
       "environmentMode": "test",
       "browserTargets": ["app"],
-      "apiTargets": [],
+      "apiTargets": ["app"],
       "databaseTargets": []
     }
   }

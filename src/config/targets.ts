@@ -9,10 +9,11 @@ import type { DBConnectionConfig } from '../utils/DBActions';
  * config modules take them from here, so specs, pages and services use the same values:
  *
  *   url: appUrl('app'),              // browser target "app": its first origin
+ *   apiUrl: apiUrl('app'),           // API target "app": its base URL
  *   appDb: databaseTarget('appDb'),  // database target "appDb": server, port, database
  *
  * An environment variable named after the target overrides a value on one machine or
- * run: APP_URL; APP_DB_SERVER, APP_DB_PORT, APP_DB_NAME.
+ * run: APP_URL; APP_API_URL; APP_DB_SERVER, APP_DB_PORT, APP_DB_NAME.
  *
  * Credentials are secrets and never live in that file: a database target names the
  * variable that holds its {"user","password"} JSON (connectionRef "env:APP_DB");
@@ -22,6 +23,7 @@ import type { DBConnectionConfig } from '../utils/DBActions';
 interface HarnessTargets {
   databases?: Record<string, { connectionRef: string; server?: string; port?: number; database?: string; encrypt?: boolean; trustServerCertificate?: boolean }>;
   browser?: Record<string, { origins: string[] }>;
+  api?: Record<string, { baseUrl: string; credentialRef?: string }>;
 }
 const targetsFile = path.resolve(__dirname, '../../.harness/targets.json');
 const targets: HarnessTargets = existsSync(targetsFile) ? JSON.parse(readFileSync(targetsFile, 'utf8')) : {};
@@ -30,6 +32,9 @@ const variablePrefix = (id: string): string => id.replace(/([a-z0-9])([A-Z])/g, 
 
 /** The application's address: `<TARGET>_URL`, else the browser target's first origin. */
 export const appUrl = (id: string): string => process.env[`${variablePrefix(id)}_URL`] || targets.browser?.[id]?.origins[0] || '';
+
+/** An API's base URL (no trailing slash): `<TARGET>_API_URL`, else the API target's `baseUrl`. */
+export const apiUrl = (id: string): string => (process.env[`${variablePrefix(id)}_API_URL`] || targets.api?.[id]?.baseUrl || '').replace(/\/+$/, '');
 
 /** A database's coordinates from its target, its credentials from the variable the target names. */
 export function databaseTarget(id: string): DBConnectionConfig {

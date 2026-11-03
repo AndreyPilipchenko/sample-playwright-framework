@@ -1,5 +1,5 @@
 // Example skeleton — adapt to your project (ships with the harness package).
-import { appUrl } from './targets';
+import { apiUrl, appUrl } from './targets';
 
 /**
  * All applications under test — one named entry per app; specs and page classes
@@ -7,7 +7,7 @@ import { appUrl } from './targets';
  *
  *   readonly url: string = `${applications.app.url}/login`;
  *
- * Addresses come from the browser target of the same name in .harness/targets.json,
+ * Addresses come from the browser and API targets of the same name in .harness/targets.json,
  * shared with the harness runtime (see targets.ts for the per-machine override).
  * Credentials are secrets: account identifiers and passwords come only from
  * environment variables — set them in the gitignored .env at the repo root
@@ -19,6 +19,8 @@ export const applications = {
   app: {
     name: 'app',
     url: appUrl('app'),
+    /** REST API base URL; API service classes build their `_serviceName` endpoints on it. */
+    apiUrl: apiUrl('app'),
     /** Pre-existing accounts per role; setup/auth.setup.ts signs each one in once per run. */
     accounts: {
       customer: {
