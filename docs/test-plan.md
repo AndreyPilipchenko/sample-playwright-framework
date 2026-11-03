@@ -134,27 +134,36 @@ out in `playwright.config.ts`.
 
 ## 4. Testing against a deliberately broken application
 
-This is the defining constraint of this project and it changes how tests must be
-written.
+This is the defining constraint of this project: which tests may exist on which branch
+follows from it (§4.1).
 
-### 4.1 Expected-failure policy
+### 4.1 Test intent and branch policy
 
-Most automated checks that assert *correct* behaviour will **fail**, because the
-application is wrong on purpose. Each test must therefore declare its intent:
+Many checks that assert *documented* behaviour would fail, because the application is
+wrong on purpose. Each case therefore has an intent, and the intent decides which branch
+its automated test lives on:
 
-| Intent | Meaning | Assertion style |
+| Intent | Meaning | Where it is automated |
 |---|---|---|
-| **Conformance** | Asserts the documented acceptance criterion. Expected to FAIL while the matching defect is open. | Assert the AC as specified; link the defect ID. |
-| **Characterisation** | Pins the current (buggy) behaviour so regressions are visible. | Assert what the app actually does; comment why. |
-| **Neutral** | Behaviour unaffected by any known defect. | Ordinary assertion. |
+| **Neutral** | Behaviour unaffected by any known defect. Tests existing, working functionality. | Mainline branches (the default branch and feature/automation branches). |
+| **Conformance** | Asserts the documented acceptance criterion where the application currently violates it. | **Only** the separate `conformance-test` branch. |
+| **Characterisation** | Pins the current (buggy) behaviour so changes are visible. | No decision yet; none are written. Decide when the first one is needed. |
 
-Record the intent and any defect ID in the test's Allure metadata
-(`allure.issue(...)` for a defect, `allure.testCaseId(...)` for the local case ID) so
-report readers can tell a real regression from a known bug.
+**Mainline branches contain only tests of existing functionality.** A test that fails on a
+mainline branch is a real failure and **stays red until the functionality is fixed**. Do not
+hide it: no `test.fail()`, `test.fixme()`, `test.skip()` or retry-until-green, no weakened
+assertion and no workaround in the page objects. Conformance cases are not automated on
+mainline branches, so the mainline suite is expected to be green on a working application.
 
-Do **not** weaken a conformance assertion to make the suite green — that destroys the
-signal the suite exists to provide. Either let it fail against a linked defect, or
-write it deliberately as characterisation.
+**Conformance tests are developed later, on the `conformance-test` branch.** There they
+assert the documented behaviour exactly as specified, link the defect ID with
+`allure.issue(...)` and are expected to fail while the defect is open. They are never
+weakened to pass and are not merged into mainline branches while they fail. Until that
+branch exists no conformance tests are written.
+
+Record the case ID with `allure.testCaseId(...)`; add `allure.issue(...)` only for a defect
+a test is linked to. The [known-defects register](known-defects.md) and the
+[bug reports](bug-reports/README.md) are documentation. Tests do not read them at run time.
 
 ### 4.2 Avoid asserting on defective surfaces incidentally
 
@@ -201,10 +210,12 @@ Ranked by likely impact on this application:
 valid or a fresh account registerable; required secrets present in `.env`.
 
 **Exit.** Every in-scope area has at least its documented happy-path and primary
-negative cases automated or explicitly deferred; all conformance failures trace to a
-defect ID in the register; no unexplained failure remains; reports published.
+negative cases automated or explicitly deferred; conformance cases are deferred to the
+`conformance-test` branch (§4.1); reports published.
 
-A failing suite is not by itself an exit blocker here — an **unexplained** failure is.
+A failing test on a mainline branch blocks exit and stays red until the functionality is
+fixed. Results of the `conformance-test` branch are reported separately and do not gate
+the mainline suite.
 
 ---
 

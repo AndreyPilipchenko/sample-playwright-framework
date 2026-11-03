@@ -5,19 +5,21 @@ Test conditions per feature area, compiled from the
 and filtered to the features present in the latest deployed build.
 Grouped by **feature area**.
 
-Read [the test plan](test-plan.md) first — in particular §4, which explains why many of
-these cases are expected to fail and how to mark them.
+Read [the test plan](test-plan.md) first — in particular §4.1, which says which intent is
+automated on which branch: neutral cases on mainline branches, conformance cases only on the
+`conformance-test` branch.
 
 ## How to read this
 
 - **ID** — stable reference, `TC-<AREA>-<n>`. Use it as the local scenario ID in
   `allure.testCaseId(...)`.
 - **Intent** — per test plan §4.1:
-  - `C` **conformance** — asserts the documented AC; expected to fail while the linked defect is open
-  - `X` **characterisation** — pins current buggy behaviour
-  - `N` **neutral** — no known defect on this path
+  - `C` **conformance** — asserts the documented AC; automated only on the `conformance-test` branch,
+    where it is expected to fail while the linked defect is open
+  - `X` **characterisation** — pins current buggy behaviour; not decided yet where these live
+  - `N` **neutral** — no known defect on this path; automated on mainline branches
 - **Defect** — ID in the [known-defects register](known-defects.md). A defect reference
-  means a conformance test here should be expected to fail.
+  marks a conformance case: do not automate it on a mainline branch.
 - **AC** — the upstream acceptance criterion this traces back to.
 
 Priority: **P1** core revenue/security path, **P2** important, **P3** cosmetic or edge.

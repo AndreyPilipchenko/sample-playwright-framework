@@ -36,7 +36,8 @@ See `AGENTS.md` / `CLAUDE.md` for the AI-agent skill routing, and the harness's 
 compiled from the upstream Practice Software Testing docs:
 
 - [Test plan](docs/test-plan.md) — scope, environment, approach, risks, and the
-  expected-failure policy for a deliberately broken target
+  test intent and branch policy for a deliberately broken target (conformance tests live
+  on the `conformance-test` branch)
 - [Test cases](docs/test-cases.md) — test conditions per feature area, traced to
   upstream acceptance criteria
 
