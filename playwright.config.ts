@@ -53,6 +53,8 @@ export default defineConfig({
   use: {
     /* No baseURL — every journey navigates to an absolute URL from src/config (e.g. the partner portal quote URL). */
     ignoreHTTPSErrors: true,
+    /* The app tags its controls with `data-test`, so page classes locate them with page.getByTestId('nav-home'). */
+    testIdAttribute: 'data-test',
     /* A hung click/fill/waitFor fails as itself after 30s, never as an opaque "test timed out". */
     actionTimeout: ACTION_DEFAULT_MS,
     /* Sized to measured slow-environment page loads. */

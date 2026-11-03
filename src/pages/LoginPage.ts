@@ -13,9 +13,9 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.email_input = page.locator('[data-test="email"]');
-    this.password_input = page.locator('[data-test="password"]');
-    this.login_button = page.locator('[data-test="login-submit"]');
+    this.email_input = page.getByTestId('email');
+    this.password_input = page.getByTestId('password');
+    this.login_button = page.getByTestId('login-submit');
   }
 
   ///// Actions

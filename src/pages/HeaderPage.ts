@@ -13,8 +13,8 @@ export class HeaderPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.navHome_link = page.locator('[data-test="nav-home"]');
-    this.accountMenu_button = page.locator('[data-test="nav-user-menu"], [data-test="nav-admin-menu"]');
+    this.navHome_link = page.getByTestId('nav-home');
+    this.accountMenu_button = page.getByTestId('nav-user-menu').or(page.getByTestId('nav-admin-menu'));
   }
 
   ///// Actions

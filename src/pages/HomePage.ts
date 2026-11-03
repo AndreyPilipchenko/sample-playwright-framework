@@ -12,7 +12,7 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.productCards_list = page.locator('[data-test^="product-"]').filter({ has: page.locator('[data-test="product-name"]') });
+    this.productCards_list = page.getByTestId(/^product-/).filter({ has: page.getByTestId('product-name') });
   }
 
   ///// Actions
