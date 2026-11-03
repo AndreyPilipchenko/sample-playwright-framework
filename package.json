@@ -28,6 +28,7 @@
     "dotenv": "17.4.2",
     "eslint-plugin-playwright": "2.12.2",
     "mssql": "12.7.2",
+    "mysql2": "3.24.6",
     "oxlint": "1.90.0",
     "oxlint-tsgolint": "7.0.2005",
     "playwright": "1.63.0",

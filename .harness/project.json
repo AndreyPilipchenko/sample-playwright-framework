@@ -20,7 +20,9 @@
       "apiTargets": [
         "app-local"
       ],
-      "databaseTargets": []
+      "databaseTargets": [
+        "appDb-local"
+      ]
     }
   }
 }

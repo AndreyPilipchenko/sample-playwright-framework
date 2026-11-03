@@ -15,5 +15,13 @@
       "baseUrl": "http://localhost:8091"
     }
   },
-  "databases": {}
+  "databases": {
+    "appDb-local": {
+      "engine": "mysql",
+      "connectionRef": "env:APP_DB_LOCAL",
+      "server": "localhost",
+      "port": 3306,
+      "database": "toolshop"
+    }
+  }
 }
