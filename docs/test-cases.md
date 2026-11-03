@@ -53,7 +53,8 @@ Route: `#/`
 | TC-PO-21 | Search icon image loads | P3 | C | 30 | — |
 | TC-PO-22 | Product names wrap correctly (Firefox) | P3 | C | 35 | — |
 
-Smoke coverage for TC-PO-1 is automated in `tests/HomeTests.spec.ts`.
+Smoke coverage: TC-PO-1 is automated in `tests/HomeTests.spec.ts`; TC-PO-2, TC-PO-5 and
+TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`).
 
 ## 2. Navigation & Header
 
@@ -433,17 +434,17 @@ is used.
 
 | Area | Cases | Automated |
 |---|---|---|
-| Product Overview | 22 | 1 (TC-PO-1, smoke) |
-| Navigation & Header | 5 | 0 |
+| Product Overview | 22 | 4 (TC-PO-1, 2, 5, 8 — smoke) |
+| Navigation & Header | 5 | 1 (TC-NAV-5, smoke) |
 | Product Category | 6 | 0 |
-| Product Detail | 18 | 0 |
+| Product Detail | 18 | 1 (TC-PD-3, smoke) |
 | Rentals | 7 | 0 |
 | Checkout — Cart | 12 | 0 |
 | Checkout — Sign In | 4 | 0 |
 | Checkout — Address | 10 | 0 |
 | Checkout — Payment | 14 | 0 |
 | Registration | 14 | 0 |
-| Login | 13 | 0 |
+| Login | 13 | 2 (TC-LOGIN-2, 3 — smoke) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 0 |
 | Change Password | 7 | 0 |
@@ -457,7 +458,7 @@ is used.
 | API | 16 | 0 |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **1** |
+| **Total** | **234** | **8** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.
