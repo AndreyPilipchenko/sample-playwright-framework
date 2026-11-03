@@ -184,6 +184,18 @@ exploratory sessions.
 
 ---
 
+## Locally observed defects (L-prefixed)
+
+Defects found while automating that the upstream list does not contain. They take an
+`L` prefix so they can never collide with upstream numbering. Each entry was reproduced
+on both the public instance and the local Docker stack (`sprint5-with-bugs`).
+
+| ID | Area | Title | Observed | Case |
+|---|---|---|---|---|
+| L1 | Checkout — cart | Cart table header has a blank extra column, and the Actions (remove) column is labelled "Total" (`Item, —, Quantity, Price, Total, Total`) | 2026-11-03 | TC-CART-1 |
+
+---
+
 ## Register integrity
 
 This register is a transcription of upstream documentation as of 2026-11-02, not an

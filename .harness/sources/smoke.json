@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "id": "toolshop-smoke",
+  "title": "Toolshop smoke suite (P1 neutral cases from docs/test-cases.md; TC-CART-1 left out as conformance, defect L1)",
+  "scenarios": [
+    {
+      "id": "TC-PO-2",
+      "title": "Clicking a product card navigates to its detail page",
+      "steps": [
+        {
+          "action": "Open the home page as an anonymous visitor",
+          "expected": ["The product grid shows product cards"]
+        },
+        {
+          "action": "Click a product card in the grid",
+          "expected": ["The product detail page of the clicked product opens, showing that product's name"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-PO-2"}]
+    },
+    {
+      "id": "TC-PO-5",
+      "title": "Search with a valid 3-40 character query filters the grid",
+      "steps": [
+        {
+          "action": "Open the home page as an anonymous visitor",
+          "expected": []
+        },
+        {
+          "action": "Search for the valid query \"pliers\" (between 3 and 40 characters)",
+          "expected": ["The grid shows only products whose name contains the query"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-PO-5"}]
+    },
+    {
+      "id": "TC-PO-8",
+      "title": "Category checkbox filters the grid to that category",
+      "steps": [
+        {
+          "action": "Open the home page as an anonymous visitor",
+          "expected": []
+        },
+        {
+          "action": "Tick the \"Hammer\" category checkbox in the filters",
+          "expected": ["The grid shows only products of the Hammer category"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-PO-8"}]
+    },
+    {
+      "id": "TC-PD-3",
+      "title": "Quantity selector is displayed defaulting to 1",
+      "steps": [
+        {
+          "action": "Open the detail page of a product that is in stock",
+          "expected": ["A quantity input with plus (+) and minus (-) buttons is displayed", "The quantity input shows 1"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-PD-3"}]
+    },
+    {
+      "id": "TC-NAV-5",
+      "title": "Guarded routes redirect to login when unauthenticated",
+      "steps": [
+        {
+          "action": "As an anonymous visitor, open #/account",
+          "expected": ["The browser is redirected to the login page (#/auth/login)"]
+        },
+        {
+          "action": "As an anonymous visitor, open #/account/invoices",
+          "expected": ["The browser is redirected to the login page (#/auth/login)"]
+        },
+        {
+          "action": "As an anonymous visitor, open #/account/favorites",
+          "expected": ["The browser is redirected to the login page (#/auth/login)"]
+        },
+        {
+          "action": "As an anonymous visitor, open #/admin/dashboard",
+          "expected": ["The browser is redirected to the login page (#/auth/login)"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-NAV-5"}]
+    },
+    {
+      "id": "TC-LOGIN-2",
+      "title": "Valid user credentials redirect to #/account",
+      "steps": [
+        {
+          "action": "Open the login page and sign in with the configured customer account",
+          "expected": ["The browser is redirected to the customer account page (#/account)"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-LOGIN-2"}]
+    },
+    {
+      "id": "TC-LOGIN-3",
+      "title": "Valid admin credentials redirect to #/admin/dashboard",
+      "steps": [
+        {
+          "action": "Open the login page and sign in with the configured admin account",
+          "expected": ["The browser is redirected to the admin dashboard (#/admin/dashboard)"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-LOGIN-3"}]
+    }
+  ]
+}

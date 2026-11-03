@@ -118,7 +118,7 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 
 | ID | Title | Pri | Intent | Defect | AC |
 |---|---|---|---|---|---|
-| TC-CART-1 | Cart table shows Item, Quantity, Price, Total, Actions | P1 | N | — | AC1 |
+| TC-CART-1 | Cart table shows Item, Quantity, Price, Total, Actions | P1 | C | L1 | AC1 |
 | TC-CART-2 | Changing quantity recalculates line and cart totals | P1 | C | 1 | AC2 |
 | TC-CART-3 | Quantity update shows "Product quantity updated." | P2 | C | 1 | AC2 |
 | TC-CART-4 | Delete button removes the item | P1 | C | 7 | AC3 |

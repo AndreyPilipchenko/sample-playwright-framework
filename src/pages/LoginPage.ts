@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { expectToHaveURL } from '../utils/Expects';
 
 export class LoginPage {
   readonly page: Page;
@@ -32,6 +33,14 @@ export class LoginPage {
       await this.email_input.fill(email);
       await this.password_input.fill(password);
       await this.login_button.click();
+    });
+  }
+
+  ///// Validations
+
+  async verifyPageOpened() {
+    await step('Verify the login page is open', async () => {
+      await expectToHaveURL(this.page, this.url);
     });
   }
 }

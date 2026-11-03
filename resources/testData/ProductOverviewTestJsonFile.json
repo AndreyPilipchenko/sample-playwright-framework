@@ -1,0 +1,21 @@
+{
+  "tcPO2": {
+    "productName": "Bolt Cutters"
+  },
+  "tcPO5": {
+    "searchQuery": "pliers"
+  },
+  "tcPO8": {
+    "categoryName": "Hammer",
+    "categorySlug": "hammer",
+    "knownProductNames": [
+      "Claw Hammer with Shock Reduction Grip",
+      "Hammer",
+      "Claw Hammer",
+      "Thor Hammer",
+      "Sledgehammer",
+      "Claw Hammer with Fiberglass Handle",
+      "Court Hammer"
+    ]
+  }
+}

@@ -1,10 +1,10 @@
 {
   "browser": {
     "app": {
-      "origins": ["https://with-bugs.practicesoftwaretesting.com"]
+      "origins": ["https://with-bugs.practicesoftwaretesting.com", "https://api-with-bugs.practicesoftwaretesting.com"]
     },
     "app-local": {
-      "origins": ["http://localhost:4200"]
+      "origins": ["http://localhost:4200", "http://localhost:8091"]
     }
   },
   "api": {

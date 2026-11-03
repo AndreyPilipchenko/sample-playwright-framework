@@ -134,6 +134,11 @@ export function expectNotToContain<T>(subject: string, actual: string | T[], une
   expect(actual, `Expect ${subject} not to contain ${fmt(unexpected)}`).not.toContain(unexpected);
 }
 
+/** Asserts the collection includes every expected entry, in any order, extra entries allowed — `Expect <subject> to include all of <expected>`. */
+export function expectToContainAll<T>(subject: string, actual: T[], expected: T[]): void {
+  expect(actual, `Expect ${subject} to include all of ${fmt(expected)}`).toEqual(expect.arrayContaining(expected));
+}
+
 /** Inverted membership — the element is the business subject, the allowed set the oracle: `Expect <subject> to be one of <allowed>`. */
 export function expectToBeOneOf<T>(subject: string, element: T, allowed: T[]): void {
   expect(allowed, `Expect ${subject} to be one of ${fmt(allowed)}`).toContain(element);
@@ -210,6 +215,44 @@ export async function expectToHaveMatchingCount(
       { message: `Expect ${subject} to show as many ${unit}(s) as the reference set → ${locator.toString()} (reference: ${referenceLocator.toString()})`, ...options },
     )
     .toBe(true);
+}
+
+/**
+ * Auto-retrying subset assertion over the trimmed texts of every matched element —
+ * `Expect <subject> to include all of <expected> → …`. Any order, extra elements
+ * allowed; the texts are re-read on every retry, so it settles across async re-renders.
+ */
+export async function expectTextsToContainAll(
+  subject: string,
+  locator: Locator,
+  expected: string[],
+  options?: RetryOptions,
+): Promise<void> {
+  await expect
+    .poll(async () => (await locator.allTextContents()).map((text) => text.trim()), {
+      message: `Expect ${subject} to include all of ${fmt(expected)} → ${locator.toString()}`,
+      ...options,
+    })
+    .toEqual(expect.arrayContaining(expected));
+}
+
+/**
+ * Auto-retrying set-equality assertion over the trimmed texts of every matched element —
+ * `Expect <subject> to be exactly <expected> in any order → …`. Same entries and count,
+ * order ignored; re-read on every retry, so it settles across async re-renders.
+ */
+export async function expectTextsToEqualInAnyOrder(
+  subject: string,
+  locator: Locator,
+  expected: string[],
+  options?: RetryOptions,
+): Promise<void> {
+  await expect
+    .poll(async () => (await locator.allTextContents()).map((text) => text.trim()).sort(), {
+      message: `Expect ${subject} to be exactly ${fmt(expected)} in any order → ${locator.toString()}`,
+      ...options,
+    })
+    .toEqual([...expected].sort());
 }
 
 /** Auto-retrying negated count assertion — `Expect <subject> not to show <unexpected> <unit>(s) → …`. */
