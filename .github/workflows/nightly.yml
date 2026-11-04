@@ -1,0 +1,194 @@
+# Nightly full run on the default branch: everything the pull-request gate (playwright.yml)
+# leaves out. GitHub runs `schedule` triggers only on the default branch; run it on any
+# branch by hand through workflow_dispatch.
+#
+# JOBS — independent of each other, so one red job never hides another's result:
+#   smoke-cross-browser  the @smoke subset on firefox and webkit
+#   regression           every non-smoke spec on chromium, in parallel shards. It includes the
+#                        @conformance tests (documented behaviour the application violates), so
+#                        this job is red while those defects are open (docs/test-plan.md §4.1).
+#                        Locally, `npm run test:non-conformance` is the suite that must be green.
+#   regression-local     the whole suite against a private Docker instance of the application
+#
+# The auth setup project runs on Desktop Chrome, so every job that runs browser specs installs
+# chromium as well as the browser it tests.
+#
+# SECRETS and headless settings: as in playwright.yml.
+
+name: Nightly tests
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 02:00 UTC every day
+  workflow_dispatch: {}
+
+jobs:
+  # The critical-path subset on the browsers the pull-request gate does not cover (chromium
+  # runs there). fail-fast is off so one browser's failure does not hide the other's result.
+  smoke-cross-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies, chromium (auth setup) and ${{ matrix.browser }}
+        uses: ./.github/actions/setup
+        with:
+          browsers: chromium ${{ matrix.browser }}
+
+      - name: Run the @smoke specs on ${{ matrix.browser }}
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=${{ matrix.browser }} --grep @smoke
+        continue-on-error: true # reporting below must run even when tests fail
+        # env:                  # uncomment after adding the repo secrets
+        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #   SQLCMDPASSWORD: ${{ secrets.SQLCMDPASSWORD }}
+        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke-${{ matrix.browser }}
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-smoke-${{ matrix.browser }}
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
+  # Everything that is not @smoke, on chromium only (the full functional suite is
+  # chromium-only, see playwright.config.ts), split into parallel shards. Includes the
+  # @conformance specs, so it is red while their defects are open.
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies and chromium
+        uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: Run the non-smoke specs, shard ${{ matrix.shard }} of 2
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
+        continue-on-error: true # reporting below must run even when tests fail
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-regression-${{ matrix.shard }}
+          path: reports/playwright-report
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-regression-${{ matrix.shard }}
+          path: reports/allure-report/index.html
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
+  # Separate job: brings the application under test up on the runner itself and runs
+  # the suite against that private instance instead of the shared public one.
+  #
+  # Why a separate job: the hosted-target runs answer a different question (is the hosted
+  # target healthy vs does the suite pass against a known-good, freshly seeded instance), they
+  # must not share a failure, and this one carries a much heavier setup cost.
+  # Artifact names are suffixed so they cannot collide with the other jobs' uploads -
+  # upload-artifact@v4 rejects duplicate names across jobs.
+  regression-local:
+    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies and browsers
+        uses: ./.github/actions/setup
+
+      # The upstream `web` (nginx) and `cron` images are published for linux/arm64
+      # only, while this runner is amd64. Docker Desktop emulates arm64 out of the
+      # box; a GitHub-hosted runner does not, so without binfmt handlers the `web`
+      # container — the proxy that serves the API on 8091 — fails to start and the
+      # stack never becomes ready. Verified locally: web/cron are arm64, ui/api amd64.
+      - name: Enable arm64 emulation for the upstream nginx/cron images
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Start the application under test
+        run: node scripts/app.mjs up --timeout 900
+
+      - name: Run Playwright specs against the local instance
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never node scripts/app.mjs test
+        continue-on-error: true # reporting and teardown below must run even when tests fail
+
+      # Container logs are the only way to diagnose an application-side failure after
+      # the runner is torn down, so capture them whenever the run did not pass.
+      - name: Capture application logs
+        if: always() && steps.run_specs.outcome != 'success'
+        run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
+
+      - name: Publish application logs
+        if: always() && steps.run_specs.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs-local
+          path: app-logs.txt
+          retention-days: 30
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-local
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-local
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      - name: Stop the application under test
+        if: always()
+        run: node scripts/app.mjs down --volumes || true
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi

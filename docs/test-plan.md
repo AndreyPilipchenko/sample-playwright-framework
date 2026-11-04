@@ -147,20 +147,33 @@ its automated test lives on:
 | Intent | Meaning | Where it is automated |
 |---|---|---|
 | **Neutral** | Behaviour unaffected by any known defect. Tests existing, working functionality. | Mainline branches (the default branch and feature/automation branches). |
-| **Conformance** | Asserts the documented acceptance criterion where the application currently violates it. | **Only** the separate `conformance-test` branch. |
+| **Conformance** | Asserts the documented acceptance criterion where the application currently violates it. | Mainline branches, tagged `@conformance`. |
 | **Characterisation** | Pins the current (buggy) behaviour so changes are visible. | No decision yet; none are written. Decide when the first one is needed. |
 
-**Mainline branches contain only tests of existing functionality.** A test that fails on a
-mainline branch is a real failure and **stays red until the functionality is fixed**. Do not
+**Every automated test lives on the mainline branches, conformance tests included.** A
+failing test is a real failure and **stays red until the functionality is fixed**. Do not
 hide it: no `test.fail()`, `test.fixme()`, `test.skip()` or retry-until-green, no weakened
-assertion and no workaround in the page objects. Conformance cases are not automated on
-mainline branches, so the mainline suite is expected to be green on a working application.
+assertion and no workaround in the page objects.
 
-**Conformance tests are developed later, on the `conformance-test` branch.** There they
-assert the documented behaviour exactly as specified, link the defect ID with
-`allure.issue(...)` and are expected to fail while the defect is open. They are never
-weakened to pass and are not merged into mainline branches while they fail. Until that
-branch exists no conformance tests are written.
+**Conformance tests are tagged `@conformance`** (on the `test.describe`). They assert the
+documented behaviour exactly as specified and are expected to fail while the defect is
+open. The tag separates the two signals without a second branch:
+
+| Run | Command | Expected |
+|---|---|---|
+| Working functionality | `npm run test:non-conformance` (`--grep-invert @conformance`) | Green; any failure is a regression |
+| Conformance | `npm run test:conformance` (`--grep @conformance`) | Red while the linked defects are open |
+| Full suite | `npx playwright test` | Red exactly where conformance tests fail |
+
+The harness closes the tag set to `@smoke` / `@regression`, so each spec carrying the
+describe-level `@conformance` tag shows one `tag-vocabulary` WARN in the conventions check. It
+is accepted: a WARN does not fail the check. Every conformance test also keeps `@regression`.
+
+**CI.** Pull requests (and pushes to the default branch) run only the API specs and the
+Chromium `@smoke` subset. Everything else runs nightly on the default branch
+(`.github/workflows/nightly.yml`): `@smoke` on Firefox and WebKit, every non-smoke spec
+(conformance included, so that job is red while defects are open) and the suite against a
+local Docker instance.
 
 Record the case ID with `allure.testCaseId(...)`; add `allure.issue(...)` only for a defect
 a test is linked to. The [known-defects register](known-defects.md) and the
@@ -211,12 +224,12 @@ Ranked by likely impact on this application:
 valid or a fresh account registerable; required secrets present in `.env`.
 
 **Exit.** Every in-scope area has at least its documented happy-path and primary
-negative cases automated or explicitly deferred; conformance cases are deferred to the
-`conformance-test` branch (§4.1); reports published.
+negative cases automated or explicitly deferred; conformance cases are automated and
+tagged `@conformance` (§4.1); reports published.
 
-A failing test on a mainline branch blocks exit and stays red until the functionality is
-fixed. Results of the `conformance-test` branch are reported separately and do not gate
-the mainline suite.
+A failing non-conformance test blocks exit and stays red until the functionality is
+fixed. Conformance results are reported separately (`npm run test:conformance`) and do not
+gate exit.
 
 ---
 

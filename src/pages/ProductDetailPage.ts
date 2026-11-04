@@ -13,6 +13,7 @@ export class ProductDetailPage {
   private readonly increaseQuantity_button: Locator;
   private readonly decreaseQuantity_button: Locator;
   private readonly outOfStock_msg: Locator;
+  private readonly addToCart_button: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -21,6 +22,7 @@ export class ProductDetailPage {
     this.increaseQuantity_button = page.getByTestId('increase-quantity');
     this.decreaseQuantity_button = page.getByTestId('decrease-quantity');
     this.outOfStock_msg = page.getByTestId('out-of-stock');
+    this.addToCart_button = page.getByTestId('add-to-cart');
   }
 
   ///// Actions
@@ -28,6 +30,12 @@ export class ProductDetailPage {
   async navigate(productId: string) {
     await step(`Navigate to the product detail page of product ${productId}`, async () => {
       await this.page.goto(`${this.url}/${encodeURIComponent(productId)}`);
+    });
+  }
+
+  async addToCart() {
+    await step('Click Add to cart on the product detail page', async () => {
+      await this.addToCart_button.click();
     });
   }
 

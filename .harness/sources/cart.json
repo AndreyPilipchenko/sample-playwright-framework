@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "id": "toolshop-cart",
+  "title": "Toolshop checkout cart review (P1 conformance cases from docs/test-cases.md; expected to expose open defects, left failing)",
+  "scenarios": [
+    {
+      "id": "TC-CART-1",
+      "title": "Cart table shows Item, Quantity, Price, Total, Actions",
+      "steps": [
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the cart (checkout, step 1)",
+          "expected": ["The cart table header shows the columns Item, Quantity, Price, Total, Actions"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-CART-1"}]
+    },
+    {
+      "id": "TC-CART-2",
+      "title": "Changing quantity recalculates line and cart totals",
+      "steps": [
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Change the quantity of the product in the cart to 3",
+          "expected": ["The line total equals the unit price multiplied by 3", "The cart total equals the unit price multiplied by 3"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-CART-2"}]
+    },
+    {
+      "id": "TC-CART-4",
+      "title": "Delete button removes the item",
+      "steps": [
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click the delete button of the product in the cart",
+          "expected": ["The product is no longer listed in the cart"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-CART-4"}]
+    },
+    {
+      "id": "TC-CART-5",
+      "title": "Cart total recalculates after deletion",
+      "steps": [
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the detail page of a second in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click the delete button of the first product in the cart",
+          "expected": ["The cart total equals the unit price of the remaining product"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-CART-5"}]
+    },
+    {
+      "id": "TC-CART-7",
+      "title": "Cart total reflects the sum of line totals (not 0,00)",
+      "steps": [
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart",
+          "expected": []
+        },
+        {
+          "action": "Open the cart (checkout, step 1)",
+          "expected": ["The cart total equals the sum of the line totals and is not 0,00"]
+        }
+      ],
+      "externalReferences": [{"system": "docs/test-cases.md", "id": "TC-CART-7"}]
+    }
+  ]
+}

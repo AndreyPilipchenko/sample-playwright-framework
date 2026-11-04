@@ -1,0 +1,93 @@
+{
+  "tcCART1": {
+    "brandName": "Cart Brand TC-CART-1 {uuid}",
+    "categoryName": "Cart Category TC-CART-1 {uuid}",
+    "products": [
+      {
+        "name": "Cart Header Product TC-CART-1 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "expectedColumnHeaders": [
+      "Item",
+      "Quantity",
+      "Price",
+      "Total",
+      "Actions"
+    ]
+  },
+  "tcCART2": {
+    "brandName": "Cart Brand TC-CART-2 {uuid}",
+    "categoryName": "Cart Category TC-CART-2 {uuid}",
+    "products": [
+      {
+        "name": "Cart Quantity Product TC-CART-2 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "newQuantity": "3",
+    "expectedLineTotal": "$42.45",
+    "expectedCartTotal": "$42.45"
+  },
+  "tcCART4": {
+    "brandName": "Cart Brand TC-CART-4 {uuid}",
+    "categoryName": "Cart Category TC-CART-4 {uuid}",
+    "products": [
+      {
+        "name": "Cart Delete Product TC-CART-4 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1"
+  },
+  "tcCART5": {
+    "brandName": "Cart Brand TC-CART-5 {uuid}",
+    "categoryName": "Cart Category TC-CART-5 {uuid}",
+    "products": [
+      {
+        "name": "Cart Removed Product TC-CART-5 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      },
+      {
+        "name": "Cart Remaining Product TC-CART-5 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 12.01,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "firstCartItemCount": "1",
+    "secondCartItemCount": "2",
+    "expectedCartTotal": "$12.01"
+  },
+  "tcCART7": {
+    "brandName": "Cart Brand TC-CART-7 {uuid}",
+    "categoryName": "Cart Category TC-CART-7 {uuid}",
+    "products": [
+      {
+        "name": "Cart Total Product TC-CART-7 {uuid}",
+        "description": "Seeded for the cart conformance case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "expectedLineTotal": "$14.15",
+    "expectedCartTotal": "$14.15"
+  }
+}

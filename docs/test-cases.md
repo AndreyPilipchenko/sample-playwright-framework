@@ -6,20 +6,20 @@ and filtered to the features present in the latest deployed build.
 Grouped by **feature area**.
 
 Read [the test plan](test-plan.md) first — in particular §4.1, which says which intent is
-automated on which branch: neutral cases on mainline branches, conformance cases only on the
-`conformance-test` branch.
+automated how: neutral cases as ordinary specs, conformance cases on the same branches but
+tagged `@conformance`.
 
 ## How to read this
 
 - **ID** — stable reference, `TC-<AREA>-<n>`. Use it as the local scenario ID in
   `allure.testCaseId(...)`.
 - **Intent** — per test plan §4.1:
-  - `C` **conformance** — asserts the documented AC; automated only on the `conformance-test` branch,
-    where it is expected to fail while the linked defect is open
+  - `C` **conformance** — asserts the documented AC; automated on mainline branches, tagged
+    `@conformance`, and expected to fail while the linked defect is open
   - `X` **characterisation** — pins current buggy behaviour; not decided yet where these live
-  - `N` **neutral** — no known defect on this path; automated on mainline branches
+  - `N` **neutral** — no known defect on this path; automated as an ordinary spec
 - **Defect** — ID in the [known-defects register](known-defects.md). A defect reference
-  marks a conformance case: do not automate it on a mainline branch.
+  marks a conformance case: tag its test `@conformance`.
 - **AC** — the upstream acceptance criterion this traces back to.
 
 Priority: **P1** core revenue/security path, **P2** important, **P3** cosmetic or edge.
@@ -137,6 +137,9 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-CART-10 | Mixed rental + non-rental cart applies 15% combination discount | P1 | N | — | AC7 |
 | TC-CART-11 | Cart shows subtotal, discount amount and final total | P1 | C | 8 | AC7 |
 | TC-CART-12 | Removing all rental items removes the 15% discount | P2 | N | — | AC8 |
+
+Automated in `tests/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5 and 7. They assert the documented
+behaviour and fail while defects L1, 7 and 8 are open; see [bug reports](bug-reports/README.md). Each case seeds its own products through the API.
 
 ## 7. Checkout — Sign In step
 
@@ -445,7 +448,7 @@ is used.
 | Product Category | 6 | 0 |
 | Product Detail | 18 | 1 (TC-PD-3, smoke) |
 | Rentals | 7 | 0 |
-| Checkout — Cart | 12 | 0 |
+| Checkout — Cart | 12 | 5 (TC-CART-1, 2, 4, 5, 7 — conformance, failing on open defects) |
 | Checkout — Sign In | 4 | 0 |
 | Checkout — Address | 10 | 0 |
 | Checkout — Payment | 14 | 0 |
@@ -464,7 +467,7 @@ is used.
 | API | 16 | 0 |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **8** |
+| **Total** | **234** | **13** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

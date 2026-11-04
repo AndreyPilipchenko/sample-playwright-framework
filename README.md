@@ -36,8 +36,8 @@ See `AGENTS.md` / `CLAUDE.md` for the AI-agent skill routing, and the harness's 
 compiled from the upstream Practice Software Testing docs:
 
 - [Test plan](docs/test-plan.md) — scope, environment, approach, risks, and the
-  test intent and branch policy for a deliberately broken target (conformance tests live
-  on the `conformance-test` branch)
+  test intent policy for a deliberately broken target (conformance tests are tagged
+  `@conformance` and fail while their defects are open)
 - [Test cases](docs/test-cases.md) — test conditions per feature area, traced to
   upstream acceptance criteria
 
@@ -130,21 +130,36 @@ CI job's QEMU step does.
 
 ## CI
 
-`.github/workflows/playwright.yml` runs on every push/PR to `main` (and on manual
-dispatch) against the hosted public instance, in stages. A stage starts only when the one
-before it passed:
+Two workflows. Except `regression-local`, every job runs against the hosted public instance.
+
+**Pull-request gate** — `.github/workflows/playwright.yml`, on every push/PR to `main` (and
+on manual dispatch). Small and fast; the smoke stage starts only when the API stage passed:
 
 | Stage | Job | What it does |
 |---|---|---|
 | 1 | `api-tests` | Conventions check, typecheck and lint, then the browserless API specs (`tests/api`) |
-| 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
-| 3 | `regression` | Every other browser spec on chromium, in 2 parallel shards |
-| - | `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance; independent of the stages, gates nothing |
+| 2 | `smoke` | The `@smoke` subset on chromium |
+
+**Nightly** — `.github/workflows/nightly.yml`, at 02:00 UTC on `main` (GitHub runs schedules
+on the default branch only) and on manual dispatch for any branch. Its jobs are independent:
+
+| Job | What it does |
+|---|---|
+| `smoke-cross-browser` | The `@smoke` subset on firefox and webkit |
+| `regression` | Every non-smoke spec on chromium, in 2 parallel shards. Includes the `@conformance` tests, so it is red while their defects are open |
+| `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance |
 
 All jobs run headless and publish HTML and Allure reports as artifacts (named per job,
 browser or shard; `regression-local` also uploads container logs when the run does not
-pass). `regression-local` is deliberately separate so a hosted-instance outage cannot mask a
-genuine suite failure.
+pass).
+
+Conformance tests (documented behaviour the application violates, tagged `@conformance`)
+stay red until the defect is fixed. Run the two signals separately when you need them:
+
+```sh
+npm run test:non-conformance  # working functionality: must be green
+npm run test:conformance      # documented behaviour: red while defects are open
+```
 
 ## Tests
 

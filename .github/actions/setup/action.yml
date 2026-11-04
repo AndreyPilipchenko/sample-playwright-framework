@@ -3,7 +3,11 @@ description: Node, npm dependencies and the requested Playwright browsers (cache
 
 inputs:
   browsers:
-    description: Space-separated Playwright browsers to install (chromium, firefox, webkit), or 'none' for jobs that run only browserless (API) specs.
+    description: >-
+      Space-separated Playwright browsers to install (chromium, firefox, webkit), or 'none' for
+      jobs that run only browserless (API) specs. Chromium is always added to any other list:
+      the auth `setup` project (setup/auth.setup.ts) runs on Desktop Chrome before every browser
+      project, so a firefox- or webkit-only job still needs chromium's headless shell.
     default: 'chromium firefox webkit'
 
 runs:
@@ -18,30 +22,60 @@ runs:
       shell: bash
       run: npm ci
 
-    - name: Read the Playwright version
+    # One normalized list for the cache key and both install commands: chromium plus the
+    # requested browsers, de-duplicated and sorted, so `webkit` and `chromium webkit` share a
+    # key. Also reads the Playwright version, which the binaries are tied to.
+    - name: Resolve the browsers to install
       if: inputs.browsers != 'none'
       id: playwright
       shell: bash
-      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      env:
+        REQUESTED: ${{ inputs.browsers }}
+      run: |
+        list=$(printf '%s\n' chromium $REQUESTED | sort -u | tr '\n' ' ' | sed 's/ $//')
+        echo "Installing Playwright browsers: $list"
+        echo "browsers=$list" >> "$GITHUB_OUTPUT"
+        echo "key=$(echo "$list" | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+        echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
 
     # Browser binaries are large and change only with the Playwright version; the key also
-    # names the requested browsers, so a one-browser job never restores or saves a partial
-    # cache under the key of the full set.
+    # names the browser set, so a job never restores a cache that lacks one of its browsers.
     - name: Cache Playwright browsers
       if: inputs.browsers != 'none'
       id: browsers
       uses: actions/cache@v4
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ inputs.browsers }}
+        key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.key }}
 
     - name: Install browsers and system dependencies
       if: inputs.browsers != 'none' && steps.browsers.outputs.cache-hit != 'true'
       shell: bash
-      run: npx playwright install --with-deps ${{ inputs.browsers }}
+      run: npx playwright install --with-deps ${{ steps.playwright.outputs.browsers }}
 
     # System packages (apt) are not part of the cache, so install them even on a hit.
     - name: Install system dependencies only
       if: inputs.browsers != 'none' && steps.browsers.outputs.cache-hit == 'true'
       shell: bash
-      run: npx playwright install-deps ${{ inputs.browsers }}
+      run: npx playwright install-deps ${{ steps.playwright.outputs.browsers }}
+
+    # Fail here, with the browser named, rather than inside the first spec that launches it
+    # (headless chromium runs the headless shell, so that is the binary checked for it).
+    - name: Verify the browsers are installed
+      if: inputs.browsers != 'none'
+      shell: bash
+      run: |
+        missing=0
+        for browser in ${{ steps.playwright.outputs.browsers }}; do
+          case "$browser" in
+            chromium) dir=chromium_headless_shell ;;
+            *) dir=$browser ;;
+          esac
+          if ls -d ~/.cache/ms-playwright/"$dir"-* >/dev/null 2>&1; then
+            echo "ok: $browser"
+          else
+            echo "::error::Playwright browser '$browser' is not installed (no ~/.cache/ms-playwright/$dir-*)"
+            missing=1
+          fi
+        done
+        exit $missing

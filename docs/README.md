@@ -18,10 +18,10 @@ application, and only the features actually present in that build are documented
 The application is **deliberately broken** — it carries 90+ intentional defects. That
 single fact drives most of the decisions in these documents:
 
-- Tests of **existing functionality** live on mainline branches; a failing test there stays
-  red until the functionality is fixed. **Conformance** tests (documented behaviour the app
-  violates) are developed later, in the separate `conformance-test` branch. See
-  [test plan §4.1](test-plan.md).
+- All tests live on the mainline branches, and a failing test stays red until the
+  functionality is fixed. **Conformance** tests (documented behaviour the app violates) are
+  tagged `@conformance`, so the working-functionality suite (`npm run test:non-conformance`)
+  stays a clean signal. See [test plan §4.1](test-plan.md).
 - Routing is **hash-based** (`#/checkout`, not `/checkout`). Clean paths return 404.
   This was verified live and contradicts the upstream release notes.
 - The instance is **public and shared**. Account and catalogue state is mutable by
