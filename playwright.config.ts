@@ -90,8 +90,15 @@ export default defineConfig({
       retries: 0, // an account locks after ONE failed login (known defect #21) — never retry
       use: { ...devices['Desktop Chrome'] },
     },
+    /* Browserless API specs (tests/api): no UI, no signed-in sessions, so no setup dependency.
+     * Run alone with `npx playwright test --project=api` (the separate CI job does). */
+    {
+      name: 'api',
+      testDir: './tests/api',
+    },
     {
       name: 'chromium',
+      testIgnore: '**/api/**',
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
     },
@@ -100,6 +107,7 @@ export default defineConfig({
      * functional suite runs on chromium only. */
     {
       name: 'firefox',
+      testIgnore: '**/api/**',
       dependencies: ['setup'],
       grep: /@smoke/,
       use: { ...devices['Desktop Firefox'], viewport: { width: 1920, height: 1080 } },
@@ -107,6 +115,7 @@ export default defineConfig({
 
     {
       name: 'webkit',
+      testIgnore: '**/api/**',
       dependencies: ['setup'],
       grep: /@smoke/,
       use: { ...devices['Desktop Safari'], viewport: { width: 1920, height: 1080 } },

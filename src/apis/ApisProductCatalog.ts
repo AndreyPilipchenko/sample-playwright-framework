@@ -10,6 +10,31 @@ interface ProductPage {
   data: { name: string; category: { slug: string } }[];
 }
 
+/** A brand as `GET /brands/{id}` returned it. */
+export interface BrandRecord {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+/** A category as `GET /categories/{id}` returned it. */
+export interface CategoryRecord {
+  id: number;
+  name: string;
+  slug: string;
+  parent_id: number | null;
+}
+
+/** A product as `GET /products/{id}` returned it. */
+export interface ProductRecord {
+  id: number;
+  name: string;
+  price: number;
+  stock: number | null;
+  category: { id: number; name: string; slug: string };
+  brand: { id: number; name: string };
+}
+
 /** One category listing as the API returned it — names and each product's own category, from the same response. */
 export interface CategoryListing {
   productNames: string[];
@@ -35,6 +60,9 @@ export interface CatalogSeed {
 
 /** What a seeded catalog left behind, for the test to drive the UI and the API with. */
 export interface SeededCatalog {
+  brandId: number;
+  brandName: string;
+  categoryId: number;
   categoryName: string;
   categorySlug: string;
   products: { id: string; name: string }[];
@@ -97,7 +125,7 @@ export class ApisProductCatalog {
         await this.setStock(productId, product, categoryId, brandId, imageId);
         seeded.push({ id: String(productId), name: product.name });
       }
-      return { categoryName, categorySlug: slugOf(categoryName), products: seeded };
+      return { brandId, brandName, categoryId, categoryName, categorySlug: slugOf(categoryName), products: seeded };
     });
   }
 
@@ -150,6 +178,49 @@ export class ApisProductCatalog {
     });
   }
 
+  async getBrand(brandId: number): Promise<BrandRecord> {
+    return await allure.step(`Get the brand ${brandId}`, async () => {
+      const response = await this.apiActions.get(`${this.brands_serviceName}/${brandId}`);
+      expectToBe('the get brand response status', response.status(), 200);
+      return (await response.json()) as BrandRecord;
+    });
+  }
+
+  async getCategory(categoryId: number): Promise<CategoryRecord> {
+    return await allure.step(`Get the category ${categoryId}`, async () => {
+      const response = await this.apiActions.get(`${this.categories_serviceName}/${categoryId}`);
+      expectToBe('the get category response status', response.status(), 200);
+      return (await response.json()) as CategoryRecord;
+    });
+  }
+
+  async getProduct(productId: string): Promise<ProductRecord> {
+    return await allure.step(`Get the product ${productId}`, async () => {
+      const response = await this.apiActions.get(`${this.products_serviceName}/${productId}`);
+      expectToBe('the get product response status', response.status(), 200);
+      return (await response.json()) as ProductRecord;
+    });
+  }
+
+  /** Names found by `GET /products/search` for the query (first page). */
+  async searchProductNames(query: string): Promise<string[]> {
+    return await allure.step(`Search the products for: ${query}`, async () => {
+      const response = await this.apiActions.get(`${this.products_serviceName}/search`, { params: { q: query } });
+      expectToBe('the product search response status', response.status(), 200);
+      const { data } = (await response.json()) as ProductPage;
+      return data.map((product) => product.name);
+    });
+  }
+
+  /** Creating a product without its required fields is refused; resolves to the field names the API complained about. */
+  async createProductWithoutRequiredFields(): Promise<string[]> {
+    return await allure.step('Create a product without its required fields', async () => {
+      const response = await this.apiActions.post(this.products_serviceName, { data: {} });
+      expectToBe('the create product without fields response status', response.status(), 422);
+      return Object.keys((await response.json()) as Record<string, string[]>);
+    });
+  }
+
   private productPayload(product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
     return {
       name: product.name,
@@ -177,6 +248,44 @@ export class ApisProductCatalog {
     await allure.step(`Verify every product listed for category ${categorySlug} belongs to it`, async () => {
       expectToBeGreaterThan('the number of products in the category', listing.categorySlugs.length, 0);
       expectToEqual('the category of every listed product', listing.categorySlugs, listing.categorySlugs.map(() => categorySlug));
+    });
+  }
+
+  async verifyBrand(brand: BrandRecord, expectedId: number, expectedName: string) {
+    await allure.step(`Verify the brand is stored as: ${expectedName}`, async () => {
+      expectToEqual('the stored brand', { id: brand.id, name: brand.name, slug: brand.slug }, { id: expectedId, name: expectedName, slug: slugOf(expectedName) });
+    });
+  }
+
+  async verifyTopLevelCategory(category: CategoryRecord, expectedId: number, expectedName: string) {
+    await allure.step(`Verify the category is stored as a top-level category: ${expectedName}`, async () => {
+      expectToEqual(
+        'the stored category',
+        { id: category.id, name: category.name, slug: category.slug, parent_id: category.parent_id },
+        { id: expectedId, name: expectedName, slug: slugOf(expectedName), parent_id: null },
+      );
+    });
+  }
+
+  async verifyProductStored(product: ProductRecord, expected: { id: string; name: string; price: number; stock: number; categoryId: number; brandId: number }) {
+    await allure.step(`Verify the product is stored as: ${expected.name}`, async () => {
+      expectToEqual(
+        'the stored product',
+        { id: String(product.id), name: product.name, price: product.price, stock: product.stock, categoryId: product.category.id, brandId: product.brand.id },
+        expected,
+      );
+    });
+  }
+
+  async verifyProductNamesFound(names: string[], expectedNames: string[]) {
+    await allure.step(`Verify the product names found are exactly: ${expectedNames.join(', ')}`, async () => {
+      expectToEqual('the product names found', [...names].sort(), [...expectedNames].sort());
+    });
+  }
+
+  async verifyRequiredProductFieldsReported(reportedFields: string[], requiredFields: string[]) {
+    await allure.step(`Verify the missing required fields are reported: ${requiredFields.join(', ')}`, async () => {
+      expectToContainAll('the fields the API reported', reportedFields, requiredFields);
     });
   }
 }

@@ -83,6 +83,47 @@ jobs:
         run: |
           if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
 
+  # Separate job for the browserless API specs (tests/api, project `api`): they call the REST
+  # API of the hosted target directly, so no browsers are installed and the job finishes in
+  # a minute or two. A failure here points at the API, not at the UI, and it never blocks
+  # or is blocked by the browser jobs.
+  api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node and dependencies (no browsers)
+        uses: ./.github/actions/setup
+        with:
+          browsers: 'false'
+
+      - name: Run API specs
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=api
+        continue-on-error: true # the report upload below must run even when tests fail
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-api
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-api
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
   # Separate job: brings the application under test up on the runner itself and runs
   # the suite against that private instance instead of the shared public one.
   #

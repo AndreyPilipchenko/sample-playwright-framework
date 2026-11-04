@@ -16,7 +16,8 @@
     "postinstall": "node -e \"import('playwright-pom-harness/scripts/postinstall.mjs').catch(()=>{})\"",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
-    "test:smoke": "playwright test --grep @smoke"
+    "test:smoke": "playwright test --grep @smoke",
+    "test:api": "playwright test --project=api"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

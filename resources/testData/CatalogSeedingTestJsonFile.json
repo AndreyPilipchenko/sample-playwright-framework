@@ -1,0 +1,100 @@
+{
+  "seedApi1": {
+    "brandName": "Stored Brand SEED-API-1 {uuid}",
+    "categoryName": "Stored Category SEED-API-1 {uuid}",
+    "products": [
+      {
+        "name": "Stored Brand Product SEED-API-1 {uuid}",
+        "description": "Seeded to check the brand is stored.",
+        "price": 4.25,
+        "co2Rating": "B",
+        "stock": 3
+      }
+    ]
+  },
+  "seedApi2": {
+    "brandName": "Stored Brand SEED-API-2 {uuid}",
+    "categoryName": "Stored Category SEED-API-2 {uuid}",
+    "products": [
+      {
+        "name": "Stored Category Product SEED-API-2 {uuid}",
+        "description": "Seeded to check the category is stored.",
+        "price": 4.5,
+        "co2Rating": "B",
+        "stock": 3
+      }
+    ]
+  },
+  "seedApi3": {
+    "brandName": "Stored Brand SEED-API-3 {uuid}",
+    "categoryName": "Stored Category SEED-API-3 {uuid}",
+    "products": [
+      {
+        "name": "Stored Product SEED-API-3 {uuid}",
+        "description": "Seeded to check price, stock, category and brand are stored.",
+        "price": 21.75,
+        "co2Rating": "B",
+        "stock": 7
+      }
+    ]
+  },
+  "seedApi4": {
+    "brandName": "Listed Brand SEED-API-4 {uuid}",
+    "categoryName": "Listed Category SEED-API-4 {uuid}",
+    "products": [
+      {
+        "name": "Listed Product A SEED-API-4 {uuid}",
+        "description": "First product of the listed category.",
+        "price": 3.5,
+        "co2Rating": "B",
+        "stock": 5
+      },
+      {
+        "name": "Listed Product B SEED-API-4 {uuid}",
+        "description": "Second product of the listed category.",
+        "price": 6.5,
+        "co2Rating": "B",
+        "stock": 5
+      }
+    ]
+  },
+  "seedApi5": {
+    "requiredFields": [
+      "name",
+      "price",
+      "category_id",
+      "brand_id",
+      "product_image_id"
+    ]
+  },
+  "seedApi6": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "seed-api-6.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api"
+    }
+  },
+  "seedApi7": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "seed-api-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api"
+    }
+  }
+}

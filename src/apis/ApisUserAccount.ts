@@ -45,22 +45,20 @@ export class ApisUserAccount {
   async registerUser(user: UserSeed): Promise<number> {
     return await allure.step('Register a customer through the API', async () => {
       const response = await this.apiActions.post(this.register_serviceName, {
-        data: {
-          first_name: user.firstName,
-          last_name: user.lastName,
-          address: user.address,
-          city: user.city,
-          state: user.state,
-          country: user.country,
-          postcode: user.postcode,
-          phone: user.phone,
-          dob: user.dob,
-          email: user.email,
-          password: user.password,
-        },
+        data: this.registerPayload(user),
       });
       expectToBe('the register response status', response.status(), 201);
       return ((await response.json()) as { id: number }).id;
+    });
+  }
+
+  /** Registering an email that is already registered is refused with 409. */
+  async verifyRegisteringExistingEmailIsRejected(user: UserSeed) {
+    await allure.step('Verify registering an already registered email is rejected', async () => {
+      const response = await this.apiActions.post(this.register_serviceName, {
+        data: this.registerPayload(user),
+      });
+      expectToBe('the duplicate register response status', response.status(), 409);
     });
   }
 
@@ -85,5 +83,21 @@ export class ApisUserAccount {
       expectToBeTruthy('the login access token', accessToken);
       return accessToken;
     });
+  }
+
+  private registerPayload(user: UserSeed) {
+    return {
+      first_name: user.firstName,
+      last_name: user.lastName,
+      address: user.address,
+      city: user.city,
+      state: user.state,
+      country: user.country,
+      postcode: user.postcode,
+      phone: user.phone,
+      dob: user.dob,
+      email: user.email,
+      password: user.password,
+    };
   }
 }
