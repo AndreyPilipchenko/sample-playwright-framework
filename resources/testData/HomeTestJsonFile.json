@@ -1,17 +1,6 @@
 {
   "home1": {
     "expectedTitleContains": "Practice Software Testing",
-    "minimumProductCount": 1,
-    "brandName": "Home Brand TC-PO-1 {uuid}",
-    "categoryName": "Home Category TC-PO-1 {uuid}",
-    "products": [
-      {
-        "name": "Home Catalog Product TC-PO-1 {uuid}",
-        "description": "Seeded so the catalog never depends on pre-existing products.",
-        "price": 12.5,
-        "co2Rating": "B",
-        "stock": 10
-      }
-    ]
+    "minimumProductCount": 1
   }
 }
