@@ -1,6 +1,7 @@
 import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
+import { withUuid } from '../utils/UniqueData';
 import { applications } from '../config/applications';
 import { expectToBe, expectToBeGreaterThan, expectToContainAll, expectToEqual } from '../utils/Expects';
 
@@ -15,7 +16,7 @@ export interface CategoryListing {
   categorySlugs: string[];
 }
 
-/** The values a seeded product is created from; `name` carries the per-run unique token. */
+/** The values a seeded product is created from; `name` is a template with a `{uuid}` placeholder. */
 export interface ProductSeed {
   name: string;
   description: string;
@@ -25,11 +26,18 @@ export interface ProductSeed {
   stock: number;
 }
 
-/** What a seeded product left behind, for the test to drive the UI with. */
-export interface SeededProduct {
-  productId: string;
-  productName: string;
+/** A brand, a top-level category and products, all named by `{uuid}` templates (see UniqueData.withUuid). */
+export interface CatalogSeed {
+  brandName: string;
   categoryName: string;
+  products: ProductSeed[];
+}
+
+/** What a seeded catalog left behind, for the test to drive the UI and the API with. */
+export interface SeededCatalog {
+  categoryName: string;
+  categorySlug: string;
+  products: { id: string; name: string }[];
 }
 
 /** URL part of a name: lowercase words separated by hyphens (Swagger: slug). */
@@ -71,18 +79,25 @@ export class ApisProductCatalog {
   }
 
   /**
-   * Creates a brand, a top-level category and one product in them, then gives the product
-   * stock. Every create endpoint is public (no token). The records are deliberately left
-   * behind: their names carry a per-run UUID, so nothing collides, and deleting needs an admin token.
+   * Creates a brand, a top-level category and the given products in them, each with stock.
+   * Every create endpoint is public (no token). The records are deliberately left behind:
+   * their names carry a per-run UUID, so nothing collides, and deleting needs an admin token.
    */
-  async seedProduct(brandName: string, categoryName: string, product: ProductSeed): Promise<SeededProduct> {
-    return await allure.step(`Seed the product: ${product.name}`, async () => {
+  async seedCatalog(uuid: string, seed: CatalogSeed): Promise<SeededCatalog> {
+    const brandName = withUuid(seed.brandName, uuid);
+    const categoryName = withUuid(seed.categoryName, uuid);
+    return await allure.step(`Seed the category ${categoryName} with ${seed.products.length} product(s)`, async () => {
       const brandId = await this.createBrand(brandName);
       const categoryId = await this.createCategory(categoryName);
       const imageId = await this.getAnyProductImageId();
-      const productId = await this.createProduct(product, categoryId, brandId, imageId);
-      await this.setStock(productId, product, categoryId, brandId, imageId);
-      return { productId: String(productId), productName: product.name, categoryName };
+      const seeded: SeededCatalog['products'] = [];
+      for (const template of seed.products) {
+        const product = { ...template, name: withUuid(template.name, uuid) };
+        const productId = await this.createProduct(product, categoryId, brandId, imageId);
+        await this.setStock(productId, product, categoryId, brandId, imageId);
+        seeded.push({ id: String(productId), name: product.name });
+      }
+      return { categoryName, categorySlug: slugOf(categoryName), products: seeded };
     });
   }
 

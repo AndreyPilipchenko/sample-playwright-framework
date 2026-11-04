@@ -1,21 +1,61 @@
 {
-  "tcPO2": {
-    "productName": "Bolt Cutters"
+  "tcPO2Search": {
+    "brandName": "Card Brand TC-PO-2-search {uuid}",
+    "categoryName": "Card Category TC-PO-2-search {uuid}",
+    "products": [
+      {
+        "name": "Card Search Product TC-PO-2 {uuid}",
+        "description": "Seeded product reached through the search box.",
+        "price": 7.75,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO2Category": {
+    "brandName": "Card Brand TC-PO-2-category {uuid}",
+    "categoryName": "Card Category TC-PO-2-category {uuid}",
+    "products": [
+      {
+        "name": "Card Category Product TC-PO-2 {uuid}",
+        "description": "Seeded product reached through its own category filter.",
+        "price": 8.25,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
   },
   "tcPO5": {
-    "searchQuery": "pliers"
+    "brandName": "Search Brand TC-PO-5 {uuid}",
+    "categoryName": "Search Category TC-PO-5 {uuid}",
+    "products": [
+      {
+        "name": "Search Product TC-PO-5 {uuid}",
+        "description": "Seeded product the search must find.",
+        "price": 5.5,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
   },
   "tcPO8": {
-    "categoryName": "Hammer",
-    "categorySlug": "hammer",
-    "knownProductNames": [
-      "Claw Hammer with Shock Reduction Grip",
-      "Hammer",
-      "Claw Hammer",
-      "Thor Hammer",
-      "Sledgehammer",
-      "Claw Hammer with Fiberglass Handle",
-      "Court Hammer"
+    "brandName": "Filter Brand TC-PO-8 {uuid}",
+    "categoryName": "Filter Category TC-PO-8 {uuid}",
+    "products": [
+      {
+        "name": "Filter Product A TC-PO-8 {uuid}",
+        "description": "First seeded product of the category.",
+        "price": 6.5,
+        "co2Rating": "B",
+        "stock": 10
+      },
+      {
+        "name": "Filter Product B TC-PO-8 {uuid}",
+        "description": "Second seeded product of the category.",
+        "price": 9.5,
+        "co2Rating": "B",
+        "stock": 10
+      }
     ]
   }
 }

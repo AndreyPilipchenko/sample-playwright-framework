@@ -56,7 +56,11 @@ Route: `#/`
 | TC-PO-22 | Product names wrap correctly (Firefox) | P3 | C | 35 | — |
 
 Smoke coverage: TC-PO-1 is automated in `tests/HomeTests.spec.ts`; TC-PO-2, TC-PO-5 and
-TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`).
+TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests
+that differ only in how the product card is reached: through the search box and through the
+product's own category filter. Each smoke case seeds its own brand, category and products
+through the API with a per-run UUID in their names, and leaves them behind (deleting needs
+an admin token).
 
 ## 2. Navigation & Header
 

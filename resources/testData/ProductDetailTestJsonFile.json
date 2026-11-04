@@ -1,6 +1,16 @@
 {
   "tcPD3": {
-    "inStockProductId": "1",
-    "expectedDefaultQuantity": "1"
+    "expectedDefaultQuantity": "1",
+    "brandName": "Detail Brand TC-PD-3 {uuid}",
+    "categoryName": "Detail Category TC-PD-3 {uuid}",
+    "products": [
+      {
+        "name": "Detail Quantity Product TC-PD-3 {uuid}",
+        "description": "Seeded in-stock product for the quantity selector.",
+        "price": 19.99,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
   }
 }
