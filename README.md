@@ -131,17 +131,20 @@ CI job's QEMU step does.
 ## CI
 
 `.github/workflows/playwright.yml` runs on every push/PR to `main` (and on manual
-dispatch) with two independent jobs:
+dispatch) against the hosted public instance, in stages. A stage starts only when the one
+before it passed:
 
-| Job | What it does |
-|---|---|
-| `test` | Runs the suite against the hosted public instance |
-| `local-app` | Brings the application up on the runner with Docker, seeds it, and runs the suite against that private instance |
+| Stage | Job | What it does |
+|---|---|---|
+| 1 | `api-tests` | Conventions check, typecheck and lint, then the browserless API specs (`tests/api`) |
+| 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
+| 3 | `regression` | Every other browser spec on chromium, in 2 parallel shards |
+| - | `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance; independent of the stages, gates nothing |
 
-Both check conventions, run headless, and publish HTML and Allure reports as
-artifacts (the `local-app` job suffixes its artifact names, and also uploads container
-logs when the run does not pass). They are deliberately separate so a hosted-instance
-outage cannot mask a genuine suite failure, and so the two run in parallel.
+All jobs run headless and publish HTML and Allure reports as artifacts (named per job,
+browser or shard; `regression-local` also uploads container logs when the run does not
+pass). `regression-local` is deliberately separate so a hosted-instance outage cannot mask a
+genuine suite failure.
 
 ## Tests
 
