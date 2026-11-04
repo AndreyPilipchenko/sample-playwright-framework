@@ -11,16 +11,58 @@ interface LoginTokenResponse {
   expires_in: number;
 }
 
+/** The values a registered customer is created from (Swagger: UserRequest); `email` carries the per-run unique token. */
+export interface UserSeed {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postcode: string;
+  phone: string;
+  dob: string;
+  email: string;
+  password: string;
+}
+
 export class ApisUserAccount {
   readonly apiActions: ApiActions;
 
   readonly login_serviceName = `${applications.app.apiUrl}/users/login`;
+  readonly register_serviceName = `${applications.app.apiUrl}/users/register`;
 
   constructor(request: APIRequestContext) {
     this.apiActions = new ApiActions(request);
   }
 
   ///// Actions
+
+  /**
+   * Registers a customer — a public endpoint, no token. The account is deliberately left
+   * behind: its email carries a per-run UUID, and deleting it needs an admin token.
+   */
+  async registerUser(user: UserSeed): Promise<number> {
+    return await allure.step('Register a customer through the API', async () => {
+      const response = await this.apiActions.post(this.register_serviceName, {
+        data: {
+          first_name: user.firstName,
+          last_name: user.lastName,
+          address: user.address,
+          city: user.city,
+          state: user.state,
+          country: user.country,
+          postcode: user.postcode,
+          phone: user.phone,
+          dob: user.dob,
+          email: user.email,
+          password: user.password,
+        },
+      });
+      expectToBe('the register response status', response.status(), 201);
+      return ((await response.json()) as { id: number }).id;
+    });
+  }
 
   async login(email: string, password: string): Promise<APIResponse> {
     return await allure.step('Log in through the API', async () => {

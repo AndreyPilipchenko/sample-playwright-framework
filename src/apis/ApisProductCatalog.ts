@@ -15,10 +15,35 @@ export interface CategoryListing {
   categorySlugs: string[];
 }
 
+/** The values a seeded product is created from; `name` carries the per-run unique token. */
+export interface ProductSeed {
+  name: string;
+  description: string;
+  price: number;
+  co2Rating: string;
+  /** Not in the Swagger ProductRequest, but PUT /products/{id} honours it — a created product has no stock and the UI shows it out of stock. */
+  stock: number;
+}
+
+/** What a seeded product left behind, for the test to drive the UI with. */
+export interface SeededProduct {
+  productId: string;
+  productName: string;
+  categoryName: string;
+}
+
+/** URL part of a name: lowercase words separated by hyphens (Swagger: slug). */
+function slugOf(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 export class ApisProductCatalog {
   readonly apiActions: ApiActions;
 
   readonly products_serviceName = `${applications.app.apiUrl}/products`;
+  readonly brands_serviceName = `${applications.app.apiUrl}/brands`;
+  readonly categories_serviceName = `${applications.app.apiUrl}/categories`;
+  readonly images_serviceName = `${applications.app.apiUrl}/images`;
 
   constructor(request: APIRequestContext) {
     this.apiActions = new ApiActions(request);
@@ -43,6 +68,85 @@ export class ApisProductCatalog {
         categorySlugs: data.map((product) => product.category.slug),
       };
     });
+  }
+
+  /**
+   * Creates a brand, a top-level category and one product in them, then gives the product
+   * stock. Every create endpoint is public (no token). The records are deliberately left
+   * behind: their names carry a per-run UUID, so nothing collides, and deleting needs an admin token.
+   */
+  async seedProduct(brandName: string, categoryName: string, product: ProductSeed): Promise<SeededProduct> {
+    return await allure.step(`Seed the product: ${product.name}`, async () => {
+      const brandId = await this.createBrand(brandName);
+      const categoryId = await this.createCategory(categoryName);
+      const imageId = await this.getAnyProductImageId();
+      const productId = await this.createProduct(product, categoryId, brandId, imageId);
+      await this.setStock(productId, product, categoryId, brandId, imageId);
+      return { productId: String(productId), productName: product.name, categoryName };
+    });
+  }
+
+  async createBrand(name: string): Promise<number> {
+    return await allure.step(`Create the brand: ${name}`, async () => {
+      const response = await this.apiActions.post(this.brands_serviceName, { data: { name, slug: slugOf(name) } });
+      expectToBe('the create brand response status', response.status(), 201);
+      return ((await response.json()) as { id: number }).id;
+    });
+  }
+
+  /** Top-level category (`parent_id` null). */
+  async createCategory(name: string): Promise<number> {
+    return await allure.step(`Create the category: ${name}`, async () => {
+      const response = await this.apiActions.post(this.categories_serviceName, {
+        data: { name, slug: slugOf(name), parent_id: null },
+      });
+      expectToBe('the create category response status', response.status(), 201);
+      return ((await response.json()) as { id: number }).id;
+    });
+  }
+
+  /** The id of an image already on the server — images cannot be created through the API. */
+  async getAnyProductImageId(): Promise<number> {
+    return await allure.step('Get the id of an existing product image', async () => {
+      const response = await this.apiActions.get(this.images_serviceName);
+      expectToBe('the image list response status', response.status(), 200);
+      const images = (await response.json()) as { id: number }[];
+      expectToBeGreaterThan('the number of existing product images', images.length, 0);
+      return images[0].id;
+    });
+  }
+
+  async createProduct(product: ProductSeed, categoryId: number, brandId: number, imageId: number): Promise<number> {
+    return await allure.step(`Create the product: ${product.name}`, async () => {
+      const response = await this.apiActions.post(this.products_serviceName, {
+        data: this.productPayload(product, categoryId, brandId, imageId),
+      });
+      expectToBe('the create product response status', response.status(), 201);
+      return ((await response.json()) as { id: number }).id;
+    });
+  }
+
+  async setStock(productId: number, product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
+    await allure.step(`Set the stock of product ${productId} to ${product.stock}`, async () => {
+      const response = await this.apiActions.put(`${this.products_serviceName}/${productId}`, {
+        data: { ...this.productPayload(product, categoryId, brandId, imageId), stock: product.stock },
+      });
+      expectToBe('the update product response status', response.status(), 200);
+    });
+  }
+
+  private productPayload(product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
+    return {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category_id: categoryId,
+      brand_id: brandId,
+      product_image_id: imageId,
+      is_location_offer: 0,
+      is_rental: 0,
+      co2_rating: product.co2Rating,
+    };
   }
 
   ///// Validations
