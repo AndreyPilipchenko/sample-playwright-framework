@@ -5,15 +5,24 @@
 # speak the Azure DevOps REST API. On this GitHub-hosted project this workflow runs
 # the specs and publishes the report artifacts; ADO delivery is not configured here.
 #
+# STAGES — each stage starts only when the one before it passed, so a broken API never
+# spends browser minutes and a broken critical path never starts the wide run:
+#   1. api-tests   static checks, then the browserless API specs (tests/api)
+#   2. smoke       the @smoke subset on chromium, firefox and webkit (one job per browser)
+#   3. regression  every other browser spec (not @smoke), chromium only, in parallel shards
+# regression-local is independent of the stages: it runs the whole suite against a private
+# Docker instance of the application and gates nothing.
+#
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
 #
 # SECRETS: none configured yet, so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset: the auth
-# setup and the login specs skip, and everything else runs. Add the corresponding GitHub
-# Actions secrets and uncomment the env mapping below to run the login specs here.
+# setup and the admin login spec skip, and everything else runs. Add the corresponding
+# GitHub Actions secrets and uncomment the env mapping in the smoke job to run it here.
 #
 # WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
-# this low; raise it, or add `--shard=i/n` through a matrix, once the suite grows.
+# this low per job; the regression stage scales by adding shards (matrix `shard`, and the
+# `/2` in its command) rather than workers.
 #
 # Deliberately headless & non-interactive: AUTO_ALLURE_OPEN=false suppresses the
 # Allure auto-open, PW_TEST_HTML_REPORT_OPEN=never suppresses the HTML report
@@ -29,64 +38,8 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node, dependencies and browsers
-        uses: ./.github/actions/setup
-
-      - name: Check POM conventions
-        run: npx --no pom-harness check-conventions
-
-      # Static checks run once, here only; the local-app job exercises the same code.
-      - name: Type-check
-        run: npm run typecheck
-
-      - name: Lint (floating promises, missing awaits, focused tests)
-        run: npm run lint
-
-      - name: Run Playwright specs
-        id: run_specs
-        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test
-        continue-on-error: true # reporting below must run even when tests fail
-        # env:                  # uncomment after adding the repo secrets
-        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        #   SQLCMDPASSWORD: ${{ secrets.SQLCMDPASSWORD }}
-        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
-        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-
-      - name: Publish HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: reports/playwright-report
-          retention-days: 30
-
-      - name: Publish current Allure report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: reports/allure-report/index.html
-          retention-days: 30
-
-      # Fail the job if the run step failed (kept explicit because the run step
-      # uses continue-on-error so the artifacts above always publish):
-      - name: Reflect test outcome
-        if: always()
-        run: |
-          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
-
-  # Separate job for the browserless API specs (tests/api, project `api`): they call the REST
-  # API of the hosted target directly, so no browsers are installed and the job finishes in
-  # a minute or two. A failure here points at the API, not at the UI, and it never blocks
-  # or is blocked by the browser jobs.
+  # Stage 1. Static checks run once, here only (the regression-local job exercises the same code).
+  # They are fast and fail before any spec runs.
   api-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -96,7 +49,16 @@ jobs:
       - name: Set up Node and dependencies (no browsers)
         uses: ./.github/actions/setup
         with:
-          browsers: 'false'
+          browsers: none
+
+      - name: Check POM conventions
+        run: npx --no pom-harness check-conventions
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint (floating promises, missing awaits, focused tests)
+        run: npm run lint
 
       - name: Run API specs
         id: run_specs
@@ -119,6 +81,107 @@ jobs:
           path: reports/allure-report/index.html
           retention-days: 30
 
+      # Fail the job if the run step failed (kept explicit because the run step
+      # uses continue-on-error so the artifacts above always publish):
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
+  # Stage 2. The critical-path subset in every browser. The three browsers run side by side
+  # as a matrix (each installs only its own browser); fail-fast is off so one browser's
+  # failure does not hide another's result.
+  smoke:
+    needs: api-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies and ${{ matrix.browser }}
+        uses: ./.github/actions/setup
+        with:
+          browsers: ${{ matrix.browser }}
+
+      - name: Run the @smoke specs on ${{ matrix.browser }}
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=${{ matrix.browser }} --grep @smoke
+        continue-on-error: true # reporting below must run even when tests fail
+        # env:                  # uncomment after adding the repo secrets
+        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #   SQLCMDPASSWORD: ${{ secrets.SQLCMDPASSWORD }}
+        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke-${{ matrix.browser }}
+          path: reports/playwright-report
+          retention-days: 30
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-smoke-${{ matrix.browser }}
+          path: reports/allure-report/index.html
+          retention-days: 30
+
+      - name: Reflect test outcome
+        if: always()
+        run: |
+          if [ "${{ steps.run_specs.outcome }}" = "failure" ]; then exit 1; fi
+
+  # Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
+  # chromium-only, see playwright.config.ts), split into parallel shards that start together
+  # once smoke has passed. Until such specs exist the shards pass on an empty selection.
+  regression:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies and chromium
+        uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: Run the non-smoke specs, shard ${{ matrix.shard }} of 2
+        id: run_specs
+        run: CI=true AUTO_ALLURE_OPEN=false PW_TEST_HTML_REPORT_OPEN=never npx playwright test --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
+        continue-on-error: true # reporting below must run even when tests fail
+
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-regression-${{ matrix.shard }}
+          path: reports/playwright-report
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Publish current Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-regression-${{ matrix.shard }}
+          path: reports/allure-report/index.html
+          retention-days: 30
+          if-no-files-found: ignore
+
       - name: Reflect test outcome
         if: always()
         run: |
@@ -127,13 +190,13 @@ jobs:
   # Separate job: brings the application under test up on the runner itself and runs
   # the suite against that private instance instead of the shared public one.
   #
-  # Why a second job rather than a step in the one above: the two runs answer
-  # different questions (is the hosted target healthy vs does the suite pass against
-  # a known-good, freshly seeded instance), they must not share a failure, and this
-  # one carries a much heavier setup cost. Running them in parallel also keeps total
-  # wall-clock down. Artifact names are suffixed so they cannot collide with the
-  # hosted job's uploads — upload-artifact@v4 rejects duplicate names across jobs.
-  local-app:
+  # Why a separate job rather than a stage above: the hosted-target runs answer a different
+  # question (is the hosted target healthy vs does the suite pass against a known-good,
+  # freshly seeded instance), they must not share a failure, and this one carries a much
+  # heavier setup cost. It has no `needs`, so it runs alongside stage 1 and gates nothing.
+  # Artifact names are suffixed so they cannot collide with the other jobs' uploads -
+  # upload-artifact@v4 rejects duplicate names across jobs.
+  regression-local:
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 60
     steps:
