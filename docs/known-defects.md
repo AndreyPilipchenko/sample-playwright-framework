@@ -7,13 +7,13 @@ for that build.
 
 These are **not** bugs to fix — they are the exercise. The register exists so that a
 failing test can be traced to a known defect instead of being investigated as a
-regression. See [test plan §4.1](test-plan.md) for the test intent policy (conformance tests are
-tagged `@conformance`) and [test cases](test-cases.md) for the defect → test-case
+regression. See [test plan §4.1](test-plan.md) for how tests of broken functionality are treated
+and [test cases](test-cases.md) for the defect → test-case
 mapping. The register is documentation: tests do not read it at run time.
 
 Upstream numbering is preserved (IDs 1–94, with the odd ordering quirk that #84 sits
 between the UI and accessibility blocks). Defect IDs are referenced from test cases as
-`Defect`, and are named in the conformance tests that cover them (tagged `@conformance`).
+`Defect`, and are named in the tests that cover them.
 
 ---
 

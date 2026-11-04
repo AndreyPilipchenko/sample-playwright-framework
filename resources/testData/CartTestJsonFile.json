@@ -5,7 +5,7 @@
     "products": [
       {
         "name": "Cart Header Product TC-CART-1 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 14.15,
         "co2Rating": "B",
         "stock": 10
@@ -26,7 +26,7 @@
     "products": [
       {
         "name": "Cart Quantity Product TC-CART-2 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 14.15,
         "co2Rating": "B",
         "stock": 10
@@ -43,7 +43,7 @@
     "products": [
       {
         "name": "Cart Delete Product TC-CART-4 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 14.15,
         "co2Rating": "B",
         "stock": 10
@@ -57,14 +57,14 @@
     "products": [
       {
         "name": "Cart Removed Product TC-CART-5 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 14.15,
         "co2Rating": "B",
         "stock": 10
       },
       {
         "name": "Cart Remaining Product TC-CART-5 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 12.01,
         "co2Rating": "B",
         "stock": 10
@@ -80,7 +80,7 @@
     "products": [
       {
         "name": "Cart Total Product TC-CART-7 {uuid}",
-        "description": "Seeded for the cart conformance case.",
+        "description": "Seeded for the cart case.",
         "price": 14.15,
         "co2Rating": "B",
         "stock": 10

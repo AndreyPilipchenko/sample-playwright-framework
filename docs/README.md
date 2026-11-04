@@ -9,7 +9,7 @@ application, and only the features actually present in that build are documented
 
 | Document | Contents |
 |---|---|
-| [Test plan](test-plan.md) | Scope, environment, accounts, approach, risks, the test intent and branch policy, open questions |
+| [Test plan](test-plan.md) | Scope, environment, accounts, approach, risks, how tests of broken functionality are treated, open questions |
 | [Test cases](test-cases.md) | 234 test conditions across 24 feature areas, traceable to upstream acceptance criteria |
 | [Known defects](known-defects.md) | The 90+ intentional defect register, with notes and exploratory tour mapping |
 
@@ -18,10 +18,8 @@ application, and only the features actually present in that build are documented
 The application is **deliberately broken** — it carries 90+ intentional defects. That
 single fact drives most of the decisions in these documents:
 
-- All tests live on the mainline branches, and a failing test stays red until the
-  functionality is fixed. **Conformance** tests (documented behaviour the app violates) are
-  tagged `@conformance`, so the working-functionality suite (`npm run test:non-conformance`)
-  stays a clean signal. See [test plan §4.1](test-plan.md).
+- Tests assert the documented behaviour, so a test of broken functionality fails and stays
+  red until the functionality is fixed. See [test plan §4.1](test-plan.md).
 - Routing is **hash-based** (`#/checkout`, not `/checkout`). Clean paths return 404.
   This was verified live and contradicts the upstream release notes.
 - The instance is **public and shared**. Account and catalogue state is mutable by

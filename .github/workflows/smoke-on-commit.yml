@@ -1,0 +1,65 @@
+# Smoke tests on every commit to the PRODUCT repository's main branch. That repository's
+# workflow sends a `repository_dispatch` of type `product-main-push` here (a sample to copy is
+# docs/ci/product-repo-trigger.yml; README "CI" explains the token it needs). The full suite
+# runs nightly (nightly.yml). This repository is the test project, not the product, so its own
+# commits and pull requests run nothing.
+#
+# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers) and run-specs
+# (run Playwright, publish the reports, reflect the outcome).
+#
+# Run it by hand: Actions → Smoke on product commit → Run workflow, or
+# `gh workflow run smoke-on-commit.yml`.
+#
+# RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
+# fine since it's a public site — no self-hosted runner needed.
+#
+# SECRETS: none configured yet, so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset: the auth setup
+# and the admin login spec skip, and everything else runs. Add the GitHub Actions secrets and
+# uncomment the env mapping below to run them here.
+
+name: Smoke on product commit
+
+# The product commit under test, so each run is traceable to it.
+run-name: "${{ github.event_name == 'repository_dispatch' && format('Smoke: {0}@{1}', github.event.client_payload.repository, github.event.client_payload.sha) || 'Smoke (manual run)' }}"
+
+on:
+  repository_dispatch:
+    types: [product-main-push]
+  workflow_dispatch: {}
+
+# Smoke runs queue behind each other. Product pushes can arrive in bursts; GitHub keeps one
+# pending run per group, so a newer push replaces an older one that has not started yet (the
+# newest commit is the one worth testing). The group is separate from nightly.yml's, so a
+# product push can never cancel a pending nightly run.
+concurrency:
+  group: test-suite-smoke
+  cancel-in-progress: false
+
+jobs:
+  # The critical-path subset in every browser, side by side; fail-fast is off so one
+  # browser's failure does not hide another's result.
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node, dependencies and ${{ matrix.browser }}
+        uses: ./.github/actions/setup
+        with:
+          browsers: ${{ matrix.browser }}
+
+      - name: Run the @smoke specs on ${{ matrix.browser }}
+        uses: ./.github/actions/run-specs
+        with:
+          args: --project=${{ matrix.browser }} --grep @smoke
+          report-name: smoke-${{ matrix.browser }}
+        # env:                  # uncomment after adding the repo secrets
+        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}

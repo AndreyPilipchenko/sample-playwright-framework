@@ -36,8 +36,8 @@ See `AGENTS.md` / `CLAUDE.md` for the AI-agent skill routing, and the harness's 
 compiled from the upstream Practice Software Testing docs:
 
 - [Test plan](docs/test-plan.md) — scope, environment, approach, risks, and the
-  test intent policy for a deliberately broken target (conformance tests are tagged
-  `@conformance` and fail while their defects are open)
+  treatment of tests for a deliberately broken target (a test of broken functionality fails
+  until it is fixed)
 - [Test cases](docs/test-cases.md) — test conditions per feature area, traced to
   upstream acceptance criteria
 
@@ -130,36 +130,48 @@ CI job's QEMU step does.
 
 ## CI
 
-Two workflows. Except `regression-local`, every job runs against the hosted public instance.
+Two workflows run the tests. This repository is the test project, not the product, so
+**commits and pull requests here run nothing**.
 
-**Pull-request gate** — `.github/workflows/playwright.yml`, on every push/PR to `main` (and
-on manual dispatch). Small and fast; the smoke stage starts only when the API stage passed:
+| Workflow | Runs | When |
+|---|---|---|
+| `smoke-on-commit.yml` | `@smoke` tests on chromium, firefox and webkit | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
+| `nightly.yml` | all tests, in stages | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
+
+Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke-on-commit.yml`
+/ `gh workflow run nightly.yml`). Smoke runs queue behind each other, and a burst of product
+commits tests only the newest one; nightly runs have their own queue, so a product commit never
+cancels a waiting nightly run.
+
+The nightly stages; each starts only when the one before it passed:
 
 | Stage | Job | What it does |
 |---|---|---|
 | 1 | `api-tests` | Conventions check, typecheck and lint, then the browserless API specs (`tests/api`) |
-| 2 | `smoke` | The `@smoke` subset on chromium |
+| 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
+| 3 | `regression` | Every other spec on chromium, in 2 parallel shards |
+| - | `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance; independent of the stages, gates nothing |
 
-**Nightly** — `.github/workflows/nightly.yml`, at 02:00 UTC on `main` (GitHub runs schedules
-on the default branch only) and on manual dispatch for any branch. Its jobs are independent:
+The steps both workflows share are composite actions in `.github/actions/`:
 
-| Job | What it does |
+| Action | What it does |
 |---|---|
-| `smoke-cross-browser` | The `@smoke` subset on firefox and webkit |
-| `regression` | Every non-smoke spec on chromium, in 2 parallel shards. Includes the `@conformance` tests, so it is red while their defects are open |
-| `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance |
+| `setup` | Node, `npm ci`, and the requested Playwright browsers (cached; chromium is always added, because the auth setup runs on it) |
+| `static-checks` | Conventions check, typecheck and lint |
+| `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
 
-All jobs run headless and publish HTML and Allure reports as artifacts (named per job,
-browser or shard; `regression-local` also uploads container logs when the run does not
-pass).
+Tests of broken functionality assert the documented behaviour, so they fail, and the run
+is red, until the product fixes them (see [test plan §4.1](docs/test-plan.md)). All jobs run
+headless and publish HTML and Allure reports as artifacts (named per job, browser or shard;
+`regression-local` also uploads container logs when the run does not pass).
 
-Conformance tests (documented behaviour the application violates, tagged `@conformance`)
-stay red until the defect is fixed. Run the two signals separately when you need them:
+### Connecting the product repository
 
-```sh
-npm run test:non-conformance  # working functionality: must be green
-npm run test:conformance      # documented behaviour: red while defects are open
-```
+The trigger that the product repository needs, and its instructions, are in
+[`docs/ci/`](docs/ci/README.md): a workflow to copy into the product repository
+([`product-repo-trigger.yml`](docs/ci/product-repo-trigger.yml)) and a README for that
+repository covering the token, the secret, how to check it works and troubleshooting. Both
+live under `docs/` so they never run here.
 
 ## Tests
 

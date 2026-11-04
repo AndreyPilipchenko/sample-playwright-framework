@@ -15,14 +15,12 @@ let apisProductCatalog: ApisProductCatalog;
 let testData: typeof import('../resources/testData/CartTestJsonFile.json');
 
 /**
- * Conformance cases (test plan §4.1): they assert the documented cart behaviour and fail
- * while defects L1, 7 and 8 are open. They are never weakened to pass; the `@conformance`
- * tag keeps them out of `npm run test:non-conformance`, the working-functionality suite.
+ * They assert the documented cart behaviour and fail while defects L1, 7 and 8 are open
+ * (test plan §4.1). They are never weakened to pass.
  * Each case seeds its own products through the API (per-run UUID in every name, left behind
  * on purpose) and never relies on the existing catalog.
  */
-// @conformance is this project's addition to the harness tag set (test plan §4.1); the conventions check reports it as one accepted WARN.
-test.describe('Checkout Cart', { tag: ['@conformance'] }, () => {
+test.describe('Checkout Cart', () => {
 
   test('Cart table shows Item, Quantity, Price, Total, Actions', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout Cart');

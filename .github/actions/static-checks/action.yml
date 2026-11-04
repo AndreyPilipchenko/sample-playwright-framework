@@ -1,0 +1,17 @@
+name: Static checks
+description: The POM conventions check, the TypeScript type-check and the linter. Run after the setup action.
+
+runs:
+  using: composite
+  steps:
+    - name: Check POM conventions
+      shell: bash
+      run: npx --no pom-harness check-conventions
+
+    - name: Type-check
+      shell: bash
+      run: npm run typecheck
+
+    - name: Lint (floating promises, missing awaits, focused tests)
+      shell: bash
+      run: npm run lint

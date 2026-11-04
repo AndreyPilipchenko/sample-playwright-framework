@@ -1,0 +1,48 @@
+# SAMPLE — copy this file into the PRODUCT repository as .github/workflows/trigger-tests.yml.
+# Its instructions (token, secret, checks, troubleshooting) are in docs/ci/README.md next to
+# this file; copy that into the product repository too.
+# It is kept here under docs/, not .github/workflows/, so it never runs in this repository.
+#
+# Every push to the product's main branch sends a `repository_dispatch` event of type
+# `product-main-push` to this test repository, whose .github/workflows/smoke-on-commit.yml
+# then runs the @smoke tests (the full suite runs there nightly). The payload names the product
+# commit; the test run shows it in its title.
+#
+# Setup in the product repository:
+#   1. Create a fine-grained personal access token (or a GitHub App token) with access to the
+#      TEST repository only and the permission "Contents: Read and write" — the permission
+#      the repository-dispatch API requires.
+#   2. Save it as the Actions secret TESTS_DISPATCH_TOKEN in the product repository.
+#   3. Set TESTS_REPOSITORY below to the test repository's owner/name.
+
+name: Trigger the test suite
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+env:
+  TESTS_REPOSITORY: AndreyPilipchenko/sample-playwright-framework
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send product-main-push to the test repository
+        env:
+          GH_TOKEN: ${{ secrets.TESTS_DISPATCH_TOKEN }}
+        run: |
+          gh api "repos/${TESTS_REPOSITORY}/dispatches" --method POST --input - <<EOF
+          {
+            "event_type": "product-main-push",
+            "client_payload": {
+              "repository": "${{ github.repository }}",
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}",
+              "url": "${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+            }
+          }
+          EOF
+          echo "Dispatched product-main-push for ${{ github.repository }}@${{ github.sha }} to ${TESTS_REPOSITORY}"
