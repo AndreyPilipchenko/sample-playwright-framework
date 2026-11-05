@@ -86,6 +86,7 @@ test.describe('Checkout', () => {
     await cartPage.proceed();
     await checkoutSignInPage.login(user.email, user.password);
     await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
     await checkoutAddressPage.clearAddressField();
     await checkoutAddressPage.verifyRequiredFieldError(testData.tcCBA3.expectedError);
     await checkoutAddressPage.verifyProceedDisabled();
@@ -101,6 +102,7 @@ test.describe('Checkout', () => {
     await cartPage.proceed();
     await checkoutSignInPage.login(user.email, user.password);
     await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
     await checkoutAddressPage.enterAddress(billing);
     await checkoutAddressPage.proceed();
     await checkoutPaymentPage.enterBankTransfer(bank.accountName, bank.accountNumber);
@@ -120,6 +122,7 @@ test.describe('Checkout', () => {
     await cartPage.proceed();
     await checkoutSignInPage.login(user.email, user.password);
     await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
     await checkoutAddressPage.enterAddress(billing);
     await checkoutAddressPage.proceed();
     await checkoutPaymentPage.enterBankTransfer(bank.accountName, bank.accountNumber);

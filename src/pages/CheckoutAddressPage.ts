@@ -1,6 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
-import { expectToBeDisabled, expectToBeVisible, expectToHaveText } from '../utils/Expects';
+import { expectToBeDisabled, expectToBeVisible, expectToHaveText, expectToHaveValue } from '../utils/Expects';
 
 /** The billing address values typed on the step. */
 export interface BillingAddress {
@@ -66,6 +66,16 @@ export class CheckoutAddressPage {
   async verifyAddressStepShown() {
     await step('Verify the billing address step is shown', async () => {
       await expectToBeVisible('the Address field', this.address_input);
+    });
+  }
+
+  /**
+   * The saved address loads after the step opens and overwrites whatever was typed or cleared before it
+   * arrives, so callers wait for it first.
+   */
+  async verifySavedAddressPrefilled(expectedAddress: string) {
+    await step('Verify the saved address is prefilled', async () => {
+      await expectToHaveValue('the Address field', this.address_input, expectedAddress);
     });
   }
 

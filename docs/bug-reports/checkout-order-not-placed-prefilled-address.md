@@ -71,11 +71,16 @@ wrong value for it (register entry 10).
 
 ## Open points before filing
 
-- The 500 response body and the request payload were not captured, so it is unconfirmed that the invoice request carries
-  `missing value` as the postcode; the table only shows that changing the postcode changes the outcome.
+- The 500 response body is `{"message":"Something went wrong"}`. The failing invoice request (captured from a trace) carries
+  `"billing_postcode":"missing value"`; with the retyped postcode the request carries `1234AA` and returns 201.
 - Whether the same failure happens for other payment methods was not checked; only Bank Transfer is rendered with
   fields in this build (the other methods show the same bank fields).
 - Public instance only; the local Docker stack was not checked.
+- While automating, a second behaviour showed up: the saved address loads after the billing step opens and overwrites
+  values typed (or a field cleared) before it arrives. In 8 of 10 diagnostic runs of the order cases the invoice request was
+  sent with the prefilled `State` / `missing value` instead of the typed `Noord-Holland` / `1234AA` and failed with 500
+  (`{"message":"Something went wrong"}`). This was a race in the first version of the tests, now handled by waiting for the
+  saved address before typing. Whether the late overwrite is itself a product defect is a decision for whoever files this.
 - Whether to track it separately from register entry 10 or as a consequence of it is a decision for whoever files it.
 - Severity and priority need the project's scale; none is invented here.
 
