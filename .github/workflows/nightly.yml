@@ -18,9 +18,10 @@
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
 #
-# SECRETS: none configured yet, so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset: the auth setup
-# and the admin login spec skip, and everything else runs. Add the GitHub Actions secrets and
-# uncomment the env mapping in the smoke job to run them here.
+# SECRETS: the repository secrets APP_CUSTOMER_USERNAME/_PASSWORD and APP_ADMIN_USERNAME/_PASSWORD
+# (the demo accounts, docs/test-plan.md §1.2) are mapped onto the run-specs step of every
+# browser job only, so no other step sees them. A role whose secrets are empty is skipped by the auth setup, not
+# failed. Mind defect #21: one failed login locks the account, so check a value before saving it.
 #
 # WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
 # this low per job; the regression stage scales by adding shards (matrix `shard`, and the
@@ -86,11 +87,11 @@ jobs:
         with:
           args: --project=${{ matrix.browser }} --grep @smoke
           report-name: smoke-${{ matrix.browser }}
-        # env:                  # uncomment after adding the repo secrets
-        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
-        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+        env:
+          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
   # Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
   # chromium-only, see playwright.config.ts), in parallel shards that start together once
@@ -116,6 +117,11 @@ jobs:
         with:
           args: --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
           report-name: regression-${{ matrix.shard }}
+        env:
+          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
   # Brings the application under test up on the runner itself and runs the whole suite against
   # that private instance instead of the shared public one. A separate job rather than a stage:
@@ -149,6 +155,12 @@ jobs:
         with:
           command: node scripts/app.mjs test
           report-name: local
+        # The local stack seeds the same demo accounts as the hosted target.
+        env:
+          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       # Container logs are the only way to diagnose an application-side failure after the
       # runner is torn down, so capture them whenever the run did not pass.

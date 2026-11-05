@@ -13,9 +13,10 @@
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
 #
-# SECRETS: none configured yet, so APP_CUSTOMER_*/APP_ADMIN_*/DB_* stay unset: the auth setup
-# and the admin login spec skip, and everything else runs. Add the GitHub Actions secrets and
-# uncomment the env mapping below to run them here.
+# SECRETS: the repository secrets APP_CUSTOMER_USERNAME/_PASSWORD and APP_ADMIN_USERNAME/_PASSWORD
+# (the demo accounts, docs/test-plan.md §1.2) are mapped onto the run-specs step only,
+# so no other step sees them. A role whose secrets are empty is skipped by the auth setup, not
+# failed. Mind defect #21: one failed login locks the account, so check a value before saving it.
 
 name: Smoke on product commit
 
@@ -58,8 +59,8 @@ jobs:
         with:
           args: --project=${{ matrix.browser }} --grep @smoke
           report-name: smoke-${{ matrix.browser }}
-        # env:                  # uncomment after adding the repo secrets
-        #   APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-        #   APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
-        #   APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-        #   APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+        env:
+          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
+          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}

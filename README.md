@@ -78,7 +78,8 @@ test.use({ role: 'customer' }); // or 'admin'
 
 Credentials come from `.env` (`APP_CUSTOMER_*`, `APP_ADMIN_*`, see `.env.example`); an unset
 role is skipped. The setup never retries, because this target locks an account after **one**
-failed login (known defect #21).
+failed login (known defect #21). On CI the same four variables come from the repository's
+GitHub Actions secrets, mapped onto the spec-running steps of both workflows.
 
 ## Running the app locally
 
