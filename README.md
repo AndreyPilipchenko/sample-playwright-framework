@@ -152,7 +152,7 @@ CI job's QEMU step does.
 ## CI
 
 Two workflows run the tests. This repository is the test project, not the product, so
-**commits and pull requests here run nothing**.
+**commits and pull requests here run no tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|

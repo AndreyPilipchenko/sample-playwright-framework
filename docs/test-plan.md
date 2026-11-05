@@ -148,7 +148,7 @@ no `test.fail()`, `test.fixme()`, `test.skip()` or retry-until-green, no weakene
 and no workaround in the page objects.
 
 **When the suite runs.** This repository is the test project, not the product, so commits
-and pull requests here do not run the suite. A change to the product repository's `main`
+and pull requests here do not run the suite (a pull request runs only the static checks, `.github/workflows/lint.yml`). A change to the product repository's `main`
 branch runs the `@smoke` tests (a `repository_dispatch` event of type `product-main-push`,
 sent by the product repository's workflow; a sample is in `docs/ci/product-repo-trigger.yml`)
 through `.github/workflows/smoke-on-commit.yml`. All tests run nightly at 02:00 UTC through
