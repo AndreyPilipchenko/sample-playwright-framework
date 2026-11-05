@@ -16,8 +16,8 @@ so don't be surprised when something looks broken — that's the point.
 
 ```
 src/pages/    GUI business layer — page classes (locators + actions + validations)
-src/apis/     API business layer (not used yet — created on first need)
-src/dbs/      DB business layer (not used yet — created on first need)
+src/apis/     API business layer — service classes per domain (accounts, catalog, invoices)
+src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
 src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
 src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
 src/fixtures/ The suite's `test` with the `role` option (signed-in sessions)
@@ -130,6 +130,13 @@ invocation honours it:
 TEST_ENV=local npx playwright test
 ```
 
+The local stack also has a database (target `appDb-local`). Specs that need it read its credentials
+as JSON from `APP_DB_LOCAL` in `.env`, shaped `APP_DB_LOCAL='{"user":"…","password":"…"}'`, with the
+`MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `regression-local`
+job reads the secret of the same name.
+Only the disabled-account cases use it (TC-LOGIN-10, `customer-account-api-6`): this build's admin
+API cannot disable an account. Without it they fail with a database connection error.
+
 To point a single run at another address without adding an environment, override it
 per name: `APP_URL` for the UI, `APP_API_URL` for the API.
 
@@ -208,7 +215,7 @@ live under `docs/` so they never run here.
 
 ## Tests
 
-Every test asserts the documented behaviour (see `docs/test-plan.md` �4.1). A test of broken functionality
+Every test asserts the documented behaviour (see `docs/test-plan.md` §4.1). A test of broken functionality
 fails and stays red until the product is fixed; the cases are in `docs/test-cases.md`, the defects in
 `docs/known-defects.md` and the written bug reports in `docs/bug-reports/`.
 
@@ -220,27 +227,34 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | `NavigationTests.spec.ts` | 1 | Guarded routes redirect to login when unauthenticated | `@smoke` |
 | `ProductOverviewTests.spec.ts` | 4 | Search, category filter and opening a product card from either | `@smoke` |
 | `ProductDetailTests.spec.ts` | 1 | Quantity selector defaults to 1 | `@smoke` |
-| `LoginTests.spec.ts` | TC-LOGIN-1..4 | Form fields, invalid credentials message, customer and admin sign-in redirects | `@regression`, sign-ins `@smoke` |
+| `LoginTests.spec.ts` | TC-LOGIN-1..5, 7, 8, 10 | Form fields, invalid credentials message, customer and admin sign-in redirects, empty-form validation, locking after 3 failures, disabled account. **TC-LOGIN-5 and 8 are red** (known defects; the local build never locks) | `@regression`, sign-ins `@smoke` |
 | `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6 | Form fields, mismatched confirmation, wrong current password, successful change and logout. **TC-CPW-1 and TC-CPW-3 are red** (known defects) | `@regression` |
 | `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7 | Cart table, quantity change, delete, totals. **All five are red** (known defects) | `@regression` |
-| `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-3, TC-CPAY-12, 13 | Guest sign-in step, billing address validation, placing an order, cart cleared afterwards | `@regression` |
-| `RegistrationTests.spec.ts` | TC-REG-9 | A valid registration creates the account, lands on login and the new customer can sign in | `@regression` |
+| `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-1, 3, 4, TC-CPAY-1, 4, 7, 12, 13 | Guest sign-in step, billing address fields and validation, proceeding to payment, payment methods, credit card form and expiry check, placing an order, cart cleared afterwards. **TC-CBA-1 and TC-CPAY-1, 4, 7 are red** (known defects) | `@regression` |
+| `RegistrationTests.spec.ts` | TC-REG-1, 7, 8, 9 | Field labels, duplicate-email message without a password hint, a valid registration that lands on login and can sign in. **TC-REG-1, 7, 8 are red** (known defects) | `@regression` |
 | `InvoiceTests.spec.ts` | TC-INV-3, 6 | Invoice detail shows number, date, total and its line items | `@regression` |
 
 ### API specs (`tests/api`, the browserless `api` project)
 
-| Spec | Covers |
-|---|---|
-| `catalog/BrandApiTests.spec.ts` | Brand creation and read-back, brand required-field rejection |
-| `catalog/CategoryApiTests.spec.ts` | Category creation and read-back, listing and search, category required-field rejection |
-| `catalog/ProductApiTests.spec.ts` | Product creation and read-back, required-field rejection, restocking, a search matching nothing, an unknown product id (404) |
-| `accounts/CustomerAccountApiTests.spec.ts` | Customer registration and login, duplicate email rejection |
-| `invoices/InvoiceApiTests.spec.ts` | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
+| Spec | Tests | Covers |
+|---|---|---|
+| `catalog/BrandApiTests.spec.ts` | 2 | Brand creation and read-back, brand required-field rejection |
+| `catalog/CategoryApiTests.spec.ts` | 3 | Category creation and read-back, listing and search, category required-field rejection |
+| `catalog/ProductApiTests.spec.ts` | 5 | Product creation and read-back, required-field rejection, restocking, a search matching nothing, an unknown product id (404) |
+| `accounts/CustomerAccountApiTests.spec.ts` | 6 | Registration and login, duplicate email (409), wrong password (401), two failures do not lock, three failures lock (423), disabled account (403, needs `APP_DB_LOCAL`). **The lock test is red** on the local build, which never locks; where defect 21 applies (locks after one failure) the two-failures test is red instead |
+| `invoices/InvoiceApiTests.spec.ts` | 5 | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
+
+Every request the service classes in `src/apis/` send has at least one API test. The `tests/api` cases
+are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed their data
+through and the login status codes, not the §22 API security cases (TC-API-1..16, not automated yet).
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
 (see Signed-in tests), seed their own data through the API and leave disposable records behind.
 
 ### Not automated yet
 
-The remaining open cases (admin: TC-LOGIN-10 and TC-ADM-*, contact: TC-CONT-8, discounts: TC-DISC-*) and the
-cases blocked by defects are listed per feature in `docs/test-cases.md`.
+40 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-*), contact (TC-CONT-*), discounts
+(TC-DISC-*), the API security cases (TC-API-*) and accessibility. Every P1 case of the checkout sign-in,
+address and payment steps, login and registration is automated; the cart still has open P1 cases
+(TC-CART-8, 10, 11).
