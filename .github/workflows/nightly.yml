@@ -205,11 +205,47 @@ jobs:
       - name: Start the application under test
         run: node scripts/app.mjs up --timeout 900
 
-      - name: Run Playwright specs against the local instance
+      # The same three selections the hosted stages used, as separate steps against one stack, so
+      # each has its own report and summary. Later steps run even when an earlier one failed.
+      - name: Run API specs against the local instance
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
-          report-name: local
+          args: -- --project=api
+          report-name: local-api
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+        # The local stack seeds the same demo accounts as the hosted target.
+        env:
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+
+      - name: Run the @smoke specs against the local instance
+        if: always()
+        uses: ./.github/actions/run-specs
+        with:
+          command: node scripts/app.mjs test
+          args: -- --project=chromium --project=firefox --project=webkit
+          stage-tag: '@smoke'
+          report-name: local-smoke
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+        # The local stack seeds the same demo accounts as the hosted target.
+        env:
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+
+      - name: Run the non-smoke specs against the local instance
+        if: always()
+        uses: ./.github/actions/run-specs
+        with:
+          command: node scripts/app.mjs test
+          args: -- --project=chromium --grep-invert @smoke --pass-with-no-tests
+          report-name: local-regression
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
