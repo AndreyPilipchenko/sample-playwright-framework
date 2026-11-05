@@ -222,6 +222,8 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6 | Form fields, mismatched confirmation, wrong current password, successful change and logout. **TC-CPW-1 and TC-CPW-3 are red** (known defects) | `@regression` |
 | `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7 | Cart table, quantity change, delete, totals. **All five are red** (known defects) | `@regression` |
 | `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-3, TC-CPAY-12, 13 | Guest sign-in step, billing address validation, placing an order, cart cleared afterwards | `@regression` |
+| `RegistrationTests.spec.ts` | TC-REG-9 | A valid registration creates the account, lands on login and the new customer can sign in | `@regression` |
+| `InvoiceTests.spec.ts` | TC-INV-3, 6 | Invoice detail shows number, date, total and its line items | `@regression` |
 
 ### API specs (`tests/api`, the browserless `api` project)
 

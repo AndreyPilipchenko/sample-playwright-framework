@@ -62,6 +62,14 @@ export class ApisUserAccount {
     });
   }
 
+  /** A registered account can sign in through the API. One login only: this target locks an account after ONE failed login (defect #21). */
+  async verifyCanLogIn(email: string, password: string) {
+    await allure.step('Verify the account can sign in through the API', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 200);
+    });
+  }
+
   async login(email: string, password: string): Promise<APIResponse> {
     return await allure.step('Log in through the API', async () => {
       return await this.apiActions.post(this.login_serviceName, {
