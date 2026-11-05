@@ -34,5 +34,5 @@ export async function createOwnInvoice(request: APIRequestContext, seed: OwnInvo
   const catalog = await new ApisProductCatalog(request).seedCatalog(uuid, seed.catalog);
   const lines: InvoiceLineSeed[] = [{ productId: catalog.products[0].id, unitPrice: seed.catalog.products[0].price, quantity: seed.quantity }];
   const created: CreatedInvoice = await apisInvoices.createInvoice(userId, seed.invoice, lines);
-  return { apisInvoices, userId, created, lines };
+  return { apisInvoices, userId, created, lines, productName: catalog.products[0].name };
 }

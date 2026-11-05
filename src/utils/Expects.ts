@@ -318,6 +318,11 @@ export async function expectToBeDisabled(subject: string, locator: Locator, opti
   await expect(locator, `Expect ${subject} to be disabled →`).toBeDisabled(options);
 }
 
+/** Auto-retrying checked-state assertion — `Expect <subject> to be checked → …`. */
+export async function expectToBeChecked(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
+  await expect(locator, `Expect ${subject} to be checked →`).toBeChecked(options);
+}
+
 /** Auto-retrying negated checked-state assertion — `Expect <subject> not to be checked → …` (negation stated here: the message discards Playwright's `not` marker). */
 export async function expectNotToBeChecked(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
   await expect(locator, `Expect ${subject} not to be checked →`).not.toBeChecked(options);

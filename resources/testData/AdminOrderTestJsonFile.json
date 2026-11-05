@@ -1,0 +1,98 @@
+{
+  "tcADM5": {
+    "order": {
+      "user": {
+        "firstName": "Admin",
+        "lastName": "Admintest",
+        "address": "Street 1",
+        "city": "Amsterdam",
+        "state": "Noord-Holland",
+        "country": "NL",
+        "postcode": "1234AA",
+        "phone": "0987654321",
+        "dob": "1990-01-01",
+        "email": "adm-5.{uuid}@example.test",
+        "password": "Sup3r-Secret!Adm5"
+      },
+      "catalog": {
+        "brandName": "Admin Brand adm-5 {uuid}",
+        "categoryName": "Admin Category adm-5 {uuid}",
+        "products": [
+          {
+            "name": "Admin Product adm-5 {uuid}",
+            "description": "Seeded for the admin case.",
+            "price": 14.15,
+            "co2Rating": "B",
+            "stock": 10
+          }
+        ]
+      },
+      "invoice": {
+        "billingAddress": "Street 1",
+        "billingCity": "Amsterdam",
+        "billingState": "Noord-Holland",
+        "billingCountry": "NL",
+        "billingPostcode": "1234AA",
+        "paymentAccountName": "Admin Customer",
+        "paymentAccountNumber": "12345678"
+      },
+      "quantity": 1
+    },
+    "expectedStatus": "AWAITING_FULFILLMENT",
+    "expectedListedTotal": "$14.15",
+    "expectedTotal": "$ 14.15",
+    "expectedPaymentMethod": "Bank Transfer",
+    "expectedLine": {
+      "quantity": "1",
+      "price": "$14.15",
+      "total": "$14.15"
+    }
+  },
+  "tcADM6": {
+    "order": {
+      "user": {
+        "firstName": "Admin",
+        "lastName": "Admintest",
+        "address": "Street 1",
+        "city": "Amsterdam",
+        "state": "Noord-Holland",
+        "country": "NL",
+        "postcode": "1234AA",
+        "phone": "0987654321",
+        "dob": "1990-01-01",
+        "email": "adm-6.{uuid}@example.test",
+        "password": "Sup3r-Secret!Adm6"
+      },
+      "catalog": {
+        "brandName": "Admin Brand adm-6 {uuid}",
+        "categoryName": "Admin Category adm-6 {uuid}",
+        "products": [
+          {
+            "name": "Admin Product adm-6 {uuid}",
+            "description": "Seeded for the admin case.",
+            "price": 14.15,
+            "co2Rating": "B",
+            "stock": 10
+          }
+        ]
+      },
+      "invoice": {
+        "billingAddress": "Street 1",
+        "billingCity": "Amsterdam",
+        "billingState": "Noord-Holland",
+        "billingCountry": "NL",
+        "billingPostcode": "1234AA",
+        "paymentAccountName": "Admin Customer",
+        "paymentAccountNumber": "12345678"
+      },
+      "quantity": 2
+    },
+    "initialStatus": "AWAITING_FULFILLMENT",
+    "updatedMessage": "Status updated!",
+    "onHold": "ON_HOLD",
+    "awaitingShipment": "AWAITING_SHIPMENT",
+    "awaitingShipmentMessage": "Waiting for the carrier pickup",
+    "shipped": "SHIPPED",
+    "completed": "COMPLETED"
+  }
+}

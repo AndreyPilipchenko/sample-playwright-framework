@@ -382,6 +382,27 @@ Route: `#/admin/dashboard` (admin role required)
 > Admin CRUD on a shared public instance is destructive and visible to other users.
 > Prefer creating and then removing your own records; avoid editing seeded data.
 
+Automated (`@regression`, local stack, admin credentials in `APP_ADMIN_*`): TC-ADM-2 (`tests/AdminProductTests.spec.ts`),
+TC-ADM-5 and 6 (`AdminOrderTests.spec.ts`), TC-ADM-7, 8 and 9 (`AdminUserTests.spec.ts`) and TC-ADM-12
+(`AdminAccessTests.spec.ts`). Each case seeds its own customer, catalog and invoice through the API. TC-ADM-2 and 7 delete the
+records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 pass; the other five are red on the local build:
+- TC-ADM-2: the product edit shows "Product saved!" but the list still shows the old price.
+- TC-ADM-7: saving an edited user is refused with 422 "The phone field must be a string". Users created after the seed
+  data (by registration or by the admin form) have their phone stored as a number (`0987654321` becomes `987654321`),
+  and the edit form sends it back as a number. Seeded users are not affected.
+- TC-ADM-8 and 9: the same refused save blocks them. TC-ADM-8 also cannot show whether the admin API drops `enabled`
+  (it did in the earlier TC-LOGIN-10 work). TC-ADM-9 starts from an account disabled in the database (`APP_DB_LOCAL`),
+  because the UI cannot disable one here.
+- TC-ADM-12: a customer calling an admin-only API endpoint gets 401, not 403 (defect 83). The UI half passes: every
+  admin route sends a signed-in customer to the login page.
+
+These local findings (product price, phone as a number, and duplicate invoice numbers, below) are not in the upstream
+register and could not be checked on the hosted site, which is broken; treat them as candidate findings.
+Duplicate invoice numbers: two invoices created at the same moment can get the same number (seen as two
+`INV-2026000027` rows with different totals), so the admin order specs find an order by its id, not its number.
+Expected behaviour comes from the defect-free upstream source: statuses only move forward, the first status
+(AWAITING_FULFILLMENT) is the starting value, and leaving ON_HOLD needs a status message.
+
 ## 20. Chat Widget
 
 | ID | Title | Pri | Defect | AC |
@@ -505,13 +526,13 @@ is used.
 | Invoices | 11 | 2 (TC-INV-3, 6) |
 | Messages | 4 | 0 |
 | Contact Form | 12 | 0 |
-| Admin | 12 | 0 |
+| Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
 | Chat Widget | 8 | 0 |
 | Discounts | 8 | 0 |
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **50** |
+| **Total** | **234** | **57** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

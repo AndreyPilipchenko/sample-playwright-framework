@@ -1,0 +1,48 @@
+{
+  "tcADM7": {
+    "user": {
+      "firstName": "Admin",
+      "lastName": "Admintest",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "adm-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Adm7"
+    },
+    "editedFirstName": "Edited"
+  },
+  "tcADM8": {
+    "user": {
+      "firstName": "Admin",
+      "lastName": "Admintest",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "adm-8.{uuid}@example.test",
+      "password": "Sup3r-Secret!Adm8"
+    }
+  },
+  "tcADM9": {
+    "user": {
+      "firstName": "Admin",
+      "lastName": "Admintest",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "adm-9.{uuid}@example.test",
+      "password": "Sup3r-Secret!Adm9"
+    }
+  }
+}
