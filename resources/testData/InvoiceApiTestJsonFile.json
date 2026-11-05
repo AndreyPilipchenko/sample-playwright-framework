@@ -1,0 +1,200 @@
+{
+  "invoiceApi1": {
+    "user": {
+      "firstName": "Invoice",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "inv-api-1.{uuid}@example.test",
+      "password": "Sup3r-Secret!1Api"
+    },
+    "catalog": {
+      "brandName": "Invoice Api Brand invoice-api-1 {uuid}",
+      "categoryName": "Invoice Api Category invoice-api-1 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Api Product invoice-api-1 {uuid}",
+          "description": "Seeded for the invoice API case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Api Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2
+  },
+  "invoiceApi2": {
+    "user": {
+      "firstName": "Invoice",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "inv-api-2.{uuid}@example.test",
+      "password": "Sup3r-Secret!2Api"
+    },
+    "catalog": {
+      "brandName": "Invoice Api Brand invoice-api-2 {uuid}",
+      "categoryName": "Invoice Api Category invoice-api-2 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Api Product invoice-api-2 {uuid}",
+          "description": "Seeded for the invoice API case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Api Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2,
+    "expectedTotal": 28.3
+  },
+  "invoiceApi3": {
+    "user": {
+      "firstName": "Invoice",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "inv-api-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!3Api"
+    },
+    "catalog": {
+      "brandName": "Invoice Api Brand invoice-api-3 {uuid}",
+      "categoryName": "Invoice Api Category invoice-api-3 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Api Product invoice-api-3 {uuid}",
+          "description": "Seeded for the invoice API case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Api Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2
+  },
+  "invoiceApi4": {
+    "user": {
+      "firstName": "Invoice",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "inv-api-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!4Api"
+    },
+    "catalog": {
+      "brandName": "Invoice Api Brand invoice-api-4 {uuid}",
+      "categoryName": "Invoice Api Category invoice-api-4 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Api Product invoice-api-4 {uuid}",
+          "description": "Seeded for the invoice API case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Api Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2
+  },
+  "invoiceApi5": {
+    "user": {
+      "firstName": "Invoice",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "inv-api-5.{uuid}@example.test",
+      "password": "Sup3r-Secret!5Api"
+    },
+    "catalog": {
+      "brandName": "Invoice Api Brand invoice-api-5 {uuid}",
+      "categoryName": "Invoice Api Category invoice-api-5 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Api Product invoice-api-5 {uuid}",
+          "description": "Seeded for the invoice API case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Api Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2,
+    "requiredFields": [
+      "user_id",
+      "billing_address",
+      "billing_city",
+      "billing_country",
+      "total"
+    ]
+  }
+}

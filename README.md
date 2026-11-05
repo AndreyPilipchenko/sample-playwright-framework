@@ -206,6 +206,37 @@ live under `docs/` so they never run here.
 
 ## Tests
 
+Every test asserts the documented behaviour (see `docs/test-plan.md` §4.1). A test of broken functionality
+fails and stays red until the product is fixed; the cases are in `docs/test-cases.md`, the defects in
+`docs/known-defects.md` and the written bug reports in `docs/bug-reports/`.
+
+### UI specs
+
+| Spec | Cases | Covers | Tag |
+|---|---|---|---|
+| `HomeTests.spec.ts` | 1 | Home page loads with the product catalog | `@smoke` |
+| `NavigationTests.spec.ts` | 1 | Guarded routes redirect to login when unauthenticated | `@smoke` |
+| `ProductOverviewTests.spec.ts` | 4 | Search, category filter and opening a product card from either | `@smoke` |
+| `ProductDetailTests.spec.ts` | 1 | Quantity selector defaults to 1 | `@smoke` |
+| `LoginTests.spec.ts` | TC-LOGIN-1..4 | Form fields, invalid credentials message, customer and admin sign-in redirects | `@regression`, sign-ins `@smoke` |
+| `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6 | Form fields, mismatched confirmation, wrong current password, successful change and logout. **TC-CPW-1 and TC-CPW-3 are red** (known defects) | `@regression` |
+| `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7 | Cart table, quantity change, delete, totals. **All five are red** (known defects) | `@regression` |
+| `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-3, TC-CPAY-12, 13 | Guest sign-in step, billing address validation, placing an order, cart cleared afterwards | `@regression` |
+| `RegistrationTests.spec.ts` | TC-REG-9 | A valid registration creates the account, lands on login and the new customer can sign in | `@regression` |
+| `InvoiceTests.spec.ts` | TC-INV-3, 6 | Invoice detail shows number, date, total and its line items | `@regression` |
+
+### API specs (`tests/api`, the browserless `api` project)
+
 | Spec | Covers |
 |---|---|
-| `tests/HomeTests.spec.ts` | Smoke check: the home page loads with its product catalog |
+| `CatalogSeedingTests.spec.ts` | Brand, category and product creation, listing and search, required-field rejection, customer registration and login, duplicate email rejection |
+| `ProductCatalogApiTests.spec.ts` | Restocking a product, brand and category required-field rejection, a search matching nothing, an unknown product id (404) |
+| `InvoiceApiTests.spec.ts` | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
+
+Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
+(see Signed-in tests), seed their own data through the API and leave disposable records behind.
+
+### Not automated yet
+
+The remaining open cases (admin: TC-LOGIN-10 and TC-ADM-*, contact: TC-CONT-8, discounts: TC-DISC-*) and the
+cases blocked by defects are listed per feature in `docs/test-cases.md`.
