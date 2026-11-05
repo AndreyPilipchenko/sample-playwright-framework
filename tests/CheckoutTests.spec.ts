@@ -92,6 +92,84 @@ test.describe('Checkout', () => {
     await checkoutAddressPage.verifyProceedDisabled();
   });
 
+  test('All required address fields are displayed', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CBA-1');
+    const user = await registerCustomer(testData.tcCBA1.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCBA1);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.verifyRequiredAddressFieldsShown(user.postcode);
+  });
+
+  test('Completing all fields allows proceeding to payment', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CBA-4');
+    const user = await registerCustomer(testData.tcCBA4.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCBA4);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.enterAddress(testData.tcCBA4.billing);
+    await checkoutAddressPage.proceed();
+    await checkoutPaymentPage.verifyPaymentStepShown();
+  });
+
+  test('Dropdown lists all five payment methods', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CPAY-1');
+    const user = await registerCustomer(testData.tcCPAY1.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCPAY1);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.enterAddress(testData.tcCPAY1.billing);
+    await checkoutAddressPage.proceed();
+    await checkoutPaymentPage.verifyPaymentMethodsListed(testData.tcCPAY1.expectedMethods);
+  });
+
+  test('Credit Card shows number, expiry, CVV, holder name', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CPAY-4');
+    const user = await registerCustomer(testData.tcCPAY4.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCPAY4);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.enterAddress(testData.tcCPAY4.billing);
+    await checkoutAddressPage.proceed();
+    await checkoutPaymentPage.choosePaymentMethod(testData.tcCPAY4.paymentMethod);
+    await checkoutPaymentPage.verifyCreditCardFieldsShown();
+  });
+
+  test('Past expiry date shows "Expiration date must be in the future."', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CPAY-7');
+    const { billing, paymentMethod, card, expectedError } = testData.tcCPAY7;
+    const user = await registerCustomer(testData.tcCPAY7.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCPAY7);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.enterAddress(billing);
+    await checkoutAddressPage.proceed();
+    await checkoutPaymentPage.choosePaymentMethod(paymentMethod);
+    await checkoutPaymentPage.verifyCreditCardFieldsShown();
+    await checkoutPaymentPage.enterCreditCard(card);
+    await checkoutPaymentPage.verifyExpirationDateError(expectedError);
+  });
+
   test('Valid payment places the order and shows the invoice number', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-12');

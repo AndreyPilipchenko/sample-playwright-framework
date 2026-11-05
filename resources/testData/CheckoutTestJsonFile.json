@@ -159,5 +159,184 @@
       "accountNumber": "12345678"
     },
     "expectedPaymentMessage": "Payment was successful"
+  },
+  "tcCBA1": {
+    "brandName": "Checkout Brand TC-CBA-1 {uuid}",
+    "categoryName": "Checkout Category TC-CBA-1 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CBA-1 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cba-1.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cba1"
+    }
+  },
+  "tcCBA4": {
+    "brandName": "Checkout Brand TC-CBA-4 {uuid}",
+    "categoryName": "Checkout Category TC-CBA-4 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CBA-4 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cba-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cba4"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    }
+  },
+  "tcCPAY1": {
+    "brandName": "Checkout Brand TC-CPAY-1 {uuid}",
+    "categoryName": "Checkout Category TC-CPAY-1 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CPAY-1 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cpay-1.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cpay1"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    },
+    "expectedMethods": [
+      "Bank Transfer",
+      "Cash on Delivery",
+      "Credit Card",
+      "Buy Now Pay Later",
+      "Gift Card"
+    ]
+  },
+  "tcCPAY4": {
+    "brandName": "Checkout Brand TC-CPAY-4 {uuid}",
+    "categoryName": "Checkout Category TC-CPAY-4 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CPAY-4 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cpay-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cpay4"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    },
+    "paymentMethod": "Credit Card"
+  },
+  "tcCPAY7": {
+    "brandName": "Checkout Brand TC-CPAY-7 {uuid}",
+    "categoryName": "Checkout Category TC-CPAY-7 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CPAY-7 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cpay-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cpay7"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    },
+    "paymentMethod": "Credit Card",
+    "card": {
+      "number": "1111-2222-3333-4444",
+      "expirationDate": "01/2020",
+      "cvv": "123",
+      "holderName": "Checkout Customer"
+    },
+    "expectedError": "Expiration date must be in the future."
   }
 }
