@@ -1,0 +1,21 @@
+{
+  "brandApi1": {
+    "brandName": "Stored Brand BRAND-API-1 {uuid}",
+    "categoryName": "Stored Category BRAND-API-1 {uuid}",
+    "products": [
+      {
+        "name": "Stored Brand Product BRAND-API-1 {uuid}",
+        "description": "Seeded to check the brand is stored.",
+        "price": 4.25,
+        "co2Rating": "B",
+        "stock": 3
+      }
+    ]
+  },
+  "brandApi2": {
+    "requiredFields": [
+      "name",
+      "slug"
+    ]
+  }
+}

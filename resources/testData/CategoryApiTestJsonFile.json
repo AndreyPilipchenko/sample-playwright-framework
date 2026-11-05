@@ -1,0 +1,41 @@
+{
+  "categoryApi1": {
+    "brandName": "Stored Brand CATEGORY-API-1 {uuid}",
+    "categoryName": "Stored Category CATEGORY-API-1 {uuid}",
+    "products": [
+      {
+        "name": "Stored Category Product CATEGORY-API-1 {uuid}",
+        "description": "Seeded to check the category is stored.",
+        "price": 4.5,
+        "co2Rating": "B",
+        "stock": 3
+      }
+    ]
+  },
+  "categoryApi2": {
+    "brandName": "Listed Brand CATEGORY-API-2 {uuid}",
+    "categoryName": "Listed Category CATEGORY-API-2 {uuid}",
+    "products": [
+      {
+        "name": "Listed Product A CATEGORY-API-2 {uuid}",
+        "description": "First product of the listed category.",
+        "price": 3.5,
+        "co2Rating": "B",
+        "stock": 5
+      },
+      {
+        "name": "Listed Product B CATEGORY-API-2 {uuid}",
+        "description": "Second product of the listed category.",
+        "price": 6.5,
+        "co2Rating": "B",
+        "stock": 5
+      }
+    ]
+  },
+  "categoryApi3": {
+    "requiredFields": [
+      "name",
+      "slug"
+    ]
+  }
+}
