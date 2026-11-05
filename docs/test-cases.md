@@ -385,10 +385,10 @@ Route: `#/admin/dashboard` (admin role required)
 Automated (`@regression`, local stack, admin credentials in `APP_ADMIN_*`): TC-ADM-2 (`tests/AdminProductTests.spec.ts`),
 TC-ADM-5 and 6 (`AdminOrderTests.spec.ts`), TC-ADM-7, 8 and 9 (`AdminUserTests.spec.ts`) and TC-ADM-12
 (`AdminAccessTests.spec.ts`). Each case seeds its own customer, catalog and invoice through the API. TC-ADM-2 and 7 delete the
-records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 pass; the other five are red on the local build:
+records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 passed twice in a row on a local run (2026-11-05); the other five were red there. The causes below are suspected, not confirmed:
 - TC-ADM-2: the product edit shows "Product saved!" but the list still shows the old price.
-- TC-ADM-7: saving an edited user is refused with 422 "The phone field must be a string". Users created after the seed
-  data (by registration or by the admin form) have their phone stored as a number (`0987654321` becomes `987654321`),
+- TC-ADM-7: saving an edited user is refused (seen in the network response) with 422 "The phone field must be a string". Users created after the seed
+  data (by registration or by the admin form) appear to have their phone stored as a number (`0987654321` becomes `987654321`),
   and the edit form sends it back as a number. Seeded users are not affected.
 - TC-ADM-8 and 9: the same refused save blocks them. TC-ADM-8 also cannot show whether the admin API drops `enabled`
   (it did in the earlier TC-LOGIN-10 work). TC-ADM-9 starts from an account disabled in the database (`APP_DB_LOCAL`),
