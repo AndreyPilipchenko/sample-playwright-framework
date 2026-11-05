@@ -1,0 +1,42 @@
+{
+  "tcCAT1Listed": {
+    "brandName": "Listed Brand TC-CAT-1 {uuid}",
+    "categoryName": "Listed Category TC-CAT-1 {uuid}",
+    "products": [
+      {
+        "name": "Listed Product A TC-CAT-1 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      },
+      {
+        "name": "Listed Product B TC-CAT-1 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcCAT1Other": {
+    "brandName": "Other Brand TC-CAT-1 {uuid}",
+    "categoryName": "Other Category TC-CAT-1 {uuid}",
+    "products": [
+      {
+        "name": "Other Product TC-CAT-1 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcCAT3": {
+    "categorySlug": "hand-tools"
+  },
+  "tcCAT4": {
+    "entry": "Chainsaws",
+    "expectedTitle": "Category: Chainsaws"
+  }
+}

@@ -5,12 +5,26 @@ import { InvoicesPage } from '../src/pages/InvoicesPage';
 import { FavoritesPage } from '../src/pages/FavoritesPage';
 import { AdminDashboardPage } from '../src/pages/AdminDashboardPage';
 import { LoginPage } from '../src/pages/LoginPage';
+import { HeaderPage } from '../src/pages/HeaderPage';
+import { HomePage } from '../src/pages/HomePage';
+import { CategoryPage } from '../src/pages/CategoryPage';
+import { RentalsPage } from '../src/pages/RentalsPage';
+import { ApisUserAccount } from '../src/apis/ApisUserAccount';
+import { loadTestData } from '../src/utils/TestData';
+import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
 
 let accountPage: AccountPage;
 let invoicesPage: InvoicesPage;
 let favoritesPage: FavoritesPage;
 let adminDashboardPage: AdminDashboardPage;
 let loginPage: LoginPage;
+let headerPage: HeaderPage;
+let homePage: HomePage;
+let categoryPage: CategoryPage;
+let rentalsPage: RentalsPage;
+let apisUserAccount: ApisUserAccount;
+
+let testData: typeof import('../resources/testData/NavigationTestJsonFile.json');
 
 test.describe('Navigation & Header', () => {
 
@@ -28,12 +42,61 @@ test.describe('Navigation & Header', () => {
     await loginPage.verifyPageOpened();
   });
 
-  test.beforeEach(({ page }) => {
+  test('Home link navigates to the home page', { tag: ['@regression'] }, async () => {
+    await allure.feature('Navigation & Header');
+    await allure.testCaseId('TC-NAV-1');
+
+    await rentalsPage.navigate();
+    await headerPage.clickHome();
+    await homePage.verifyHomePageOpened();
+  });
+
+  test('Each category nav entry opens its category page', { tag: ['@regression'] }, async () => {
+    await allure.feature('Navigation & Header');
+    await allure.testCaseId('TC-NAV-3');
+    const { handTools, powerTools, chainsaws } = testData.tcNAV3;
+
+    await homePage.navigate();
+    await headerPage.openCategoriesEntry(handTools.entry);
+    await categoryPage.verifyCategoryOpened(handTools.expectedTitle, handTools.knownProduct);
+    await headerPage.openCategoriesEntry(powerTools.entry);
+    await categoryPage.verifyCategoryOpened(powerTools.expectedTitle, powerTools.knownProduct);
+    await headerPage.openCategoriesEntry(chainsaws.entry);
+    await categoryPage.verifyResolvedWithoutNotFound(chainsaws.expectedTitle);
+  });
+
+  /** Never retried: this target locks an account after ONE failed login (known defect #21). */
+  test.describe('Signed in', () => {
+    test.describe.configure({ retries: 0 });
+
+    test("Signed-in user's name is displayed in the header", { tag: ['@regression'] }, async () => {
+      await allure.feature('Navigation & Header');
+      await allure.testCaseId('TC-NAV-4');
+
+      const user = withUniqueEmail(testData.tcNAV4.user, newUuid());
+      await apisUserAccount.registerUser(user);
+      await loginPage.navigate();
+      await loginPage.login(user.email, user.password);
+      await accountPage.verifyPageOpened();
+      await headerPage.verifySignedInUserName(`${user.firstName} ${user.lastName}`);
+    });
+  });
+
+  test.beforeAll(async () => {
+    testData = loadTestData('NavigationTestJsonFile.json');
+  });
+
+  test.beforeEach(({ page, request }) => {
     accountPage = new AccountPage(page);
     invoicesPage = new InvoicesPage(page);
     favoritesPage = new FavoritesPage(page);
     adminDashboardPage = new AdminDashboardPage(page);
     loginPage = new LoginPage(page);
+    headerPage = new HeaderPage(page);
+    homePage = new HomePage(page);
+    categoryPage = new CategoryPage(page);
+    rentalsPage = new RentalsPage(page);
+    apisUserAccount = new ApisUserAccount(request);
   });
 
 });

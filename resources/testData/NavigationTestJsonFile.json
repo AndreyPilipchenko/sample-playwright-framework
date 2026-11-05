@@ -1,1 +1,33 @@
-{}
+{
+  "tcNAV3": {
+    "handTools": {
+      "entry": "Hand Tools",
+      "expectedTitle": "Category: Hand Tools",
+      "knownProduct": "Combination Pliers"
+    },
+    "powerTools": {
+      "entry": "Power Tools",
+      "expectedTitle": "Category: Power Tools",
+      "knownProduct": "Sheet Sander"
+    },
+    "chainsaws": {
+      "entry": "Chainsaws",
+      "expectedTitle": "Category: Chainsaws"
+    }
+  },
+  "tcNAV4": {
+    "user": {
+      "firstName": "Catalog",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-nav-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Nav4"
+    }
+  }
+}

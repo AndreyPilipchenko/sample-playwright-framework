@@ -224,9 +224,11 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | Spec | Cases | Covers | Tag |
 |---|---|---|---|
 | `HomeTests.spec.ts` | 1 | Home page loads with the product catalog | `@smoke` |
-| `NavigationTests.spec.ts` | 1 | Guarded routes redirect to login when unauthenticated | `@smoke` |
-| `ProductOverviewTests.spec.ts` | TC-PO-1, 2, 5, 8, 13, 15 | Search, category filter, opening a product card, sort options, price range. **TC-PO-13 and 15 are red** (known defects) | `@smoke`, `@regression` |
-| `ProductDetailTests.spec.ts` | TC-PD-1, 3, 4, 5, 8 | Details shown, quantity selector default, plus and minus buttons, add to cart with a quantity. **TC-PD-4 and 5 are red** (known defect) | `@smoke`, `@regression` |
+| `NavigationTests.spec.ts` | TC-NAV-1, 3, 4, 5 | Home link, category menu entries, signed-in name in the header, guarded routes. **TC-NAV-1, 3 and 4 are red** (defects 29, 3, 32) | `@smoke`, `@regression` |
+| `ProductOverviewTests.spec.ts` | TC-PO-1 to 9, 11 to 17 | Search and its limits, category and brand filters, opening a product card, pagination, sort options, price range, discount and out-of-stock on the cards. **TC-PO-13 and 15 are red** (known defects); **TC-PO-6 and 9 are red** (local findings) | `@smoke`, `@regression` |
+| `ProductDetailTests.spec.ts` | TC-PD-1 to 12, 14, 16, 17 | Details shown, discount, quantity selector and limits, plus and minus buttons, add to cart, out of stock, rental slider, favorites, accessible label and alt text. **TC-PD-4, 5, 8, 12, 16 and 17 are red** (defects 40, 43, 41, 91, 92); **TC-PD-7 is red** (local finding) | `@smoke`, `@regression` |
+| `CategoryTests.spec.ts` | TC-CAT-1, 3, 4 | Only the category's products, the filter set, the Chainsaws entry. **TC-CAT-3 is red** (local finding); **TC-CAT-4 is red** (defect 3) | `@regression` |
+| `RentalTests.spec.ts` | TC-RENT-1 to 5 | Rentals page and its cards, duration slider and total, rental label in the cart, location discount. **TC-RENT-1 and 5 are red** (local findings) | `@regression` |
 | `LoginTests.spec.ts` | TC-LOGIN-1..5, 7, 8, 10 | Form fields, invalid credentials message, customer and admin sign-in redirects, empty-form validation, locking after 3 failures, disabled account. **TC-LOGIN-5 and 8 are red** (known defects; the local build never locks) | `@regression`, sign-ins `@smoke` |
 | `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6, 7 | Form fields, mismatched confirmation, wrong current password, successful change and logout, the new password on the next login. **TC-CPW-1, 3 and 7 are red** (TC-CPW-7: defect 39) | `@regression` |
 | `ProfileTests.spec.ts` | TC-PROF-1, 4, 5, 7 | Account details, valid update with its fading confirmation, first and last name fields, address update. **All four are red** (defects 36, 37, 38) | `@regression` |
@@ -270,7 +272,7 @@ Run only these with `npx playwright test --project=api`. UI specs sign in throug
 
 ### Not automated yet
 
-85 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+116 of the 234 designed cases are automated; the per-area count is the Coverage summary in
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
 (TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
