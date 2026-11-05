@@ -3,6 +3,7 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import {
   expectToHaveTitle,
+  expectToHaveText,
   expectToBeVisible,
   expectToBeAtLeast,
   expectToContainText,
@@ -22,6 +23,9 @@ export class HomePage {
   private readonly searchQuery_input: Locator;
   private readonly searchSubmit_button: Locator;
   private readonly searchCaption_txt: Locator;
+  private readonly sort_dropdown: Locator;
+  private readonly minPrice_input: Locator;
+  private readonly maxPrice_input: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -30,6 +34,9 @@ export class HomePage {
     this.searchQuery_input = page.getByTestId('search-query');
     this.searchSubmit_button = page.getByTestId('search-submit');
     this.searchCaption_txt = page.getByTestId('search-caption');
+    this.sort_dropdown = page.getByTestId('sort');
+    this.minPrice_input = page.locator('.ngx-slider-pointer-min');
+    this.maxPrice_input = page.locator('.ngx-slider-pointer-max');
   }
 
   /** The product card whose name is exactly `productName`. */
@@ -65,6 +72,25 @@ export class HomePage {
     });
   }
 
+  async sortBy(optionLabel: string) {
+    await step(`Sort the products by: ${optionLabel}`, async () => {
+      await this.sort_dropdown.selectOption({ label: optionLabel });
+    });
+  }
+
+  /**
+   * Moves both price slider handles with the keyboard, one step per key press: the left handle up from 0, the right
+   * handle down from the top of the scale. The grid reloads after every press, so the last one decides.
+   */
+  async setPriceRange(minimum: number, maximum: number, scaleMaximum: number = 200) {
+    await step(`Set the price range to ${minimum} - ${maximum}`, async () => {
+      await this.minPrice_input.press('Home');
+      for (let press = 0; press < minimum; press++) await this.minPrice_input.press('ArrowRight');
+      await this.maxPrice_input.press('End');
+      for (let press = 0; press < scaleMaximum - maximum; press++) await this.maxPrice_input.press('ArrowLeft');
+    });
+  }
+
   async filterByCategory(categoryName: string) {
     await step(`Filter the products by category: ${categoryName}`, async () => {
       await this.category_checkbox(categoryName).check();
@@ -96,6 +122,13 @@ export class HomePage {
       await expectToContainText('the search caption', this.searchCaption_txt, query);
       await expectNotToHaveCount('the product names shown', this.productNames_list, 0, 'product');
       await expectToHaveMatchingCount(`the product names containing "${query}"`, this.productNames_list.filter({ hasText: query }), this.productNames_list, 'product');
+    });
+  }
+
+  /** The grid lists exactly these products, in this order. */
+  async verifyProductNamesInOrder(expectedNames: string[]) {
+    await step(`Verify the grid lists the products in this order: ${expectedNames.join(', ')}`, async () => {
+      await expectToHaveText('the product names shown', this.productNames_list, expectedNames);
     });
   }
 

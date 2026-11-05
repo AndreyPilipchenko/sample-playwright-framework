@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
+import { expectToBeVisible, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
 
 /** Checkout step 1: the cart review table (`#/checkout`). The cart is client-side state, so it must be filled in the same browser session. */
 export class CartPage {
@@ -13,6 +13,9 @@ export class CartPage {
   private readonly cartTotal_txt: Locator;
   private readonly proceed_button: Locator;
   private readonly emptyCart_msg: Locator;
+  private readonly subtotal_txt: Locator;
+  private readonly discount_txt: Locator;
+  private readonly discountLabel_txt: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -20,6 +23,9 @@ export class CartPage {
     this.cartTotal_txt = page.getByTestId('cart-total');
     this.proceed_button = page.getByTestId('proceed-1');
     this.emptyCart_msg = page.getByText(/cart is empty/i);
+    this.subtotal_txt = page.getByTestId('cart-subtotal');
+    this.discount_txt = page.getByTestId('cart-discount');
+    this.discountLabel_txt = page.getByRole('row').filter({ has: page.getByTestId('cart-discount') }).getByRole('cell').first();
   }
 
   /** The table row of the cart item named exactly `productName`. */
@@ -71,6 +77,32 @@ export class CartPage {
   async verifyLineTotal(productName: string, expectedTotal: string) {
     await step(`Verify the line total of ${productName} is ${expectedTotal}`, async () => {
       await expectToHaveText(`the line total of ${productName}`, this.cartItem_row(productName).getByTestId('line-price'), expectedTotal);
+    });
+  }
+
+  async verifyItemPrice(productName: string, expectedPrice: string) {
+    await step(`Verify the price of ${productName} in the cart is ${expectedPrice}`, async () => {
+      await expectToHaveText(`the price of ${productName}`, this.cartItem_row(productName).getByTestId('product-price'), expectedPrice);
+    });
+  }
+
+  async verifyItemQuantity(productName: string, expectedQuantity: string) {
+    await step(`Verify the quantity of ${productName} in the cart is ${expectedQuantity}`, async () => {
+      await expectToHaveValue(`the quantity of ${productName}`, this.cartItem_row(productName).getByTestId('product-quantity'), expectedQuantity);
+    });
+  }
+
+  async verifyCartSubtotal(expectedSubtotal: string) {
+    await step(`Verify the cart subtotal is ${expectedSubtotal}`, async () => {
+      await expectToHaveText('the cart subtotal', this.subtotal_txt, expectedSubtotal);
+    });
+  }
+
+  /** The discount line names its percentage in its label and shows its amount as a deduction. */
+  async verifyCartDiscount(expectedLabel: string, expectedAmount: string) {
+    await step(`Verify the cart shows the discount ${expectedLabel} of ${expectedAmount}`, async () => {
+      await expectToHaveText('the discount label', this.discountLabel_txt, expectedLabel);
+      await expectToHaveText('the discount amount', this.discount_txt, expectedAmount);
     });
   }
 

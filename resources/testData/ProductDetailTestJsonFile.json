@@ -12,5 +12,63 @@
         "stock": 10
       }
     ]
+  },
+  "tcPD1": {
+    "brandName": "Detail Brand TC-PD-1 {uuid}",
+    "categoryName": "Detail Category TC-PD-1 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-1 {uuid}",
+        "description": "Seeded product for the detail page case.",
+        "price": 19.99,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedPrice": "19.99"
+  },
+  "tcPD4": {
+    "brandName": "Detail Brand TC-PD-4 {uuid}",
+    "categoryName": "Detail Category TC-PD-4 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-4 {uuid}",
+        "description": "Seeded for the detail case.",
+        "price": 19.99,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedStartQuantity": "1",
+    "expectedIncreasedQuantity": "2"
+  },
+  "tcPD5": {
+    "brandName": "Detail Brand TC-PD-5 {uuid}",
+    "categoryName": "Detail Category TC-PD-5 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-5 {uuid}",
+        "description": "Seeded for the detail case.",
+        "price": 19.99,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "startQuantity": "3",
+    "expectedDecreasedQuantity": "2"
+  },
+  "tcPD8": {
+    "brandName": "Detail Brand TC-PD-8 {uuid}",
+    "categoryName": "Detail Category TC-PD-8 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-8 {uuid}",
+        "description": "Seeded for the detail case.",
+        "price": 19.99,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "quantity": "3"
   }
 }

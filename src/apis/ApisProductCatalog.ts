@@ -49,6 +49,10 @@ export interface ProductSeed {
   co2Rating: string;
   /** Not in the Swagger ProductRequest, but PUT /products/{id} honours it — a created product has no stock and the UI shows it out of stock. */
   stock: number;
+  /** Rental products are priced per hour and count as the rental half of the 15% combination discount. */
+  isRental?: boolean;
+  /** Location offers get the geo-location discount in the UI. */
+  isLocationOffer?: boolean;
 }
 
 /** A brand, a top-level category and products, all named by `{uuid}` templates (see UniqueData.withUuid). */
@@ -280,8 +284,8 @@ export class ApisProductCatalog {
       category_id: categoryId,
       brand_id: brandId,
       product_image_id: imageId,
-      is_location_offer: 0,
-      is_rental: 0,
+      is_location_offer: product.isLocationOffer ? 1 : 0,
+      is_rental: product.isRental ? 1 : 0,
       co2_rating: product.co2Rating,
     };
   }

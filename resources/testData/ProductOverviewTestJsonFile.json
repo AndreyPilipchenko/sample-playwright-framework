@@ -57,5 +57,67 @@
         "stock": 10
       }
     ]
+  },
+  "tcPO13": {
+    "brandName": "Sort Brand TC-PO-13 {uuid}",
+    "categoryName": "Sort Category TC-PO-13 {uuid}",
+    "products": [
+      {
+        "name": "Sort A TC-PO-13 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 15,
+        "co2Rating": "A",
+        "stock": 10
+      },
+      {
+        "name": "Sort M TC-PO-13 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 55,
+        "co2Rating": "C",
+        "stock": 10
+      },
+      {
+        "name": "Sort Z TC-PO-13 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 95,
+        "co2Rating": "E",
+        "stock": 10
+      }
+    ],
+    "sortNameZA": "Name (Z - A)",
+    "sortNameAZ": "Name (A - Z)",
+    "sortPriceHighLow": "Price (High - Low)",
+    "sortPriceLowHigh": "Price (Low - High)",
+    "sortCo2Worst": "CO₂ Rating (Worst First)",
+    "sortCo2Best": "CO₂ Rating (Best First)"
+  },
+  "tcPO15": {
+    "brandName": "Range Brand TC-PO-15 {uuid}",
+    "categoryName": "Range Category TC-PO-15 {uuid}",
+    "products": [
+      {
+        "name": "Sort A TC-PO-15 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 15,
+        "co2Rating": "A",
+        "stock": 10
+      },
+      {
+        "name": "Sort M TC-PO-15 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 55,
+        "co2Rating": "C",
+        "stock": 10
+      },
+      {
+        "name": "Sort Z TC-PO-15 {uuid}",
+        "description": "Seeded for the sort case.",
+        "price": 95,
+        "co2Rating": "E",
+        "stock": 10
+      }
+    ],
+    "minimumPrice": 40,
+    "maximumPrice": 70
   }
 }

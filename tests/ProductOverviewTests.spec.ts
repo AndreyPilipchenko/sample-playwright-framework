@@ -70,6 +70,46 @@ test.describe('Product Overview', () => {
     await homePage.verifyProductNamesInclude(seededNames);
   });
 
+  test('Each sort option orders the grid correctly', { tag: ['@regression'] }, async () => {
+    await allure.feature('Product Overview');
+    await allure.testCaseId('TC-PO-13');
+    const { sortNameZA, sortNameAZ, sortPriceHighLow, sortPriceLowHigh, sortCo2Worst, sortCo2Best } = testData.tcPO13;
+
+    const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPO13);
+    const [lowest, middle, highest] = catalog.products.map((product) => product.name);
+    await homePage.navigate();
+    await homePage.verifyProductCatalogVisible();
+    await homePage.filterByCategory(catalog.categoryName);
+    await homePage.verifyProductNamesShown([lowest, middle, highest]);
+    // The options alternate between descending and ascending, so a grid that has not re-sorted yet never matches by chance.
+    await homePage.sortBy(sortNameZA);
+    await homePage.verifyProductNamesInOrder([highest, middle, lowest]);
+    await homePage.sortBy(sortNameAZ);
+    await homePage.verifyProductNamesInOrder([lowest, middle, highest]);
+    await homePage.sortBy(sortPriceHighLow);
+    await homePage.verifyProductNamesInOrder([highest, middle, lowest]);
+    await homePage.sortBy(sortPriceLowHigh);
+    await homePage.verifyProductNamesInOrder([lowest, middle, highest]);
+    await homePage.sortBy(sortCo2Worst);
+    await homePage.verifyProductNamesInOrder([highest, middle, lowest]);
+    await homePage.sortBy(sortCo2Best);
+    await homePage.verifyProductNamesInOrder([lowest, middle, highest]);
+  });
+
+  test('Adjusting the price range filters the grid to that range', { tag: ['@regression'] }, async () => {
+    await allure.feature('Product Overview');
+    await allure.testCaseId('TC-PO-15');
+    const { minimumPrice, maximumPrice } = testData.tcPO15;
+
+    const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPO15);
+    const [, middle] = catalog.products.map((product) => product.name);
+    await homePage.navigate();
+    await homePage.verifyProductCatalogVisible();
+    await homePage.filterByCategory(catalog.categoryName);
+    await homePage.setPriceRange(minimumPrice, maximumPrice);
+    await homePage.verifyProductNamesShown([middle]);
+  });
+
   test.beforeAll(async () => {
     testData = JSON.parse(fs.readFileSync('./resources/testData/ProductOverviewTestJsonFile.json', 'utf8'));
   });

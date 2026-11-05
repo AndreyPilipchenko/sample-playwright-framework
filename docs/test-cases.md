@@ -56,6 +56,12 @@ product's own category filter. Each smoke case seeds its own brand, category and
 through the API with a per-run UUID in their names, and leaves them behind (deleting needs
 an admin token).
 
+Automated in `tests/ProductOverviewTests.spec.ts` (`@regression`): TC-PO-13 and 15. Both seed three products in one
+category (prices 15, 55 and 95; CO₂ ratings A, C and E) and look at that category only. TC-PO-13 cycles the sort options
+in alternating directions, so a grid that has not re-sorted can never match by chance; it fails on the local build at the
+first sort (the grid stays in ascending name order after Name Z-A). TC-PO-15 moves both slider handles with the
+keyboard (range 40 to 70) and expects only the 55 product; it fails on the local build, which keeps all three.
+
 ## 2. Navigation & Header
 
 | ID | Title | Pri | Defect | AC |
@@ -103,6 +109,10 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-PD-17 | Product images have alt text | P2 | 92 | — |
 | TC-PD-18 | Title alignment and button layout render correctly per browser | P3 | 44, 45 | — |
 
+Automated in `tests/ProductDetailTests.spec.ts` (`@regression`): TC-PD-1, 4, 5 and 8. TC-PD-4 and 5 fail on the local
+build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 and 8 pass: the
+local build adds the typed quantity to the cart without an error message, so defect 43 is not reproduced here.
+
 ## 5. Rentals
 
 | ID | Title | Pri | Defect | AC |
@@ -132,8 +142,13 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-CART-11 | Cart shows subtotal, discount amount and final total | P1 | 8 | AC7 |
 | TC-CART-12 | Removing all rental items removes the 15% discount | P2 | — | AC8 |
 
-Automated in `tests/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5 and 7. They assert the documented
+Automated in `tests/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5, 7, 8, 10 and 11. They assert the documented
 behaviour and fail while defects L1, 7 and 8 are open; see [bug reports](bug-reports/README.md). Each case seeds its own products through the API.
+
+TC-CART-8, 10 and 11 are in the same spec. TC-CART-8 is the same observable as TC-CSI-1 (Proceed from the cart
+leads to the sign-in step) and passes. TC-CART-10 and 11 seed a 50.00 rental product and a 20.00 non-rental product and
+expect "Discount (15%)" of "- $10.50", a subtotal of "$70.00" and a total of "$59.50"; the local build shows no
+combination discount line, so both fail.
 
 ## 7. Checkout — Sign In step
 
@@ -450,6 +465,17 @@ Expected behaviour comes from the defect-free upstream source: statuses only mov
 | TC-DISC-7 | Removing one product type removes the 15% | P2 | — | Comb AC3 |
 | TC-DISC-8 | Invoice reflects subtotal, discount and final total | P1 | — | Comb AC4 |
 
+Automated in `tests/DiscountTests.spec.ts` (`@regression`): TC-DISC-1, 4, 5, 6 and 8. The location cases use the
+browser's own geolocation (the context grants the permission and reports a chosen position; the app is then told to
+read it). TC-DISC-1 checks the product page badge for Mumbai (-10%), Tokyo (-15%), Amsterdam (-20%), London (-25%) and
+New York (-5%), New York last. TC-DISC-4 puts a 100.00 location offer in the cart from Amsterdam and expects "$80.00";
+it passes. On the local build the New York badge does not appear, so TC-DISC-1 fails there (a local finding; the cause
+is not confirmed, the upstream source handles longitude with a sign quirk). TC-DISC-5, 6 and 8 reuse the mixed
+rental and non-rental cart of TC-CART-10 and 11; TC-DISC-8 places the order through checkout and reads the invoice's
+subtotal, discount amount and total. All three fail on the local build: it applies no combination discount, and its
+invoice page has no Subtotal or Discount amount field. The Subtotal and Discount amount labels come from the
+defect-free upstream source.
+
 Geo rates: New York 5%, Mumbai 10%, Tokyo 15%, Amsterdam 20%, London 25%.
 Geo-location testing requires browser-context geolocation override plus the
 corresponding permission grant.
@@ -529,12 +555,12 @@ is used.
 
 | Area | Cases | Automated |
 |---|---|---|
-| Product Overview | 22 | 4 (TC-PO-1, 2, 5, 8 — smoke) |
+| Product Overview | 22 | 6 (TC-PO-1, 2, 5, 8 — smoke; TC-PO-13, 15 failing on defects 2, 27, 33) |
 | Navigation & Header | 5 | 1 (TC-NAV-5, smoke) |
 | Product Category | 6 | 0 |
-| Product Detail | 18 | 1 (TC-PD-3, smoke) |
+| Product Detail | 18 | 5 (TC-PD-3 — smoke; TC-PD-1, 8 pass; TC-PD-4, 5 failing on defect 40) |
 | Rentals | 7 | 0 |
-| Checkout — Cart | 12 | 5 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8) |
+| Checkout — Cart | 12 | 8 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8; TC-CART-8 passes; TC-CART-10, 11 failing, no combination discount locally) |
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
 | Checkout — Address | 10 | 3 (TC-CBA-1, 3, 4 — TC-CBA-1 failing on open defect 10) |
 | Checkout — Payment | 14 | 5 (TC-CPAY-1, 4, 7, 12, 13 — TC-CPAY-1, 4, 7 failing on open defect 12) |
@@ -549,11 +575,11 @@ is used.
 | Contact Form | 12 | 0 |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
 | Chat Widget | 8 | 0 |
-| Discounts | 8 | 0 |
+| Discounts | 8 | 5 (TC-DISC-1, 4, 5, 6, 8 — TC-DISC-4 passes; the rest fail locally) |
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **67** |
+| **Total** | **234** | **81** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

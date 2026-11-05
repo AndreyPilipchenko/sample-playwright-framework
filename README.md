@@ -225,12 +225,13 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 |---|---|---|---|
 | `HomeTests.spec.ts` | 1 | Home page loads with the product catalog | `@smoke` |
 | `NavigationTests.spec.ts` | 1 | Guarded routes redirect to login when unauthenticated | `@smoke` |
-| `ProductOverviewTests.spec.ts` | 4 | Search, category filter and opening a product card from either | `@smoke` |
-| `ProductDetailTests.spec.ts` | 1 | Quantity selector defaults to 1 | `@smoke` |
+| `ProductOverviewTests.spec.ts` | TC-PO-1, 2, 5, 8, 13, 15 | Search, category filter, opening a product card, sort options, price range. **TC-PO-13 and 15 are red** (known defects) | `@smoke`, `@regression` |
+| `ProductDetailTests.spec.ts` | TC-PD-1, 3, 4, 5, 8 | Details shown, quantity selector default, plus and minus buttons, add to cart with a quantity. **TC-PD-4 and 5 are red** (known defect) | `@smoke`, `@regression` |
 | `LoginTests.spec.ts` | TC-LOGIN-1..5, 7, 8, 10 | Form fields, invalid credentials message, customer and admin sign-in redirects, empty-form validation, locking after 3 failures, disabled account. **TC-LOGIN-5 and 8 are red** (known defects; the local build never locks) | `@regression`, sign-ins `@smoke` |
 | `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6, 7 | Form fields, mismatched confirmation, wrong current password, successful change and logout, the new password on the next login. **TC-CPW-1, 3 and 7 are red** (TC-CPW-7: defect 39) | `@regression` |
 | `ProfileTests.spec.ts` | TC-PROF-1, 4, 5, 7 | Account details, valid update with its fading confirmation, first and last name fields, address update. **All four are red** (defects 36, 37, 38) | `@regression` |
-| `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7 | Cart table, quantity change, delete, totals. **All five are red** (known defects) | `@regression` |
+| `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7, 8, 10, 11 | Cart table, quantity change, delete, totals, proceed to checkout, the 15% combination discount. **All but TC-CART-8 are red** (known defects; no combination discount locally) | `@regression` |
+| `DiscountTests.spec.ts` | TC-DISC-1, 4, 5, 6, 8 | Location discount per city through the browser's geolocation, discounted cart line, combination discount in the cart and on the invoice. **All but TC-DISC-4 are red** on the local build | `@regression` |
 | `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-1, 3, 4, TC-CPAY-1, 4, 7, 12, 13 | Guest sign-in step, billing address fields and validation, proceeding to payment, payment methods, credit card form and expiry check, placing an order, cart cleared afterwards. **TC-CBA-1 and TC-CPAY-1, 4, 7 are red** (known defects) | `@regression` |
 | `RegistrationTests.spec.ts` | TC-REG-1, 7, 8, 9 | Field labels, duplicate-email message without a password hint, a valid registration that lands on login and can sign in. **TC-REG-1, 7, 8 are red** (known defects) | `@regression` |
 | `InvoiceTests.spec.ts` | TC-INV-3, 4, 5, 6, 7, 10, 11 | Invoice detail shows number, date, total, line items, billing address, payment details, and "not found" for a missing or foreign invoice. **TC-INV-4, 5, 7, 10 and 11 are red** (defects 14, 15, 16; TC-INV-7 a local finding) | `@regression` |
@@ -265,8 +266,7 @@ Run only these with `npx playwright test --project=api`. UI specs sign in throug
 
 ### Not automated yet
 
-67 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+81 of the 234 designed cases are automated; the per-area count is the Coverage summary in
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-*), discounts
-(TC-DISC-*), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
-address and payment steps, login and registration is automated; the cart still has open P1 cases
-(TC-CART-8, 10, 11).
+(TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
+address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
