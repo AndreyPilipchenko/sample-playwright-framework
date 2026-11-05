@@ -62,6 +62,12 @@ in alternating directions, so a grid that has not re-sorted can never match by c
 first sort (the grid stays in ascending name order after Name Z-A). TC-PO-15 moves both slider handles with the
 keyboard (range 40 to 70) and expects only the 55 product; it fails on the local build, which keeps all three.
 
+Also automated there (`@regression`): TC-PO-3, 4, 6, 7, 9, 11, 12, 14, 16 and 17. TC-PO-6 activates the category, brand,
+price and sort filters; the first three reset, and it fails on the sort dropdown, which keeps its option
+([report](bug-reports/search-leaves-sort-selected.md)). It counts sorting as a filter because the category story's AC2 does.
+TC-PO-9 fails on the local build, where a parent category has no checkbox
+([report](bug-reports/category-parent-no-checkbox.md)). TC-PO-16 runs at an Amsterdam position, like the discount cases.
+
 ## 2. Navigation & Header
 
 | ID | Title | Pri | Defect | AC |
@@ -71,6 +77,10 @@ keyboard (range 40 to 70) and expects only the 55 product; it fails on the local
 | TC-NAV-3 | Each category nav entry opens its category page | P2 | 3 | — |
 | TC-NAV-4 | Signed-in user's name is displayed in the header | P2 | 32 | — |
 | TC-NAV-5 | Guarded routes redirect to login when unauthenticated | P1 | — | — |
+
+TC-NAV-1, 3 and 4 are automated in `tests/NavigationTests.spec.ts` (`@regression`) and fail on defects 29, 3 and 32. TC-NAV-3
+opens Hand Tools, Power Tools and Chainsaws, and fails on Chainsaws. It leaves out the entry labelled "UNDEFINED", which no
+source describes ([report](bug-reports/nav-undefined-category-entry.md)).
 
 TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 `#/account/favorites` and `#/admin/dashboard` all redirect to `#/auth/login`.
@@ -86,6 +96,11 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-CAT-5 | Product names are left-aligned | P3 | 4 | — |
 | TC-CAT-6 | Page title alignment is consistent (Edge) | P3 | 5 | — |
 
+Automated in `tests/CategoryTests.spec.ts` (`@regression`): TC-CAT-1, 3 and 4. TC-CAT-1 seeds two categories and passes.
+TC-CAT-3 finds the category and brand checkboxes, the sort dropdown and the pagination, then fails: the page has no price
+slider ([report](bug-reports/category-page-no-price-slider.md)). TC-CAT-4 fails on defect 3. The page title comes from the
+URL slug ([report](bug-reports/category-title-from-slug.md)), which matters for TC-CAT-2, not automated yet.
+
 ## 4. Product Detail
 
 | ID | Title | Pri | Defect | AC |
@@ -98,7 +113,7 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-PD-6 | Quantity cannot go below 1 | P2 | — | AC6 |
 | TC-PD-7 | Quantity accepts manual numeric entry | P2 | — | AC7 |
 | TC-PD-8 | Add to cart adds the selected quantity without error | P1 | 43 | AC8 |
-| TC-PD-9 | More than 10 units can be added | P2 | 47 | AC8 |
+| TC-PD-9 | More than 10 units can be added | P2 | — | AC8 |
 | TC-PD-10 | Out-of-stock product cannot be added to cart | P2 | — | AC9 |
 | TC-PD-11 | Rental product shows an hourly duration slider (1–10) | P2 | — | AC10 |
 | TC-PD-12 | Add to Favorites succeeds for a logged-in user | P2 | 41 | AC11 |
@@ -110,8 +125,15 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-PD-18 | Title alignment and button layout render correctly per browser | P3 | 44, 45 | — |
 
 Automated in `tests/ProductDetailTests.spec.ts` (`@regression`): TC-PD-1, 4, 5 and 8. TC-PD-4 and 5 fail on the local
-build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 and 8 pass: the
-local build adds the typed quantity to the cart without an error message, so defect 43 is not reproduced here.
+build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 passes. TC-PD-8 fails
+on defect 43: it expects AC8's success message, and the local build shows a red error, though the items are still added.
+An earlier form of this case passed by mistake: it looked for the error only after the message had gone, about 3 seconds
+after appearing.
+
+Also automated there (`@regression`): TC-PD-2, 6, 7, 9, 10, 11, 12, 14, 16 and 17. TC-PD-12, 16 and 17 fail on defects 41, 91
+and 92. TC-PD-7 passes typed entry and the lower limit, then fails on the story's upper limit, because the page stops at 99
+([report](bug-reports/product-quantity-capped-at-99.md)). TC-PD-9 passes on the local build, with 12 units reaching the cart.
+TC-PD-6 passes, but proves nothing while defect 40 is open: the minus button does nothing at any quantity.
 
 ## 5. Rentals
 
@@ -124,6 +146,12 @@ local build adds the typed quantity to the cart without an error message, so def
 | TC-RENT-5 | Location-based discount applies to rentals | P2 | — | AC5 |
 | TC-RENT-6 | Rental product images load across browsers | P3 | 48 | — |
 | TC-RENT-7 | Rentals page title alignment is consistent | P3 | 49 | — |
+
+Automated in `tests/RentalTests.spec.ts` (`@regression`): TC-RENT-1 to 5. TC-RENT-1 seeds 10 rentals, more than one page
+holds, and fails: the page shows 9 and has no pagination ([report](bug-reports/rentals-page-no-pagination.md)). TC-RENT-4
+expects the local build's wording, "Item for rent, price per hour", by decision of 2026-11-06; the story's AC4 says "This is a
+rental item". TC-RENT-5 passes on the discounted price and fails on the total, which stays at the full rate
+([report](bug-reports/rental-total-ignores-location-discount.md)).
 
 ## 6. Checkout — Cart Review
 
@@ -572,11 +600,11 @@ is used.
 
 | Area | Cases | Automated |
 |---|---|---|
-| Product Overview | 22 | 6 (TC-PO-1, 2, 5, 8 — smoke; TC-PO-13, 15 failing on defects 2, 27, 33) |
-| Navigation & Header | 5 | 1 (TC-NAV-5, smoke) |
-| Product Category | 6 | 0 |
-| Product Detail | 18 | 5 (TC-PD-3 — smoke; TC-PD-1, 8 pass; TC-PD-4, 5 failing on defect 40) |
-| Rentals | 7 | 0 |
+| Product Overview | 22 | 16 (TC-PO-1, 2, 5, 8 — smoke; TC-PO-3, 4, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-6, 9 failing on local findings) |
+| Navigation & Header | 5 | 4 (TC-NAV-5, smoke; TC-NAV-1, 3, 4 failing on defects 29, 3, 32) |
+| Product Category | 6 | 3 (TC-CAT-1 passes; TC-CAT-3 failing on a local finding, TC-CAT-4 on defect 3) |
+| Product Detail | 18 | 15 (TC-PD-3 — smoke; TC-PD-1, 2, 6, 9, 10, 11, 14 pass; TC-PD-4, 5, 8, 12, 16, 17 failing on defects 40, 43, 41, 91, 92; TC-PD-7 on a local finding) |
+| Rentals | 7 | 5 (TC-RENT-2, 3, 4 pass; TC-RENT-1, 5 failing on local findings) |
 | Checkout — Cart | 12 | 8 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8; TC-CART-8 passes; TC-CART-10, 11 failing, no combination discount locally) |
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
 | Checkout — Address | 10 | 3 (TC-CBA-1, 3, 4 — TC-CBA-1 failing on open defect 10) |
@@ -596,7 +624,7 @@ is used.
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **85** |
+| **Total** | **234** | **116** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

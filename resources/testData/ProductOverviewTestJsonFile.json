@@ -119,5 +119,180 @@
     ],
     "minimumPrice": 40,
     "maximumPrice": 70
+  },
+  "tcPO3": {
+    "nextPage": "2"
+  },
+  "tcPO4": {
+    "nextPage": "2"
+  },
+  "tcPO6Filtered": {
+    "brandName": "Filtered Brand TC-PO-6 {uuid}",
+    "categoryName": "Filtered Category TC-PO-6 {uuid}",
+    "products": [
+      {
+        "name": "Filtered Product TC-PO-6 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO6Searched": {
+    "brandName": "Searched Brand TC-PO-6 {uuid}",
+    "categoryName": "Searched Category TC-PO-6 {uuid}",
+    "products": [
+      {
+        "name": "Searched Product TC-PO-6 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO7": {
+    "tooShortQuery": "ab",
+    "tooLongQuery": "abcdefghijklmnopqrstuvwxyzabcdefghijklmno"
+  },
+  "tcPO9": {
+    "parentCategoryName": "Parent Category TC-PO-9 {uuid}",
+    "firstChildCategoryName": "First Child TC-PO-9 {uuid}",
+    "secondChildCategoryName": "Second Child TC-PO-9 {uuid}"
+  },
+  "tcPO11First": {
+    "brandName": "First Brand TC-PO-11 {uuid}",
+    "categoryName": "First Category TC-PO-11 {uuid}",
+    "products": [
+      {
+        "name": "First Brand Product TC-PO-11 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO11Second": {
+    "brandName": "Second Brand TC-PO-11 {uuid}",
+    "categoryName": "Second Category TC-PO-11 {uuid}",
+    "products": [
+      {
+        "name": "Second Brand Product TC-PO-11 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO11Crossed": {
+    "name": "Crossed Product TC-PO-11 {uuid}",
+    "description": "Seeded for the case.",
+    "price": 20.0,
+    "co2Rating": "B",
+    "stock": 10
+  },
+  "tcPO12First": {
+    "brandName": "First Brand TC-PO-12 {uuid}",
+    "categoryName": "First Category TC-PO-12 {uuid}",
+    "products": [
+      {
+        "name": "First Both Product TC-PO-12 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO12Second": {
+    "brandName": "Second Brand TC-PO-12 {uuid}",
+    "categoryName": "Second Category TC-PO-12 {uuid}",
+    "products": [
+      {
+        "name": "Second Both Product TC-PO-12 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  },
+  "tcPO12CategoryOnly": {
+    "name": "Category Only Product TC-PO-12 {uuid}",
+    "description": "Seeded for the case.",
+    "price": 20.0,
+    "co2Rating": "B",
+    "stock": 10
+  },
+  "tcPO12BrandOnly": {
+    "name": "Brand Only Product TC-PO-12 {uuid}",
+    "description": "Seeded for the case.",
+    "price": 20.0,
+    "co2Rating": "B",
+    "stock": 10
+  },
+  "tcPO14": {
+    "minimum": "1",
+    "maximum": "100",
+    "scaleMaximum": "200"
+  },
+  "tcPO16": {
+    "brandName": "Catalog Brand TC-PO-16 {uuid}",
+    "categoryName": "Catalog Category TC-PO-16 {uuid}",
+    "products": [
+      {
+        "name": "Offer Product TC-PO-16 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 100.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isLocationOffer": true
+      }
+    ],
+    "position": {
+      "latitude": 52.37,
+      "longitude": 4.9
+    },
+    "originalPrice": "$100.00",
+    "discountedPrice": "$80.00"
+  },
+  "tcPO17": {
+    "brandName": "Catalog Brand TC-PO-17 {uuid}",
+    "categoryName": "Catalog Category TC-PO-17 {uuid}",
+    "products": [
+      {
+        "name": "Sold Out Product TC-PO-17 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 0
+      },
+      {
+        "name": "Stocked Product TC-PO-17 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedLabel": "Out of stock"
+  },
+  "tcPO6Range": {
+    "minimumPrice": 5,
+    "maximumPrice": 190,
+    "defaultRange": {
+      "minimum": "1",
+      "maximum": "100",
+      "scaleMaximum": "200"
+    },
+    "sortOption": "Name (Z - A)",
+    "activeRange": {
+      "minimum": "5",
+      "maximum": "190",
+      "scaleMaximum": "200"
+    }
   }
 }

@@ -1,0 +1,135 @@
+{
+  "tcRENT1": {
+    "entry": "Rentals",
+    "expectedTitle": "Rentals",
+    "brandName": "Rental Brand TC-RENT-1 {uuid}",
+    "categoryName": "Rental Category TC-RENT-1 {uuid}",
+    "products": [
+      {
+        "name": "Rental 1 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 2 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 3 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 4 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 5 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 6 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 7 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 8 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 9 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Rental 10 TC-RENT-1 {uuid}",
+        "description": "Seeded for the rentals page case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      }
+    ]
+  },
+  "tcRENT3": {
+    "minimumHours": "1",
+    "maximumHours": "10",
+    "startHours": 1,
+    "chosenHours": 4
+  },
+  "tcRENT4": {
+    "brandName": "Rental Brand TC-RENT-4 {uuid}",
+    "categoryName": "Rental Category TC-RENT-4 {uuid}",
+    "products": [
+      {
+        "name": "Rental Product TC-RENT-4 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      }
+    ],
+    "cartItemCount": "1",
+    "expectedLabel": "Item for rent, price per hour"
+  },
+  "tcRENT5": {
+    "brandName": "Rental Brand TC-RENT-5 {uuid}",
+    "categoryName": "Rental Category TC-RENT-5 {uuid}",
+    "products": [
+      {
+        "name": "Rental Offer TC-RENT-5 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 100.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true,
+        "isLocationOffer": true
+      }
+    ],
+    "position": {
+      "latitude": 52.37,
+      "longitude": 4.9
+    },
+    "originalPrice": "100.00",
+    "discountedPrice": "$80",
+    "discountedRate": 80,
+    "hours": 1
+  }
+}

@@ -16,3 +16,11 @@ separate, explicitly approved preview. Reports are written even when the defect 
 | [Chat sign-in shows the typed password in plain text](chat-echoes-password.md) | new | seen in TC-CHAT-6 | Open, not filed |
 | [Contact form and `POST /messages` accept an invalid email address](contact-api-accepts-invalid-email.md) | new | `contact-api-5` | Open, not filed |
 | [`POST /messages` returns 500 for a guest without both a name and an email](contact-api-500-without-identity.md) | new | none | Open, not filed |
+| [A parent category with children has no checkbox in the sidebar](category-parent-no-checkbox.md) | new | TC-PO-9 | Open, not filed |
+| [A search leaves the sort dropdown showing the previous option](search-leaves-sort-selected.md) | new | TC-PO-6 | Open, not filed |
+| [The category page has no price range slider](category-page-no-price-slider.md) | new | TC-CAT-3 | Open, not filed |
+| [The category page title comes from the URL slug, not the category name](category-title-from-slug.md) | new | TC-CAT-2 (not automated) | Open, not filed |
+| [The Categories menu has an entry labelled "UNDEFINED" that opens an empty page](nav-undefined-category-entry.md) | new | none | Open, not filed |
+| [The product quantity is capped at 99, while the story allows 999,999,999](product-quantity-capped-at-99.md) | new | TC-PD-7 | Open, not filed |
+| [The rentals page shows only the first 9 rentals, with no way to reach the rest](rentals-page-no-pagination.md) | new | TC-RENT-1 | Open, not filed |
+| [A discounted rental shows a total at the full hourly rate](rental-total-ignores-location-discount.md) | new | TC-RENT-5 | Open, not filed |

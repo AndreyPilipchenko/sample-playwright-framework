@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToBeVisible, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
+import { expectToBeVisible, expectToContainText, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
 
 /** Checkout step 1: the cart review table (`#/checkout`). The cart is client-side state, so it must be filled in the same browser session. */
 export class CartPage {
@@ -83,6 +83,12 @@ export class CartPage {
   async verifyItemPrice(productName: string, expectedPrice: string) {
     await step(`Verify the price of ${productName} in the cart is ${expectedPrice}`, async () => {
       await expectToHaveText(`the price of ${productName}`, this.cartItem_row(productName).getByTestId('product-price'), expectedPrice);
+    });
+  }
+
+  async verifyItemMarkedAsRental(productName: string, expectedLabel: string) {
+    await step(`Verify ${productName} is marked in the cart with: ${expectedLabel}`, async () => {
+      await expectToContainText(`the cart line of ${productName}`, this.cartItem_row(productName), expectedLabel);
     });
   }
 

@@ -69,6 +69,183 @@
         "stock": 10
       }
     ],
-    "quantity": "3"
+    "quantity": "3",
+    "expectedMessage": "Product added to shopping cart."
+  },
+  "tcPD2": {
+    "brandName": "Detail Brand TC-PD-2 {uuid}",
+    "categoryName": "Detail Category TC-PD-2 {uuid}",
+    "products": [
+      {
+        "name": "Offer Product TC-PD-2 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 100.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isLocationOffer": true
+      }
+    ],
+    "position": {
+      "latitude": 52.37,
+      "longitude": 4.9
+    },
+    "originalPrice": "100.00",
+    "discountedPrice": "$80",
+    "expectedBadge": "-20%"
+  },
+  "tcPD6": {
+    "brandName": "Detail Brand TC-PD-6 {uuid}",
+    "categoryName": "Detail Category TC-PD-6 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-6 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedQuantity": "1"
+  },
+  "tcPD7": {
+    "brandName": "Detail Brand TC-PD-7 {uuid}",
+    "categoryName": "Detail Category TC-PD-7 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-7 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "typedQuantity": "5",
+    "belowMinimum": "0",
+    "expectedMinimum": "1",
+    "aboveMaximum": "1000000000",
+    "expectedMaximum": "999999999"
+  },
+  "tcPD9": {
+    "brandName": "Detail Brand TC-PD-9 {uuid}",
+    "categoryName": "Detail Category TC-PD-9 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-9 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 50
+      }
+    ],
+    "quantity": "12"
+  },
+  "tcPD10": {
+    "brandName": "Detail Brand TC-PD-10 {uuid}",
+    "categoryName": "Detail Category TC-PD-10 {uuid}",
+    "products": [
+      {
+        "name": "Sold Out Product TC-PD-10 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 0
+      }
+    ],
+    "expectedLabel": "Out of stock",
+    "expectedColor": "rgb(220, 53, 69)"
+  },
+  "tcPD11": {
+    "brandName": "Detail Brand TC-PD-11 {uuid}",
+    "categoryName": "Detail Category TC-PD-11 {uuid}",
+    "products": [
+      {
+        "name": "Rental Product TC-PD-11 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      }
+    ],
+    "minimumHours": "1",
+    "maximumHours": "10",
+    "hourlyRate": 20,
+    "startHours": 1,
+    "chosenHours": 3
+  },
+  "tcPD12": {
+    "brandName": "Detail Brand TC-PD-12 {uuid}",
+    "categoryName": "Detail Category TC-PD-12 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-12 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedMessage": "Product added to your favorites list.",
+    "user": {
+      "firstName": "Catalog",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-pd-12.{uuid}@example.test",
+      "password": "Sup3r-Secret!Pd12"
+    }
+  },
+  "tcPD14": {
+    "brandName": "Detail Brand TC-PD-14 {uuid}",
+    "categoryName": "Detail Category TC-PD-14 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-14 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedMessage": "Unauthorized, can not add product to your favorite list."
+  },
+  "tcPD16": {
+    "brandName": "Detail Brand TC-PD-16 {uuid}",
+    "categoryName": "Detail Category TC-PD-16 {uuid}",
+    "products": [
+      {
+        "name": "Detail Product TC-PD-16 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "expectedLabel": "Quantity"
+  },
+  "tcPD17": {
+    "brandName": "Detail Brand TC-PD-17 {uuid}",
+    "categoryName": "Detail Category TC-PD-17 {uuid}",
+    "products": [
+      {
+        "name": "Shown Product TC-PD-17 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      },
+      {
+        "name": "Related Product TC-PD-17 {uuid}",
+        "description": "Seeded for the case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
   }
 }

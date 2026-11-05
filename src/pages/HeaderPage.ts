@@ -12,12 +12,19 @@ export class HeaderPage {
   private readonly accountMenu_button: Locator;
   /** The item count badge on the cart link. */
   private readonly cartQuantity_txt: Locator;
+  private readonly categoriesMenu_button: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.navHome_link = page.getByTestId('nav-home');
     this.accountMenu_button = page.getByTestId('nav-user-menu').or(page.getByTestId('nav-admin-menu'));
     this.cartQuantity_txt = page.getByTestId('cart-quantity');
+    this.categoriesMenu_button = page.getByTestId('nav-categories');
+  }
+
+  /** The entry labelled exactly `entryName` in the Categories menu. */
+  private categoriesEntry_link(entryName: string): Locator {
+    return this.page.getByRole('link', { name: entryName, exact: true });
   }
 
   ///// Actions
@@ -25,6 +32,13 @@ export class HeaderPage {
   async clickHome() {
     await step('Click the Home link in the navigation bar', async () => {
       await this.navHome_link.click();
+    });
+  }
+
+  async openCategoriesEntry(entryName: string) {
+    await step(`Open ${entryName} from the Categories menu`, async () => {
+      await this.categoriesMenu_button.click();
+      await this.categoriesEntry_link(entryName).click();
     });
   }
 
@@ -39,6 +53,12 @@ export class HeaderPage {
   async verifySignedIn() {
     await step('Verify the user is signed in', async () => {
       await expectToBeVisible('the signed-in account menu', this.accountMenu_button);
+    });
+  }
+
+  async verifySignedInUserName(expectedName: string) {
+    await step(`Verify the header shows the signed-in user: ${expectedName}`, async () => {
+      await expectToHaveText('the signed-in account menu', this.accountMenu_button, expectedName);
     });
   }
 

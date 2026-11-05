@@ -201,6 +201,11 @@ export async function expectToHaveValue(
   await expect(locator, `Expect ${subject} to have value ${fmt(expected)} →`).toHaveValue(expected, options);
 }
 
+/** Auto-retrying negated list-text assertion: the locator's texts have moved away from the `unexpected` list. */
+export async function expectNotToHaveTexts(subject: string, locator: Locator, unexpected: string[], options?: RetryOptions): Promise<void> {
+  await expect(locator, `Expect ${subject} not to read ${fmt(unexpected)} →`).not.toHaveText(unexpected, options);
+}
+
 /** Auto-retrying count assertion — `Expect <subject> to show <expected> <unit>(s) → …`; `unit` defaults to "item". */
 export async function expectToHaveCount(
   subject: string,

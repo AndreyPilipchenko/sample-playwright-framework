@@ -55,6 +55,12 @@ export interface ProductSeed {
   isLocationOffer?: boolean;
 }
 
+/** A rental product as `GET /products?is_rental=true` returned it. */
+export interface RentalListingEntry {
+  name: string;
+  price: number;
+}
+
 /** A brand, a top-level category and products, all named by `{uuid}` templates (see UniqueData.withUuid). */
 export interface CatalogSeed {
   brandName: string;
@@ -141,14 +147,36 @@ export class ApisProductCatalog {
     });
   }
 
-  /** Top-level category (`parent_id` null). */
-  async createCategory(name: string): Promise<number> {
+  /** Top-level unless `parentId` is given. */
+  async createCategory(name: string, parentId: number | null = null): Promise<number> {
     return await allure.step(`Create the category: ${name}`, async () => {
       const response = await this.apiActions.post(this.categories_serviceName, {
-        data: { name, slug: slugOf(name), parent_id: null },
+        data: { name, slug: slugOf(name), parent_id: parentId },
       });
       expectToBe('the create category response status', response.status(), 201);
       return ((await response.json()) as { id: number }).id;
+    });
+  }
+
+  /** One more stocked product in a category and brand that already exist; lets a case combine records of two seeded catalogs. */
+  async addProduct(uuid: string, template: ProductSeed, categoryId: number, brandId: number): Promise<{ id: string; name: string }> {
+    const product = { ...template, name: withUuid(template.name, uuid) };
+    return await allure.step(`Add the product ${product.name} to category ${categoryId} and brand ${brandId}`, async () => {
+      const imageId = await this.getAnyProductImageId();
+      const productId = await this.createProduct(product, categoryId, brandId, imageId);
+      await this.setStock(productId, product, categoryId, brandId, imageId);
+      return { id: String(productId), name: product.name };
+    });
+  }
+
+  /** The first page of rental products, ordered by id, so the first entries stay put while other cases seed rentals. */
+  async getRentalListing(): Promise<RentalListingEntry[]> {
+    return await allure.step('Get the first page of rental products', async () => {
+      const response = await this.apiActions.get(this.products_serviceName, { params: { is_rental: 'true' } });
+      expectToBe('the rental list response status', response.status(), 200);
+      const { data } = (await response.json()) as { data: RentalListingEntry[] };
+      expectToBeGreaterThan('the number of rental products', data.length, 0);
+      return data;
     });
   }
 
