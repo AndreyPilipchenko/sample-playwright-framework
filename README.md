@@ -229,9 +229,11 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 
 | Spec | Covers |
 |---|---|
-| `CatalogSeedingTests.spec.ts` | Brand, category and product creation, listing and search, required-field rejection, customer registration and login, duplicate email rejection |
-| `ProductCatalogApiTests.spec.ts` | Restocking a product, brand and category required-field rejection, a search matching nothing, an unknown product id (404) |
-| `InvoiceApiTests.spec.ts` | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
+| `catalog/BrandApiTests.spec.ts` | Brand creation and read-back, brand required-field rejection |
+| `catalog/CategoryApiTests.spec.ts` | Category creation and read-back, listing and search, category required-field rejection |
+| `catalog/ProductApiTests.spec.ts` | Product creation and read-back, required-field rejection, restocking, a search matching nothing, an unknown product id (404) |
+| `accounts/CustomerAccountApiTests.spec.ts` | Customer registration and login, duplicate email rejection |
+| `invoices/InvoiceApiTests.spec.ts` | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
 (see Signed-in tests), seed their own data through the API and leave disposable records behind.

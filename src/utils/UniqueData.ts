@@ -18,3 +18,8 @@ export function withUuid(template: string, uuid: string): string {
 export function searchTokenOf(uuid: string): string {
   return uuid.split('-')[0];
 }
+
+/** A copy of a paired-JSON user whose `{uuid}` email placeholder is filled, so the account is unique to one attempt. */
+export function withUniqueEmail<T extends { email: string }>(user: T, uuid: string): T {
+  return { ...user, email: withUuid(user.email, uuid) };
+}

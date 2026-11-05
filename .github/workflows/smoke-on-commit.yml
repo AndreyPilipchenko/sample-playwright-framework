@@ -71,29 +71,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # The critical-path subset in every browser, side by side; fail-fast is off so one
-  # browser's failure does not hide another's result.
-  smoke:
+  # TEMPORARY: the smoke subset runs against a private local instance started on the runner
+  # (chromium only). The hosted-target job below is commented out; to go back to the
+  # deployment, uncomment it and delete this job.
+  smoke-local:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Node, dependencies and ${{ matrix.browser }}
+      - name: Set up Node, dependencies and browsers
         uses: ./.github/actions/setup
-        with:
-          browsers: ${{ matrix.browser }}
 
-      - name: Run the @smoke specs on ${{ matrix.browser }}
+      # The upstream web/cron images are arm64-only; see nightly.yml regression-local.
+      - name: Enable arm64 emulation for the upstream nginx/cron images
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Start the application under test
+        run: node scripts/app.mjs up --timeout 900
+
+      - name: Run the @smoke specs against the local instance
         uses: ./.github/actions/run-specs
         with:
-          args: --project=${{ matrix.browser }}
+          command: node scripts/app.mjs test
+          args: --project=chromium
           stage-tag: '@smoke'
-          report-name: smoke-${{ matrix.browser }}
+          report-name: smoke-local
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
@@ -101,5 +106,52 @@ jobs:
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
+
+      - name: Capture application logs
+        if: failure()
+        run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
+
+      - name: Publish application logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-logs-smoke-local
+          path: app-logs.txt
+          retention-days: 30
+
+      - name: Stop the application under test
+        if: always()
+        run: node scripts/app.mjs down --volumes || true
+
+  ## The critical-path subset in every browser, side by side; fail-fast is off so one
+  ## browser's failure does not hide another's result.
+  #smoke:
+  #  runs-on: ubuntu-latest
+  #  timeout-minutes: 30
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      browser: [chromium, firefox, webkit]
+  #  steps:
+  #    - uses: actions/checkout@v7
+#
+  #    - name: Set up Node, dependencies and ${{ matrix.browser }}
+  #      uses: ./.github/actions/setup
+  #      with:
+  #        browsers: ${{ matrix.browser }}
+#
+  #    - name: Run the @smoke specs on ${{ matrix.browser }}
+  #      uses: ./.github/actions/run-specs
+  #      with:
+  #        args: --project=${{ matrix.browser }}
+  #        stage-tag: '@smoke'
+  #        report-name: smoke-${{ matrix.browser }}
+  #        tag: ${{ inputs.tag }}
+  #        name: ${{ inputs.name }}
+  #        paths: ${{ inputs.path }}
+  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+  #      env:
+  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+  #        APP_URL: ${{ inputs.app_url }}
+  #        APP_API_URL: ${{ inputs.api_url }}

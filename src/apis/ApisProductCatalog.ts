@@ -1,7 +1,7 @@
 import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
-import { withUuid } from '../utils/UniqueData';
+import { searchTokenOf, withUuid } from '../utils/UniqueData';
 import { applications } from '../config/applications';
 import { expectToBe, expectToBeGreaterThan, expectToContainAll, expectToEqual } from '../utils/Expects';
 
@@ -316,6 +316,31 @@ export class ApisProductCatalog {
     await allure.step(`Verify the product names found are exactly: ${expectedNames.join(', ')}`, async () => {
       expectToEqual('the product names found', [...names].sort(), [...expectedNames].sort());
     });
+  }
+
+  /** Reads the first seeded product back and checks it is stored with the seeded price, stock, category and brand. */
+  async verifyFirstProductSeeded(catalog: SeededCatalog, seed: CatalogSeed) {
+    const [seeded] = catalog.products;
+    const [template] = seed.products;
+    const product = await this.getProduct(seeded.id);
+    await this.verifyProductStored(product, {
+      id: seeded.id,
+      name: seeded.name,
+      price: template.price,
+      stock: template.stock,
+      categoryId: catalog.categoryId,
+      brandId: catalog.brandId,
+    });
+  }
+
+  /** Checks every seeded product is listed in its category and found by the run's search token. */
+  async verifyProductsListedAndSearchable(catalog: SeededCatalog, uuid: string) {
+    const seededNames = catalog.products.map((product) => product.name);
+    const listing = await this.getCategoryListing(catalog.categorySlug);
+    await this.verifyAllProductsInCategory(listing, catalog.categorySlug);
+    await this.verifyProductNamesFound(listing.productNames, seededNames);
+    const found = await this.searchProductNames(searchTokenOf(uuid));
+    await this.verifyProductNamesFound(found, seededNames);
   }
 
   async verifyRequiredProductFieldsReported(reportedFields: string[], requiredFields: string[]) {
