@@ -35,5 +35,6 @@ requests run no tests. When reviewing, flag these in particular:
   repository's dispatch, the full suite nightly, both by hand.
 - Shared steps live in composite actions in `.github/actions/`. Workflow inputs reach scripts
   through `env`, never spliced into `run:` text.
-- This repository is public: jobs that sign in with shared credentials must not publish
-  report artifacts unless `PUBLISH_REPORTS` is enabled.
+- This repository is public: jobs that sign in with shared credentials must not publish the
+  Playwright HTML report (failure pages, traces) unless `PUBLISH_REPORTS` is enabled. The
+  Allure report is always published.

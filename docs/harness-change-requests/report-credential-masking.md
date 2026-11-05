@@ -29,9 +29,13 @@ access and retention and to prefer disposable credentials, which is what this pr
 
 - The customer role uses a disposable account the setup registers through the API each run.
 - The admin can't be created through the API, so it stays a shared account (GitHub secrets).
-- This repository is public, so the CI jobs that sign in don't upload the HTML or Allure
-  reports unless the repository variable `PUBLISH_REPORTS` is `true`. The run's Summary page
-  (`scripts/ci-summary.mjs`) carries the results instead.
+- This repository is public, so the CI jobs that sign in don't upload the Playwright HTML
+  report (failure pages, traces) unless the repository variable `PUBLISH_REPORTS` is `true`.
+  The Allure report is always uploaded. `src/utils/AllureReport.ts` masks the value typed
+  into a field whose locator looks secret (`REDACTED_FIELD_LOCATOR`), so its step titles show
+  `Fill "***"` for passwords; emails stay visible, and a failure's page snapshot attachment can
+  still show a filled password field. The run's Summary page
+  (`scripts/ci-summary.mjs`) shows the results as well.
 
 ## Requested
 

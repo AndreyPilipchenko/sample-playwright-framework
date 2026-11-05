@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { allureConfig } from '../config/reporting';
+import { REDACTED_FIELD_LOCATOR } from './RedactedKeys';
 
 /** Records locator-bearing Allure steps and generates HTML after every reporter has flushed. */
 export default class AllureReport extends AllureReporter {
@@ -30,6 +31,18 @@ export default class AllureReport extends AllureReporter {
     await super.onTestEnd(test, { ...result, attachments: this.reportAttachments(result.attachments) });
   }
 
+  /**
+   * The title of an input step on a secret field, with the typed value masked: Playwright
+   * renders `Fill "<value>"` / `Type "<text>"`, so `Fill "***"` instead. The field is
+   * recognised by its locator (REDACTED_FIELD_LOCATOR), never by known secret values; any
+   * other step keeps its title. Only this Allure view changes, the native step does not.
+   */
+  private static maskSecretInput(step: TestStep, locator: unknown): string {
+    return step.category === 'pw:api' && typeof locator === 'string' && REDACTED_FIELD_LOCATOR.test(locator)
+      ? step.title.replace(/^(Fill|Type) ".*"$/s, '$1 "***"')
+      : step.title;
+  }
+
   /** Keeps stable step identities and parents for Allure without changing native events. */
   private allureStep(step: TestStep): TestStep {
     let view = this.stepViews.get(step);
@@ -40,8 +53,9 @@ export default class AllureReport extends AllureReporter {
     const locator = step.params?.locator;
     const appendLocator = ['pw:api', 'expect'].includes(step.category)
       && typeof locator === 'string' && locator.length > 0 && !step.title.endsWith(` ${locator}`);
+    const title = AllureReport.maskSecretInput(step, locator);
     Object.assign(view, step, {
-      title: appendLocator ? `${step.title} ${locator}` : step.title,
+      title: appendLocator ? `${title} ${locator}` : title,
       parent: step.parent ? this.allureStep(step.parent) : undefined,
       ...(step.attachments ? { attachments: this.reportAttachments(step.attachments) } : {}),
     });
