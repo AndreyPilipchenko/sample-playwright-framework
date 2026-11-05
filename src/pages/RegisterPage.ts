@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { expectNotToContainText, expectToBeVisible, expectToHaveText } from '../utils/Expects';
 
 /** The values typed on the registration form. */
 export interface RegistrationForm {
@@ -12,6 +13,21 @@ export interface RegistrationForm {
   city: string;
   state: string;
   /** The country as the dropdown lists it, e.g. "Netherlands (the)". */
+  country: string;
+  phone: string;
+  email: string;
+  password: string;
+}
+
+/** The label each required registration field must carry. */
+export interface RegistrationLabels {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  address: string;
+  postcode: string;
+  city: string;
+  state: string;
   country: string;
   phone: string;
   email: string;
@@ -36,6 +52,18 @@ export class RegisterPage {
   private readonly email_input: Locator;
   private readonly password_input: Locator;
   private readonly register_button: Locator;
+  private readonly registerError_txt: Locator;
+  private readonly firstNameLabel_txt: Locator;
+  private readonly lastNameLabel_txt: Locator;
+  private readonly dateOfBirthLabel_txt: Locator;
+  private readonly addressLabel_txt: Locator;
+  private readonly postcodeLabel_txt: Locator;
+  private readonly cityLabel_txt: Locator;
+  private readonly stateLabel_txt: Locator;
+  private readonly countryLabel_txt: Locator;
+  private readonly phoneLabel_txt: Locator;
+  private readonly emailLabel_txt: Locator;
+  private readonly passwordLabel_txt: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -51,6 +79,19 @@ export class RegisterPage {
     this.email_input = page.getByTestId('email');
     this.password_input = page.getByTestId('password');
     this.register_button = page.getByTestId('register-submit');
+    this.registerError_txt = page.getByTestId('register-error');
+    // Each label belongs to the field its `for` attribute names.
+    this.firstNameLabel_txt = page.locator('label[for="first_name"]');
+    this.lastNameLabel_txt = page.locator('label[for="last_name"]');
+    this.dateOfBirthLabel_txt = page.locator('label[for="dob"]');
+    this.addressLabel_txt = page.locator('label[for="address"]');
+    this.postcodeLabel_txt = page.locator('label[for="postcode"]');
+    this.cityLabel_txt = page.locator('label[for="city"]');
+    this.stateLabel_txt = page.locator('label[for="state"]');
+    this.countryLabel_txt = page.locator('label[for="country"]');
+    this.phoneLabel_txt = page.locator('label[for="phone"]');
+    this.emailLabel_txt = page.locator('label[for="email"]');
+    this.passwordLabel_txt = page.locator('label[for="password"]');
   }
 
   ///// Actions
@@ -78,6 +119,50 @@ export class RegisterPage {
       await this.email_input.fill(form.email);
       await this.password_input.fill(form.password);
       await this.register_button.click();
+    });
+  }
+
+  ///// Validations
+
+  /** Every required field is shown under its own label. */
+  async verifyRequiredFieldsShown(expected: RegistrationLabels) {
+    await step('Verify every required registration field is shown with its label', async () => {
+      await expectToBeVisible(`the ${expected.firstName} field`, this.firstName_input);
+      await expectToHaveText(`the label of the ${expected.firstName} field`, this.firstNameLabel_txt, expected.firstName);
+      await expectToBeVisible(`the ${expected.lastName} field`, this.lastName_input);
+      await expectToHaveText(`the label of the ${expected.lastName} field`, this.lastNameLabel_txt, expected.lastName);
+      await expectToBeVisible(`the ${expected.dateOfBirth} field`, this.dateOfBirth_input);
+      await expectToHaveText(`the label of the ${expected.dateOfBirth} field`, this.dateOfBirthLabel_txt, expected.dateOfBirth);
+      await expectToBeVisible(`the ${expected.address} field`, this.address_input);
+      await expectToHaveText(`the label of the ${expected.address} field`, this.addressLabel_txt, expected.address);
+      await expectToBeVisible(`the ${expected.postcode} field`, this.postcode_input);
+      await expectToHaveText(`the label of the ${expected.postcode} field`, this.postcodeLabel_txt, expected.postcode);
+      await expectToBeVisible(`the ${expected.city} field`, this.city_input);
+      await expectToHaveText(`the label of the ${expected.city} field`, this.cityLabel_txt, expected.city);
+      await expectToBeVisible(`the ${expected.state} field`, this.state_input);
+      await expectToHaveText(`the label of the ${expected.state} field`, this.stateLabel_txt, expected.state);
+      await expectToBeVisible(`the ${expected.country} field`, this.country_dropdown);
+      await expectToHaveText(`the label of the ${expected.country} field`, this.countryLabel_txt, expected.country);
+      await expectToBeVisible(`the ${expected.phone} field`, this.phone_input);
+      await expectToHaveText(`the label of the ${expected.phone} field`, this.phoneLabel_txt, expected.phone);
+      await expectToBeVisible(`the ${expected.email} field`, this.email_input);
+      await expectToHaveText(`the label of the ${expected.email} field`, this.emailLabel_txt, expected.email);
+      await expectToBeVisible(`the ${expected.password} field`, this.password_input);
+      await expectToHaveText(`the label of the ${expected.password} field`, this.passwordLabel_txt, expected.password);
+    });
+  }
+
+  async verifyRegisterError(expectedMessage: string) {
+    await step('Verify the registration error is shown', async () => {
+      await expectToHaveText('the registration error', this.registerError_txt, expectedMessage);
+    });
+  }
+
+  /** The error is shown and does not match the forbidden pattern, ignoring case. */
+  async verifyRegisterErrorOmits(forbiddenPattern: string) {
+    await step(`Verify the registration error does not reveal: ${forbiddenPattern}`, async () => {
+      await expectToBeVisible('the registration error', this.registerError_txt);
+      await expectNotToContainText('the registration error', this.registerError_txt, new RegExp(forbiddenPattern, 'i'));
     });
   }
 }

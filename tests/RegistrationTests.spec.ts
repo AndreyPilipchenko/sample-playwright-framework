@@ -31,6 +31,36 @@ test.describe('User Registration', () => {
     await apisUserAccount.verifyCanLogIn(form.email, form.password);
   });
 
+  test('All required registration fields are displayed', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Registration');
+    await allure.testCaseId('TC-REG-1');
+
+    await registerPage.navigate();
+    await registerPage.verifyRequiredFieldsShown(testData.tcREG1.labels);
+  });
+
+  test('Duplicate email shows "Email is already in use."', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Registration');
+    await allure.testCaseId('TC-REG-7');
+    const email = withUuid(testData.tcREG7.user.email, newUuid());
+
+    await apisUserAccount.registerUser({ ...testData.tcREG7.user, email });
+    await registerPage.navigate();
+    await registerPage.register({ ...testData.tcREG7.form, email });
+    await registerPage.verifyRegisterError(testData.tcREG7.expectedError);
+  });
+
+  test('Duplicate-email error does not reveal a password hint', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Registration');
+    await allure.testCaseId('TC-REG-8');
+    const email = withUuid(testData.tcREG8.user.email, newUuid());
+
+    await apisUserAccount.registerUser({ ...testData.tcREG8.user, email });
+    await registerPage.navigate();
+    await registerPage.register({ ...testData.tcREG8.form, email });
+    await registerPage.verifyRegisterErrorOmits(testData.tcREG8.forbiddenPattern);
+  });
+
   test.beforeAll(async () => {
     testData = JSON.parse(fs.readFileSync('./resources/testData/RegistrationTestJsonFile.json', 'utf8'));
   });

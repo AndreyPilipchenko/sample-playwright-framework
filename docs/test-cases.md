@@ -201,6 +201,10 @@ Route: `#/auth/register`
 | TC-REG-13 | Phone placeholder text is spelled correctly | P3 | 54 | — |
 | TC-REG-14 | Field labels, padding and button width render correctly per browser | P3 | 55–59 | — |
 
+Automated in `tests/RegistrationTests.spec.ts` (`@regression`): TC-REG-1, 7, 8 and 9. TC-REG-1 fails while defect 52
+is open (the State and Country labels are swapped). TC-REG-7 and 8 fail while defect 50 is open (the error reads "User
+already registered - Your password hint is: …").
+
 ## 11. User Login
 
 Route: `#/auth/login`
@@ -224,6 +228,23 @@ Route: `#/auth/login`
 > TC-LOGIN-7 / TC-LOGIN-8 are destructive on a shared instance. Register a throwaway
 > account first (test plan §4.3). Social login (upstream AC1, AC10) and TOTP
 > (AC7–AC9) are **out of scope** — absent from this build.
+
+Automated in `tests/LoginTests.spec.ts`: TC-LOGIN-1 to 5, 7, 8 and 10. Expected texts and status codes for TC-LOGIN-5,
+8 and 10 come from the defect-free upstream source (`sprint5` in testsmith-io/practice-software-testing), not from a
+live instance:
+
+- **TC-LOGIN-5** fails while defect 17 is open: the form submits empty and only the server's "Invalid email or
+  password" appears. The `email-error` / `password-error` ids have never rendered here.
+- **TC-LOGIN-7 and 8 (locking):** the local with-bugs build never locks an account. A wrong password is treated as
+  an unknown user and the failure count is not incremented, so after 3 failures the right password still works.
+  That differs from defect 21 ("locked after 1 attempt"), which matches the current upstream with-bugs source and the
+  hosted instance. TC-LOGIN-7 (two failures, then a valid login succeeds) therefore passes locally and fails where
+  defect 21 applies; TC-LOGIN-8 (lock message "Account locked, too many failed attempts. Please contact the
+  administrator." and HTTP 423, threshold 3 per the upstream source) fails locally because nothing locks.
+- **TC-LOGIN-10** passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
+  test disables its account with `UPDATE users SET enabled = 0` (`src/dbs/DbsUserAccount.ts`). It runs only where
+  `APP_DB_LOCAL` is set (local stack; the nightly `regression-local` job reads the secret of that name) and fails with
+  a database connection error without it ("Access denied" on the local stack).
 
 ## 12. Forgot Password
 
@@ -446,8 +467,8 @@ is used.
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
 | Checkout — Address | 10 | 1 (TC-CBA-3) |
 | Checkout — Payment | 14 | 2 (TC-CPAY-12, 13) |
-| Registration | 14 | 1 (TC-REG-9) |
-| Login | 13 | 4 (TC-LOGIN-1, 4; TC-LOGIN-2, 3 — smoke) |
+| Registration | 14 | 4 (TC-REG-1, 7, 8, 9 — TC-REG-1, 7, 8 failing on open defects 52, 50) |
+| Login | 13 | 8 (TC-LOGIN-1, 4, 5, 7, 8, 10; TC-LOGIN-2, 3 — smoke; TC-LOGIN-5, 8 failing) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 0 |
 | Change Password | 7 | 4 (TC-CPW-1, 3, 4, 6) |
@@ -461,7 +482,7 @@ is used.
 | API | 16 | 0 (the 17 tests in `tests/api/` cover seeding, catalog and invoice calls, not these security cases) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **28** |
+| **Total** | **234** | **35** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

@@ -228,6 +228,9 @@ Carried deliberately rather than guessed:
    hash route, so this proves nothing either way — confirm whether real content renders.
 4. **Does this build enforce 3-attempt locking at all?** Defect #21 says it locks after
    1 attempt. The threshold needs confirming before a locking test can assert anything.
+   *Partly answered 2026-11-05:* the defect-free upstream source locks after 3 failures (HTTP 423);
+   the local with-bugs stack never locks at all. TC-LOGIN-7/8 assert the threshold of 3, see
+   [test cases §11](test-cases.md#11-user-login).
 
 ---
 

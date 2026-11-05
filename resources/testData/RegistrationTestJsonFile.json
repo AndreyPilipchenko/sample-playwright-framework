@@ -13,5 +13,78 @@
       "email": "tc-reg-9.{uuid}@example.test",
       "password": "Sup3r-Secret!Reg9"
     }
+  },
+  "tcREG1": {
+    "labels": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "dateOfBirth": "Date of birth",
+      "address": "Address",
+      "postcode": "Postcode",
+      "city": "City",
+      "state": "State",
+      "country": "Country",
+      "phone": "Phone",
+      "email": "E-mail address",
+      "password": "Password"
+    }
+  },
+  "tcREG7": {
+    "user": {
+      "firstName": "Register",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-reg-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Reg7"
+    },
+    "form": {
+      "firstName": "Register",
+      "lastName": "Customer",
+      "dateOfBirth": "1990-01-01",
+      "address": "Street 1",
+      "postcode": "1234AA",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "Netherlands (the)",
+      "phone": "0987654321",
+      "email": "tc-reg-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Reg7"
+    },
+    "expectedError": "Email is already in use."
+  },
+  "tcREG8": {
+    "user": {
+      "firstName": "Register",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-reg-8.{uuid}@example.test",
+      "password": "Sup3r-Secret!Reg8"
+    },
+    "form": {
+      "firstName": "Register",
+      "lastName": "Customer",
+      "dateOfBirth": "1990-01-01",
+      "address": "Street 1",
+      "postcode": "1234AA",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "Netherlands (the)",
+      "phone": "0987654321",
+      "email": "tc-reg-8.{uuid}@example.test",
+      "password": "Sup3r-Secret!Reg8"
+    },
+    "forbiddenPattern": "password hint"
   }
 }

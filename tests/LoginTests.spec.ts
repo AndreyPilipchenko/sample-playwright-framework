@@ -6,12 +6,15 @@ import { LoginPage } from '../src/pages/LoginPage';
 import { AccountPage } from '../src/pages/AccountPage';
 import { AdminDashboardPage } from '../src/pages/AdminDashboardPage';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
+import { databases } from '../src/config/databases';
+import { DbsUserAccount } from '../src/dbs/DbsUserAccount';
 import { newUuid, withUuid } from '../src/utils/UniqueData';
 
 let loginPage: LoginPage;
 let accountPage: AccountPage;
 let adminDashboardPage: AdminDashboardPage;
 let apisUserAccount: ApisUserAccount;
+let dbsUserAccount: DbsUserAccount;
 
 let testData: typeof import('../resources/testData/LoginTestJsonFile.json');
 
@@ -65,8 +68,71 @@ test.describe('User Login', () => {
     await adminDashboardPage.verifyPageOpened();
   });
 
+  test('Empty email and password are validated client-side', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-5');
+    const { email, password, expectedEmailError, expectedPasswordError } = testData.tcLogin5;
+
+    await loginPage.navigate();
+    await loginPage.login(email, password);
+    await loginPage.verifyEmailAndPasswordRequired(expectedEmailError, expectedPasswordError);
+  });
+
+  test('Account locks only after 3 consecutive failures', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-7');
+    const { wrongPassword, expectedError } = testData.tcLogin7;
+    const user = { ...testData.tcLogin7.user, email: withUuid(testData.tcLogin7.user.email, newUuid()) };
+
+    await apisUserAccount.registerUser(user);
+    await loginPage.navigate();
+    await loginPage.login(user.email, wrongPassword);
+    await loginPage.verifyLoginError(expectedError);
+    await loginPage.login(user.email, wrongPassword);
+    await loginPage.verifyLoginError(expectedError);
+    await loginPage.login(user.email, user.password);
+    await accountPage.verifyPageOpened();
+  });
+
+  test('Locked account shows the lock message and API returns HTTP 423', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-8');
+    const { wrongPassword, expectedError, expectedLockMessage } = testData.tcLogin8;
+    const user = { ...testData.tcLogin8.user, email: withUuid(testData.tcLogin8.user.email, newUuid()) };
+
+    await apisUserAccount.registerUser(user);
+    await loginPage.navigate();
+    await loginPage.login(user.email, wrongPassword);
+    await loginPage.verifyLoginError(expectedError);
+    await loginPage.login(user.email, wrongPassword);
+    await loginPage.verifyLoginError(expectedError);
+    await loginPage.login(user.email, wrongPassword);
+    await loginPage.verifyLoginError(expectedError);
+    await loginPage.login(user.email, user.password);
+    await loginPage.verifyLoginError(expectedLockMessage);
+    await apisUserAccount.verifyLoginLocked(user.email, user.password);
+  });
+
+  test('Disabled account shows "Account disabled." and is not authenticated', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-10');
+    const user = { ...testData.tcLogin10.user, email: withUuid(testData.tcLogin10.user.email, newUuid()) };
+
+    await apisUserAccount.registerUser(user);
+    await dbsUserAccount.disableUser(user.email);
+    await loginPage.navigate();
+    await loginPage.login(user.email, user.password);
+    await loginPage.verifyLoginError(testData.tcLogin10.expectedError);
+    await loginPage.verifyPageOpened();
+  });
+
   test.beforeAll(async () => {
+    dbsUserAccount = new DbsUserAccount(databases.appDb);
     testData = JSON.parse(fs.readFileSync('./resources/testData/LoginTestJsonFile.json', 'utf8'));
+  });
+
+  test.afterAll(async () => {
+    await dbsUserAccount.close();
   });
 
   test.beforeEach(({ page, request }) => {

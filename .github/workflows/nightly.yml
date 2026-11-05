@@ -250,10 +250,13 @@ jobs:
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the hosted target.
+        # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL holds the
+        # local MariaDB credentials as JSON ({"user":…,"password":…}); TC-LOGIN-10 disables its
+        # account in the database, the only route this build offers.
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+          APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       # Container logs are the only way to diagnose an application-side failure after the
       # runner is torn down, so capture them whenever the run did not pass.
