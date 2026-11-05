@@ -1,0 +1,58 @@
+{
+  "contactApi1": {
+    "message": {
+      "name": "Contact Api",
+      "email": "cont-api-1.{uuid}@example.test",
+      "subject": "webmaster",
+      "message": "Please tell me where I can find the documentation for this hammer."
+    }
+  },
+  "contactApi2": {
+    "user": {
+      "firstName": "Contact",
+      "lastName": "Api",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "cont-api-2.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cont2"
+    },
+    "message": {
+      "subject": "payments",
+      "message": "Please tell me which payment methods I can use for my next order."
+    },
+    "expectedStatus": "NEW"
+  },
+  "contactApi3": {
+    "expectedErrors": {
+      "subject": ["The subject field is required."],
+      "message": ["The message field is required."]
+    }
+  },
+  "contactApi4": {
+    "message": {
+      "name": "Contact Api",
+      "email": "cont-api-4@example.test",
+      "subject": "webmaster"
+    },
+    "messageLength": 251,
+    "expectedErrors": {
+      "message": ["The message field must not be greater than 250 characters."]
+    }
+  },
+  "contactApi5": {
+    "message": {
+      "name": "Contact Api",
+      "email": "not-an-email-address",
+      "subject": "webmaster",
+      "message": "Please tell me where I can find the documentation for this hammer."
+    },
+    "expectedErrors": {
+      "email": ["The email field must be a valid email address."]
+    }
+  }
+}

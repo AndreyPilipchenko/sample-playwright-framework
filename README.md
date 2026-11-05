@@ -231,6 +231,8 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6, 7 | Form fields, mismatched confirmation, wrong current password, successful change and logout, the new password on the next login. **TC-CPW-1, 3 and 7 are red** (TC-CPW-7: defect 39) | `@regression` |
 | `ProfileTests.spec.ts` | TC-PROF-1, 4, 5, 7 | Account details, valid update with its fading confirmation, first and last name fields, address update. **All four are red** (defects 36, 37, 38) | `@regression` |
 | `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7, 8, 10, 11 | Cart table, quantity change, delete, totals, proceed to checkout, the 15% combination discount. **All but TC-CART-8 are red** (known defects; no combination discount locally) | `@regression` |
+| `ContactTests.spec.ts` | TC-CONT-3, 8, 9 | Subject options, no error entries among them, a valid guest message with its confirmation and mail in the local inbox. **All three are red** (defect 60, TC-CONT-3 also on the story's "Status of order" wording; the mail is never delivered locally) | `@regression` |
+| `ChatWidgetTests.spec.ts` | TC-CHAT-6 | Chat checkout: a customer signing in from the chat reaches the order number; the guest route is **red** (the local build does not offer it) | `@regression` |
 | `DiscountTests.spec.ts` | TC-DISC-1, 4, 5, 6, 8 | Location discount per city through the browser's geolocation, discounted cart line, combination discount in the cart and on the invoice. **All but TC-DISC-4 are red** on the local build | `@regression` |
 | `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-1, 3, 4, TC-CPAY-1, 4, 7, 12, 13 | Guest sign-in step, billing address fields and validation, proceeding to payment, payment methods, credit card form and expiry check, placing an order, cart cleared afterwards. **TC-CBA-1 and TC-CPAY-1, 4, 7 are red** (known defects) | `@regression` |
 | `RegistrationTests.spec.ts` | TC-REG-1, 7, 8, 9 | Field labels, duplicate-email message without a password hint, a valid registration that lands on login and can sign in. **TC-REG-1, 7, 8 are red** (known defects) | `@regression` |
@@ -254,11 +256,13 @@ The admin specs need `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD`; the setup pr
 | `security/CatalogSecurityApiTests.spec.ts` | 2 | TC-API-4, 6: brand and product delete without a token. **Both red** |
 | `security/InvoiceSecurityApiTests.spec.ts` | 2 | TC-API-8, 11: invoice list scoped to its owner, forged unit price and total. **Both red** |
 | `security/ServerExposureApiTests.spec.ts` | 2 | TC-API-10, 16: public log file (**red**), guarded GraphQL fields refuse unauthenticated queries |
+| `contact/ContactApiTests.spec.ts` | 6 | `POST /messages` as a guest and as a customer, read-back and listing, missing fields, over-long text, invalid email (**red**: the local build accepts it), the list requires sign-in |
 | `invoices/InvoiceApiTests.spec.ts` | 5 | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
 
-Every request the service classes in `src/apis/` send has at least one API test. The `accounts`, `catalog`
+Every request the service classes in `src/apis/` send has at least one API test, except the local mail inbox read,
+which TC-CONT-8 covers. The `accounts`, `catalog`, `contact`
 and `invoices` specs are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed
-their data through and the login status codes. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
+their data through, the login status codes and the call behind the contact form. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
 4, 6, 8, 9, 10, 11, 16) and only run meaningfully against the local stack, since they attack the target.
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
@@ -266,7 +270,7 @@ Run only these with `npx playwright test --project=api`. UI specs sign in throug
 
 ### Not automated yet
 
-81 of the 234 designed cases are automated; the per-area count is the Coverage summary in
-`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-*), discounts
+85 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
 (TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.

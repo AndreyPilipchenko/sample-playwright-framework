@@ -257,6 +257,19 @@ export async function expectTextsToContainAll(
 }
 
 /**
+ * Auto-retrying membership assertion over a value re-read on every retry, for effects that arrive later outside the
+ * page (a mail in an inbox) — `Expect <subject> to eventually include <expected>`.
+ */
+export async function expectEventuallyToContainEqual<T>(
+  subject: string,
+  read: () => Promise<T[]>,
+  expected: T,
+  options?: RetryOptions,
+): Promise<void> {
+  await expect.poll(read, { message: `Expect ${subject} to eventually include ${fmt(expected)}`, ...options }).toContainEqual(expected);
+}
+
+/**
  * Auto-retrying set-equality assertion over the trimmed texts of every matched element —
  * `Expect <subject> to be exactly <expected> in any order → …`. Same entries and count,
  * order ignored; re-read on every retry, so it settles across async re-renders.

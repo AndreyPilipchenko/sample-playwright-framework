@@ -13,6 +13,9 @@
     },
     "app-local": {
       "baseUrl": "http://localhost:8091"
+    },
+    "mail-local": {
+      "baseUrl": "http://localhost:1080"
     }
   },
   "databases": {

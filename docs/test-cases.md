@@ -396,6 +396,14 @@ Route: `#/contact`
 > TC-CONT-5 / 6 / 7 depend on resolving open question 2 in the test plan — the
 > upstream attachment rule and defect #70 contradict each other.
 
+Automated in `tests/ContactTests.spec.ts` (`@regression`): TC-CONT-3, 8 and 9. TC-CONT-3 and 9 fail while defect 60
+is open. TC-CONT-3 asserts the story's text "Status of order", while the local build and the upstream source both show
+"Status of my order", so it stays red after defect 60 is fixed unless the story or the product changes. TC-CONT-8 shows its confirmation and then fails on a local
+finding, with two causes: the API queues this mail but the local stack runs no queue worker, and the with-bugs build
+leaves `BusServiceProvider` out of `config/app.php`, so a worker could not run the job anyway. The mail never reaches the
+inbox ([bug report](bug-reports/contact-mail-not-delivered.md)). It reads the mailcatcher inbox, so that check needs the
+`local` environment.
+
 ## 19. Admin
 
 Route: `#/admin/dashboard` (admin role required)
@@ -451,6 +459,15 @@ Expected behaviour comes from the defect-free upstream source: statuses only mov
 | TC-CHAT-6 | Checkout walks through cart, details, address, payment, confirmation | P1 | — | AC4 |
 | TC-CHAT-7 | Checkout with an empty cart shows "Your cart is empty" | P3 | — | AC5 |
 | TC-CHAT-8 | Support collects subject, 50-char message and optional `.txt` | P2 | — | AC6 |
+
+Automated in `tests/ChatWidgetTests.spec.ts` (`@regression`): TC-CHAT-6, one test per route. A customer who signs in
+from the chat passes through cart total, address, payment and the order number. A guest fails on a local finding
+([bug report](bug-reports/chat-no-guest-checkout.md)): the
+local build only offers "Sign in", while the story and the upstream source also offer "Continue as guest", which asks
+for email, first name and last name. The guest test ends at the street prompt, the first step both routes share; its
+prompts come from the upstream source. The sign-in test follows the local payment questions (account name, then account
+number), while the upstream source asks for the bank name first; the story only says "details". On this build the chat
+also echoes the typed password as a visible message ([bug report](bug-reports/chat-echoes-password.md)).
 
 ## 21. Discounts
 
@@ -572,14 +589,14 @@ is used.
 | Favorites | 3 | 0 |
 | Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |
-| Contact Form | 12 | 0 |
+| Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60, TC-CONT-3 also on the story's "Status of order" wording; TC-CONT-8 failing on a local finding, mail not delivered) |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
-| Chat Widget | 8 | 0 |
+| Chat Widget | 8 | 1 (TC-CHAT-6 — sign-in route passes; guest route failing on a local finding) |
 | Discounts | 8 | 5 (TC-DISC-1, 4, 5, 6, 8 — TC-DISC-4 passes; the rest fail locally) |
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **81** |
+| **Total** | **234** | **85** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.
