@@ -262,7 +262,7 @@ The admin specs need `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD`; the setup pr
 Every request the service classes in `src/apis/` send has at least one API test, except the local mail inbox read,
 which TC-CONT-8 covers. The `accounts`, `catalog`, `contact`
 and `invoices` specs are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed
-their data through and the login status codes. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
+their data through, the login status codes and the call behind the contact form. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
 4, 6, 8, 9, 10, 11, 16) and only run meaningfully against the local stack, since they attack the target.
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project

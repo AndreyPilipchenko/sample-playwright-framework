@@ -2,7 +2,7 @@ import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeDefined, expectToContain, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToBeTruthy, expectToContain, expectToEqual } from '../utils/Expects';
 
 /** A contact message as the API takes it. A guest also gives a name and an email; a signed-in customer does not. */
 export interface ContactMessageSeed {
@@ -31,7 +31,7 @@ export class ApisContact {
 
   /** Without a `bearerTokenProvider` the calls are a guest's. With one, the facade injects a customer's token (see ApisUserAccount.getAccessToken). */
   constructor(request: APIRequestContext, bearerTokenProvider?: () => Promise<string>) {
-    this.apiActions = new ApiActions(request, bearerTokenProvider ? { bearerTokenProvider } : undefined);
+    this.apiActions = new ApiActions(request, { bearerTokenProvider });
   }
 
   ///// Actions
@@ -65,9 +65,9 @@ export class ApisContact {
 
   ///// Validations
 
-  async verifyMessageReturned(actual: ContactMessageRecord, seed: ContactMessageSeed) {
+  async verifyMessageReturned(actual: ContactMessageRecord, seed: Required<ContactMessageSeed>) {
     await allure.step('Verify the API returns the sent message with its id', async () => {
-      expectToBeDefined('the message id', actual.id);
+      expectToBeTruthy('the message id', actual.id);
       expectToBe('the message sender name', actual.name, seed.name);
       expectToBe('the message sender email', actual.email, seed.email);
       expectToBe('the message subject', actual.subject, seed.subject);
@@ -84,8 +84,10 @@ export class ApisContact {
     });
   }
 
-  verifyMessageListed(messageIds: number[], messageId: number) {
-    expectToContain('the listed message ids', messageIds, messageId);
+  async verifyMessageListed(messageIds: number[], messageId: number) {
+    await allure.step(`Verify the message list contains the message ${messageId}`, async () => {
+      expectToContain('the listed message ids', messageIds, messageId);
+    });
   }
 
   async verifyMessageRejected(seed: Partial<ContactMessageSeed>, expectedErrors: Record<string, string[]>) {

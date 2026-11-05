@@ -10,8 +10,8 @@ let testData: typeof import('../../../resources/testData/ContactApiTestJsonFile.
 /**
  * The call behind the contact form (`POST /messages`) and reading a message back. No browser. The rules come from the
  * defect-free upstream source: the API requires a subject and a message of at most 250 characters and validates an
- * email; the 50-character minimum is the form's. Messages are left behind on purpose. Never retried, because this
- * target locks an account after ONE failed login (known defect #21).
+ * email; the 50-character minimum is the form's. Messages are left behind on purpose. Not retried: every attempt would
+ * leave another message behind.
  */
 test.describe('Contact API', () => {
   test.describe.configure({ retries: 0 });
@@ -33,14 +33,13 @@ test.describe('Contact API', () => {
     const user = withUniqueEmail(testData.contactApi2.user, newUuid());
     const apisUserAccount = new ApisUserAccount(request);
     const userId = await apisUserAccount.registerUser(user);
-    const token = await apisUserAccount.getAccessToken(user.email, user.password);
-    const apisContact = new ApisContact(request, () => Promise.resolve(token));
+    const apisContact = new ApisContact(request, () => apisUserAccount.getAccessToken(user.email, user.password));
 
     const sent = await apisContact.sendMessage(message);
     const stored = await apisContact.getMessage(sent.id);
     await apisContact.verifyMessageStored(stored, userId, message, expectedStatus);
     const listed = await apisContact.getMessageIds();
-    apisContact.verifyMessageListed(listed, sent.id);
+    await apisContact.verifyMessageListed(listed, sent.id);
   });
 
   test('A message without subject and text is rejected', { tag: ['@regression'] }, async ({ request }) => {
