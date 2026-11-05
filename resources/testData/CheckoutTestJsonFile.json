@@ -1,0 +1,163 @@
+{
+  "tcCSI1": {
+    "brandName": "Checkout Brand TC-CSI-1 {uuid}",
+    "categoryName": "Checkout Category TC-CSI-1 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CSI-1 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1"
+  },
+  "tcCSI2": {
+    "brandName": "Checkout Brand TC-CSI-2 {uuid}",
+    "categoryName": "Checkout Category TC-CSI-2 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CSI-2 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1"
+  },
+  "tcCSI3": {
+    "brandName": "Checkout Brand TC-CSI-3 {uuid}",
+    "categoryName": "Checkout Category TC-CSI-3 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CSI-3 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-csi-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!Csi3"
+    }
+  },
+  "tcCBA3": {
+    "brandName": "Checkout Brand TC-CBA-3 {uuid}",
+    "categoryName": "Checkout Category TC-CBA-3 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CBA-3 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cba-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cba3"
+    },
+    "expectedError": "Address is required."
+  },
+  "tcCPAY12": {
+    "brandName": "Checkout Brand TC-CPAY-12 {uuid}",
+    "categoryName": "Checkout Category TC-CPAY-12 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CPAY-12 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cpay-12.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cpay12"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    },
+    "bank": {
+      "accountName": "Checkout Customer",
+      "accountNumber": "12345678"
+    },
+    "expectedPaymentMessage": "Payment was successful"
+  },
+  "tcCPAY13": {
+    "brandName": "Checkout Brand TC-CPAY-13 {uuid}",
+    "categoryName": "Checkout Category TC-CPAY-13 {uuid}",
+    "products": [
+      {
+        "name": "Checkout Product TC-CPAY-13 {uuid}",
+        "description": "Seeded for the checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "user": {
+      "firstName": "Checkout",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-cpay-13.{uuid}@example.test",
+      "password": "Sup3r-Secret!Cpay13"
+    },
+    "billing": {
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA"
+    },
+    "bank": {
+      "accountName": "Checkout Customer",
+      "accountNumber": "12345678"
+    },
+    "expectedPaymentMessage": "Payment was successful"
+  }
+}

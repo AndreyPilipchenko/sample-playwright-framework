@@ -1,6 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
-import { expectToBeVisible, expectToHaveText } from '../utils/Expects';
+import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
 
 // Routeless skeleton area: the navigation bar rendered on every page.
 export class HeaderPage {
@@ -45,6 +45,12 @@ export class HeaderPage {
   async verifyCartItemCount(expectedCount: string) {
     await step(`Verify the cart badge shows ${expectedCount} item(s)`, async () => {
       await expectToHaveText('the cart item count', this.cartQuantity_txt, expectedCount);
+    });
+  }
+
+  async verifyCartBadgeHidden() {
+    await step('Verify the cart shows no item count badge', async () => {
+      await expectToHaveCount('the cart item count badge', this.cartQuantity_txt, 0, 'badge');
     });
   }
 }
