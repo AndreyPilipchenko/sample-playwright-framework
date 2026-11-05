@@ -19,13 +19,14 @@ let testData: typeof import('../resources/testData/ChangePasswordTestJsonFile.js
  * purpose), signs in once in a fresh anonymous context and opens the profile page.
  * Never retried: this target locks an account after ONE failed login (known defect #21).
  */
-async function openProfileAsNewCustomer(seed: UserSeed): Promise<void> {
+async function openProfileAsNewCustomer(seed: UserSeed): Promise<UserSeed> {
   const user = { ...seed, email: withUuid(seed.email, newUuid()) };
   await apisUserAccount.registerUser(user);
   await loginPage.navigate();
   await loginPage.login(user.email, user.password);
   await accountPage.verifyPageOpened(); // the sign-in must finish before navigating away from it
   await profilePage.navigate();
+  return user;
 }
 
 test.describe('Change Password', () => {
@@ -69,6 +70,19 @@ test.describe('Change Password', () => {
     await profilePage.changePassword(user.password, newPassword, newPassword);
     await profilePage.verifySuccessMessageShown();
     await profilePage.verifyLoggedOutAfterAbout(testData.tcCPW6.logoutWindow);
+  });
+
+  test('Changed password works on the next login', { tag: ['@regression'] }, async () => {
+    await allure.feature('Change Password');
+    await allure.testCaseId('TC-CPW-7');
+    const { user: seed, newPassword } = testData.tcCPW7;
+
+    const user = await openProfileAsNewCustomer(seed);
+    await profilePage.changePassword(user.password, newPassword, newPassword);
+    await profilePage.verifySuccessMessageShown();
+    await loginPage.verifyPageOpened(); // the automatic logout ends the session
+    await loginPage.login(user.email, newPassword);
+    await accountPage.verifyPageOpened();
   });
 
   test.beforeAll(async () => {

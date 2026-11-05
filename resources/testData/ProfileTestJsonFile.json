@@ -1,0 +1,85 @@
+{
+  "tcPROF1": {
+    "user": {
+      "firstName": "Profile",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-prof-1.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcprof1"
+    }
+  },
+  "tcPROF4": {
+    "user": {
+      "firstName": "Profile",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-prof-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcprof4"
+    },
+    "edit": {
+      "firstName": "Updated",
+      "lastName": "Person",
+      "phone": "0612345678",
+      "address": "Updated Street 5",
+      "postcode": "5678CD",
+      "city": "Rotterdam",
+      "state": "Zuid-Holland",
+      "country": "NL"
+    },
+    "expectedMessage": "Your profile is successfully updated!",
+    "fadeWindow": {
+      "minSeconds": 4,
+      "maxSeconds": 7
+    }
+  },
+  "tcPROF5": {
+    "user": {
+      "firstName": "Firstname",
+      "lastName": "Lastname",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-prof-5.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcprof5"
+    }
+  },
+  "tcPROF7": {
+    "user": {
+      "firstName": "Profile",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-prof-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcprof7"
+    },
+    "address": {
+      "address": "New Street 9",
+      "postcode": "9012EF",
+      "city": "Rotterdam",
+      "state": "Zuid-Holland",
+      "country": "NL"
+    },
+    "expectedMessage": "Your profile is successfully updated!"
+  }
+}

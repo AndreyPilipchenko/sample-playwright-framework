@@ -287,6 +287,14 @@ Route: `#/account/profile`
 | TC-PROF-6 | City field shows the stored city, not "City not found" | P2 | 37 | AC1 |
 | TC-PROF-7 | Updating address fields does not error or 404 | P1 | 38 | AC4 |
 
+Automated in `tests/ProfileTests.spec.ts` (`@regression`): TC-PROF-1, 4, 5 and 7. All four fail on the local build: it
+shows the first name in the Last Name field and the other way round (defect 36), shows "City not found" instead of the
+stored city (defect 37), and refuses a profile update (defect 38; the build answers "Resource not found", wording seen locally only). Each case registers its
+own customer. The expected confirmation, "Your profile is successfully updated!", comes from the defect-free upstream
+source; the case checks it fades within 4 to 7 seconds. The two update cases wait for the profile to load (the
+read-only email shows) before typing, so a late load cannot overwrite what they enter. This build's profile fields
+carry the ids `address` and `postcode`, where upstream uses `street` and `postal_code`.
+
 ## 14. Change Password
 
 | ID | Title | Pri | Defect | AC |
@@ -298,6 +306,9 @@ Route: `#/account/profile`
 | TC-CPW-5 | New password identical to current is rejected | P2 | — | AC5 |
 | TC-CPW-6 | Successful change confirms and logs out after 5s | P1 | — | AC6 |
 | TC-CPW-7 | Changed password works on the next login | P1 | 39 | AC6 |
+
+TC-CPW-7 (in `tests/ChangePasswordTests.spec.ts`) changes the password, waits for the automatic logout and signs in
+with the new one. It fails on the local build at that sign-in (defect 39).
 
 > TC-CPW-7 is the functional check for defect #39 (password stored unhashed, so the
 > new password cannot be used). Highly destructive on a shared account — use a
@@ -326,6 +337,16 @@ Route: `#/account/profile`
 | TC-INV-9 | Discounted line item shows original and discounted price | P2 | — | AC5 |
 | TC-INV-10 | City and Country appear in their correct fields | P1 | 15 | AC2 |
 | TC-INV-11 | Address fields never render "undefined" | P1 | 16 | AC2 |
+
+Automated in `tests/InvoiceTests.spec.ts` (`@regression`): TC-INV-3, 4, 5, 6, 7, 10 and 11. TC-INV-4, 5, 7, 10 and 11
+fail on the local build: the detail shows "undefined" for address, postcode and state and swaps City and Country
+(defects 15 and 16) and shows "Method not found" for the payment method (defect 14). For an invoice that does not
+exist it shows no message; that is a local observation, not in the upstream register. A foreign invoice is also shown in
+full (seen by hand; related to defect 78, which lists every invoice); TC-INV-7 would fail on it too, but it stops at
+the first check. Expected values: the customer registers, seeds a product and creates the invoice through the API
+with distinct billing values, so a swapped or empty field cannot match by chance; the not-found text,
+"This invoice doesn't exist.", comes from the defect-free upstream source. Opening one invoice after another only
+changes the URL hash, so the detail page reloads to fetch the new one.
 
 PDF download (upstream AC6–AC8) is **out of scope** — absent from this build.
 
@@ -520,10 +541,10 @@ is used.
 | Registration | 14 | 4 (TC-REG-1, 7, 8, 9 — TC-REG-1, 7, 8 failing on open defects 52, 50) |
 | Login | 13 | 8 (TC-LOGIN-1, 4, 5, 7, 8, 10; TC-LOGIN-2, 3 — smoke; TC-LOGIN-5, 8 failing) |
 | Forgot Password | 6 | 0 |
-| Profile | 7 | 0 |
-| Change Password | 7 | 4 (TC-CPW-1, 3, 4, 6) |
+| Profile | 7 | 4 (TC-PROF-1, 4, 5, 7 — all failing on defects 36, 37, 38) |
+| Change Password | 7 | 5 (TC-CPW-1, 3, 4, 6, 7 — TC-CPW-1, 3 failing; TC-CPW-7 failing on defect 39) |
 | Favorites | 3 | 0 |
-| Invoices | 11 | 2 (TC-INV-3, 6) |
+| Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |
 | Contact Form | 12 | 0 |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
@@ -532,7 +553,7 @@ is used.
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **57** |
+| **Total** | **234** | **67** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

@@ -3,6 +3,7 @@ import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
 import { ApisInvoices, type CreatedInvoice } from '../src/apis/ApisInvoices';
 import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
+import { createOwnInvoice, type OwnInvoiceSeed } from '../src/apis/OwnInvoices';
 import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
 import { AccountPage } from '../src/pages/AccountPage';
 import { InvoiceDetailPage } from '../src/pages/InvoiceDetailPage';
@@ -20,8 +21,6 @@ let apiRequest: APIRequestContext;
 
 let testData: typeof import('../resources/testData/InvoiceTestJsonFile.json');
 
-type InvoiceCase = (typeof testData)['tcINV3'];
-
 /**
  * Each case registers its own customer, seeds its own product and creates the invoice through the API
  * (the same call checkout makes), so it never depends on an order placed elsewhere. Every record carries
@@ -29,7 +28,7 @@ type InvoiceCase = (typeof testData)['tcINV3'];
  * in once, in the browser, and opens the invoice from the list.
  * Never retried: this target locks an account after ONE failed login (known defect #21).
  */
-async function openOwnInvoiceDetail(seed: InvoiceCase): Promise<{ user: UserSeed; invoice: CreatedInvoice; productName: string }> {
+async function openOwnInvoiceDetail(seed: OwnInvoiceSeed): Promise<{ user: UserSeed; invoice: CreatedInvoice; productName: string }> {
   const uuid = newUuid();
   const user = { ...seed.user, email: withUuid(seed.user.email, uuid) };
   const userId = await apisUserAccount.registerUser(user);
@@ -71,6 +70,51 @@ test.describe('Invoices', () => {
     await invoiceDetailPage.verifyLineItemProductName(productName);
     await invoiceDetailPage.verifyLineItemPrice(productName, expectedPrice);
     await invoiceDetailPage.verifyLineItemTotal(productName, expectedLineTotal);
+  });
+
+  test('Billing address fields show their stored values', { tag: ['@regression'] }, async () => {
+    await allure.feature('Invoices');
+    await allure.testCaseId('TC-INV-4');
+
+    await openOwnInvoiceDetail(testData.tcINV4);
+    await invoiceDetailPage.verifyBillingAddress(testData.tcINV4.expectedAddress);
+  });
+
+  test('Payment method and details are shown', { tag: ['@regression'] }, async () => {
+    await allure.feature('Invoices');
+    await allure.testCaseId('TC-INV-5');
+
+    await openOwnInvoiceDetail(testData.tcINV5);
+    await invoiceDetailPage.verifyPayment(testData.tcINV5.expectedPayment);
+  });
+
+  test('Non-existent or foreign invoice shows "not found"', { tag: ['@regression'] }, async () => {
+    await allure.feature('Invoices');
+    await allure.testCaseId('TC-INV-7');
+    const { foreign, missingInvoiceId, expectedMessage } = testData.tcINV7;
+
+    await openOwnInvoiceDetail(testData.tcINV7);
+    const foreignInvoice = await createOwnInvoice(apiRequest, foreign);
+    await invoiceDetailPage.navigate(missingInvoiceId);
+    await invoiceDetailPage.verifyInvoiceDoesNotExist(expectedMessage);
+    await invoiceDetailPage.navigate(foreignInvoice.created.id);
+    await invoiceDetailPage.verifyInvoiceDoesNotExist(expectedMessage);
+  });
+
+  test('City and Country appear in their correct fields', { tag: ['@regression'] }, async () => {
+    await allure.feature('Invoices');
+    await allure.testCaseId('TC-INV-10');
+
+    await openOwnInvoiceDetail(testData.tcINV10);
+    await invoiceDetailPage.verifyCityAndCountry(testData.tcINV10.expectedCity, testData.tcINV10.expectedCountry);
+  });
+
+  test('Address fields never render "undefined"', { tag: ['@regression'] }, async () => {
+    await allure.feature('Invoices');
+    await allure.testCaseId('TC-INV-11');
+
+    await openOwnInvoiceDetail(testData.tcINV11);
+    await invoiceDetailPage.verifyNoUndefinedInAddress();
   });
 
   test.beforeAll(async () => {
