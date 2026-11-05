@@ -9,7 +9,7 @@ let contactPage: ContactPage;
 
 let testData: typeof import('../resources/testData/ContactTestJsonFile.json');
 
-/** The contact form as a guest sees it. The subject texts come from the defect-free upstream source (test plan §4.1). */
+/** The contact form as a guest sees it. The subject texts are the ones the story's AC3 lists (test plan §4.1). */
 test.describe('Contact form', () => {
 
   test('Subject dropdown lists the six documented options', { tag: ['@regression'] }, async () => {
