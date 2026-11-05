@@ -439,6 +439,19 @@ defects stand. See the register for OWASP mapping.
 > TC-API-9 (SQL injection via appending `' -- ` to the email) and TC-API-11 modify or
 > bypass data. Run them only against this intentionally vulnerable practice target.
 
+Automated in `tests/api/security/` (`@regression`, local stack): TC-API-1, 2, 3, 9 (`UserSecurityApiTests`),
+TC-API-4, 6 (`CatalogSecurityApiTests`), TC-API-8, 11 (`InvoiceSecurityApiTests`) and TC-API-10, 16
+(`ServerExposureApiTests`). Each case registers or seeds its own records. Nine of the ten are red on the local
+build, on defects 71 to 74, 76 and 78 to 81; only TC-API-16 passes. Expected behaviour is taken from the defect-free upstream build:
+- TC-API-1 accepts 401, 403 or 404 (upstream answers 404 "not authorized"), never 200.
+- TC-API-2 allows at most 60 minutes for both the login token and the refreshed token (upstream: 5-minute access
+  token, 60-minute refresh window). Only the refreshed token's lifetime is observable; the refresh window is not.
+- TC-API-4 and 6 expect 401 or 403 and then check the record still exists. TC-API-4 seeds a brand with no products,
+  because a brand that has products answers 409 and would hide the missing check.
+- TC-API-11 expects a 4xx. A fixed build that re-prices on the server and returns 201 would need a wider assertion.
+- TC-API-16 sends one guarded field per query, since an unauthenticated guarded field aborts the whole query; the
+  expected error is "Unauthenticated." and no non-null field data.
+
 ## 23. Accessibility
 
 | ID | Title | Pri | Defect |
@@ -495,10 +508,10 @@ is used.
 | Admin | 12 | 0 |
 | Chat Widget | 8 | 0 |
 | Discounts | 8 | 0 |
-| API | 16 | 0 (the 21 tests in `tests/api/` cover seeding, catalog, invoice and login calls, not these security cases) |
+| API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **40** |
+| **Total** | **234** | **50** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

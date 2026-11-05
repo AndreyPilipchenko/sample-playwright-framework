@@ -16,7 +16,7 @@ so don't be surprised when something looks broken — that's the point.
 
 ```
 src/pages/    GUI business layer — page classes (locators + actions + validations)
-src/apis/     API business layer — service classes per domain (accounts, catalog, invoices)
+src/apis/     API business layer — service classes per domain (accounts, catalog, invoices, users, logs, GraphQL)
 src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
 src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
 src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
@@ -242,19 +242,24 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | `catalog/CategoryApiTests.spec.ts` | 3 | Category creation and read-back, listing and search, category required-field rejection |
 | `catalog/ProductApiTests.spec.ts` | 5 | Product creation and read-back, required-field rejection, restocking, a search matching nothing, an unknown product id (404) |
 | `accounts/CustomerAccountApiTests.spec.ts` | 6 | Registration and login, duplicate email (409), wrong password (401), two failures do not lock, three failures lock (423), disabled account (403, needs `APP_DB_LOCAL`). **The lock test is red** on the local build, which never locks; where defect 21 applies (locks after one failure) the two-failures test is red instead |
+| `security/UserSecurityApiTests.spec.ts` | 4 | TC-API-1, 2, 3, 9: another customer's record, token lifetimes, admin-only fields hidden, injected email. **All four are red** (known defects) |
+| `security/CatalogSecurityApiTests.spec.ts` | 2 | TC-API-4, 6: brand and product delete without a token. **Both red** |
+| `security/InvoiceSecurityApiTests.spec.ts` | 2 | TC-API-8, 11: invoice list scoped to its owner, forged unit price and total. **Both red** |
+| `security/ServerExposureApiTests.spec.ts` | 2 | TC-API-10, 16: public log file (**red**), guarded GraphQL fields refuse unauthenticated queries |
 | `invoices/InvoiceApiTests.spec.ts` | 5 | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
 
-Every request the service classes in `src/apis/` send has at least one API test. The `tests/api` cases
-are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed their data
-through and the login status codes, not the §22 API security cases (TC-API-1..16, not automated yet).
+Every request the service classes in `src/apis/` send has at least one API test. The `accounts`, `catalog`
+and `invoices` specs are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed
+their data through and the login status codes. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
+4, 6, 8, 9, 10, 11, 16) and only run meaningfully against the local stack, since they attack the target.
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
 (see Signed-in tests), seed their own data through the API and leave disposable records behind.
 
 ### Not automated yet
 
-40 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+50 of the 234 designed cases are automated; the per-area count is the Coverage summary in
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-*), contact (TC-CONT-*), discounts
-(TC-DISC-*), the API security cases (TC-API-*) and accessibility. Every P1 case of the checkout sign-in,
+(TC-DISC-*), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the cart still has open P1 cases
 (TC-CART-8, 10, 11).

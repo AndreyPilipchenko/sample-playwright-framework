@@ -1,0 +1,95 @@
+{
+  "tcApi8": {
+    "owner": {
+      "user": {
+        "firstName": "Security",
+        "lastName": "Customer",
+        "address": "Street 1",
+        "city": "Amsterdam",
+        "state": "Noord-Holland",
+        "country": "NL",
+        "postcode": "1234AA",
+        "phone": "0987654321",
+        "dob": "1990-01-01",
+        "email": "sec-8a.{uuid}@example.test",
+        "password": "Sup3r-Secret!Sec8A"
+      },
+      "catalog": {
+        "brandName": "Security Brand TC-API-8 {uuid}",
+        "categoryName": "Security Category TC-API-8 {uuid}",
+        "products": [
+          {
+            "name": "Security Product TC-API-8 {uuid}",
+            "description": "Seeded for the API security case.",
+            "price": 14.15,
+            "co2Rating": "B",
+            "stock": 10
+          }
+        ]
+      },
+      "invoice": {
+        "billingAddress": "Street 1",
+        "billingCity": "Amsterdam",
+        "billingState": "Noord-Holland",
+        "billingCountry": "NL",
+        "billingPostcode": "1234AA",
+        "paymentAccountName": "Security Customer",
+        "paymentAccountNumber": "12345678"
+      },
+      "quantity": 1
+    },
+    "other": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-8b.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec8B"
+    }
+  },
+  "tcApi11": {
+    "user": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-11.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec11"
+    },
+    "catalog": {
+      "brandName": "Security Brand TC-API-11 {uuid}",
+      "categoryName": "Security Category TC-API-11 {uuid}",
+      "products": [
+        {
+          "name": "Security Product TC-API-11 {uuid}",
+          "description": "Seeded for the API security case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Security Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1,
+    "forgedUnitPrice": 0.01,
+    "forgedTotal": 0.01
+  }
+}
