@@ -161,9 +161,6 @@ TOTP during checkout (upstream AC3) is **out of scope** — absent from this bui
 | TC-CBA-9 | Address form inputs have accessible labels | P2 | 88 | — |
 | TC-CBA-10 | Checkout wizard labels meet contrast requirements | P2 | 86 | — |
 
-Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
-are shown and that the postcode shows the saved postcode; it fails while defect 10 is open (it reads "missing value").
-
 ## 9. Checkout — Payment
 
 | ID | Title | Pri | Defect | AC |
@@ -182,19 +179,6 @@ are shown and that the postcode shows the saved postcode; it fails while defect 
 | TC-CPAY-12 | Valid payment places the order and shows the invoice number | P1 | — | AC9 |
 | TC-CPAY-13 | Cart is cleared after a successful order | P1 | — | AC9 |
 | TC-CPAY-14 | Payment form inputs have accessible labels | P2 | 89 | — |
-
-Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CPAY-1, 4, 7, 12 and 13. TC-CPAY-1 and 4 fail while defect 12
-is open (the dropdown carries an extra "Error 304" option, and Credit Card shows the Bank Transfer fields). TC-CPAY-7
-has no linked defect but is blocked by the same Credit Card behaviour.
-
-**Credit card cases (TC-CPAY-4, TC-CPAY-7): field ids verified on the fixed site only.** In this build, choosing
-Credit Card shows the Bank Transfer fields, so the card fields never render here. Their `data-test` ids
-(`credit_card_number`, `expiration_date`, `cvv`, `card_holder_name`), the five dropdown options and the error
-"Expiration date must be in the future." (shown right after the expiry field once it is touched) were observed on
-the defect-free site, https://practicesoftwaretesting.com, on 2026-11-05. That site runs a newer version: its
-address step differs (`street`, `postal_code`, a required house number), so only the payment step was compared.
-The suite still runs against the with-bugs build. When the payment defect is fixed there, check that both tests
-turn green; if they stay red, compare the field ids with the fixed site first.
 
 ## 10. User Registration
 
@@ -216,6 +200,10 @@ Route: `#/auth/register`
 | TC-REG-12 | Tab order follows visual order | P3 | 53 | — |
 | TC-REG-13 | Phone placeholder text is spelled correctly | P3 | 54 | — |
 | TC-REG-14 | Field labels, padding and button width render correctly per browser | P3 | 55–59 | — |
+
+Automated in `tests/RegistrationTests.spec.ts` (`@regression`): TC-REG-1, 7, 8 and 9. TC-REG-1 fails while defect 52
+is open (the State and Country labels are swapped). TC-REG-7 and 8 fail while defect 50 is open (the error reads "User
+already registered - Your password hint is: …").
 
 ## 11. User Login
 
@@ -240,6 +228,23 @@ Route: `#/auth/login`
 > TC-LOGIN-7 / TC-LOGIN-8 are destructive on a shared instance. Register a throwaway
 > account first (test plan §4.3). Social login (upstream AC1, AC10) and TOTP
 > (AC7–AC9) are **out of scope** — absent from this build.
+
+Automated in `tests/LoginTests.spec.ts`: TC-LOGIN-1 to 5, 7, 8 and 10. Expected texts and status codes for TC-LOGIN-5,
+8 and 10 come from the defect-free upstream source (`sprint5` in testsmith-io/practice-software-testing), not from a
+live instance:
+
+- **TC-LOGIN-5** fails while defect 17 is open: the form submits empty and only the server's "Invalid email or
+  password" appears. The `email-error` / `password-error` ids have never rendered here.
+- **TC-LOGIN-7 and 8 (locking):** the local with-bugs build never locks an account. A wrong password is treated as
+  an unknown user and the failure count is not incremented, so after 3 failures the right password still works.
+  That differs from defect 21 ("locked after 1 attempt"), which matches the current upstream with-bugs source and the
+  hosted instance. TC-LOGIN-7 (two failures, then a valid login succeeds) therefore passes locally and fails where
+  defect 21 applies; TC-LOGIN-8 (lock message "Account locked, too many failed attempts. Please contact the
+  administrator." and HTTP 423, threshold 3 per the upstream source) fails locally because nothing locks.
+- **TC-LOGIN-10** passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
+  test disables its account with `UPDATE users SET enabled = 0` (`src/dbs/DbsUserAccount.ts`). It runs only where
+  `APP_DB_LOCAL` is set (local stack; the nightly `regression-local` job reads the secret of that name) and fails with
+  a database connection error without it ("Access denied" on the local stack).
 
 ## 12. Forgot Password
 
@@ -460,10 +465,10 @@ is used.
 | Rentals | 7 | 0 |
 | Checkout — Cart | 12 | 5 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8) |
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
-| Checkout — Address | 10 | 3 (TC-CBA-1, 3, 4 — TC-CBA-1 failing on open defect 10) |
-| Checkout — Payment | 14 | 5 (TC-CPAY-1, 4, 7, 12, 13 — TC-CPAY-1, 4, 7 failing on open defect 12) |
-| Registration | 14 | 1 (TC-REG-9) |
-| Login | 13 | 4 (TC-LOGIN-1, 4; TC-LOGIN-2, 3 — smoke) |
+| Checkout — Address | 10 | 1 (TC-CBA-3) |
+| Checkout — Payment | 14 | 2 (TC-CPAY-12, 13) |
+| Registration | 14 | 4 (TC-REG-1, 7, 8, 9 — TC-REG-1, 7, 8 failing on open defects 52, 50) |
+| Login | 13 | 8 (TC-LOGIN-1, 4, 5, 7, 8, 10; TC-LOGIN-2, 3 — smoke; TC-LOGIN-5, 8 failing) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 0 |
 | Change Password | 7 | 4 (TC-CPW-1, 3, 4, 6) |
@@ -477,7 +482,7 @@ is used.
 | API | 16 | 0 (the 17 tests in `tests/api/` cover seeding, catalog and invoice calls, not these security cases) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **33** |
+| **Total** | **234** | **35** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.

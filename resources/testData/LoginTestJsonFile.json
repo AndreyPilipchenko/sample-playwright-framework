@@ -30,5 +30,62 @@
     },
     "wrongPassword": "Wr0ng-Secret!Login4",
     "expectedError": "Invalid email or password"
+  },
+  "tcLogin5": {
+    "email": "",
+    "password": "",
+    "expectedEmailError": "Email is required",
+    "expectedPasswordError": "Password is required"
+  },
+  "tcLogin7": {
+    "user": {
+      "firstName": "Login",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-login-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Login7"
+    },
+    "wrongPassword": "Wr0ng-Secret!Login7",
+    "expectedError": "Invalid email or password"
+  },
+  "tcLogin8": {
+    "user": {
+      "firstName": "Login",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-login-8.{uuid}@example.test",
+      "password": "Sup3r-Secret!Login8"
+    },
+    "wrongPassword": "Wr0ng-Secret!Login8",
+    "expectedError": "Invalid email or password",
+    "expectedLockMessage": "Account locked, too many failed attempts. Please contact the administrator."
+  },
+  "tcLogin10": {
+    "user": {
+      "firstName": "Login",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "login-10.{uuid}@example.test",
+      "password": "Sup3r-Secret!Login10"
+    },
+    "expectedError": "Account disabled."
   }
 }

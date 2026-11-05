@@ -12,6 +12,8 @@ export class LoginPage {
   private readonly password_input: Locator;
   private readonly login_button: Locator;
   private readonly loginError_txt: Locator;
+  private readonly emailError_txt: Locator;
+  private readonly passwordError_txt: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,6 +21,10 @@ export class LoginPage {
     this.password_input = page.getByTestId('password');
     this.login_button = page.getByTestId('login-submit');
     this.loginError_txt = page.getByTestId('login-error');
+    // Never rendered by the with-bugs build (it does not validate the form); ids from the defect-free upstream
+    // source, see docs/test-cases.md §11.
+    this.emailError_txt = page.getByTestId('email-error');
+    this.passwordError_txt = page.getByTestId('password-error');
   }
 
   ///// Actions
@@ -50,6 +56,13 @@ export class LoginPage {
     await step('Verify the login form shows the email and password fields', async () => {
       await expectToBeVisible('the email field', this.email_input);
       await expectToBeVisible('the password field', this.password_input);
+    });
+  }
+
+  async verifyEmailAndPasswordRequired(expectedEmailError: string, expectedPasswordError: string) {
+    await step('Verify the empty email and password are flagged as required', async () => {
+      await expectToHaveText('the email error', this.emailError_txt, expectedEmailError);
+      await expectToHaveText('the password error', this.passwordError_txt, expectedPasswordError);
     });
   }
 

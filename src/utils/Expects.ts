@@ -171,6 +171,16 @@ export async function expectToContainText(
   await expect(locator, `Expect ${subject} to contain text ${fmt(expected)} →`).toContainText(expected, options);
 }
 
+/** Auto-retrying negated contains-text assertion — `Expect <subject> not to contain text <unexpected> → …`. */
+export async function expectNotToContainText(
+  subject: string,
+  locator: Locator,
+  unexpected: string | RegExp,
+  options?: TextOptions,
+): Promise<void> {
+  await expect(locator, `Expect ${subject} not to contain text ${fmt(unexpected)} →`).not.toContainText(unexpected, options);
+}
+
 /** Auto-retrying input-value assertion — `Expect <subject> to have value <expected> → …`. */
 export async function expectToHaveValue(
   subject: string,

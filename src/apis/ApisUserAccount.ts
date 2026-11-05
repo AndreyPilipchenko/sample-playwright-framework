@@ -70,6 +70,14 @@ export class ApisUserAccount {
     });
   }
 
+  /** A locked account is refused with HTTP 423 (Locked), even with the right password. */
+  async verifyLoginLocked(email: string, password: string) {
+    await allure.step('Verify the account is locked for API sign-in', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 423);
+    });
+  }
+
   async login(email: string, password: string): Promise<APIResponse> {
     return await allure.step('Log in through the API', async () => {
       return await this.apiActions.post(this.login_serviceName, {
