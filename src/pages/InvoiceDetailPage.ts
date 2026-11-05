@@ -37,6 +37,8 @@ export class InvoiceDetailPage {
   private readonly accountName_input: Locator;
   private readonly accountNumber_input: Locator;
   private readonly notExist_txt: Locator;
+  private readonly subtotal_input: Locator;
+  private readonly discount_input: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -51,6 +53,8 @@ export class InvoiceDetailPage {
     this.paymentMethod_input = page.getByTestId('payment-method');
     this.accountName_input = page.getByTestId('account-name');
     this.accountNumber_input = page.getByTestId('account-number');
+    this.subtotal_input = page.getByLabel('Subtotal', { exact: true });
+    this.discount_input = page.getByLabel('Discount amount', { exact: true });
     this.notExist_txt = page.locator('p', { hasText: /This invoice doesn't exist/ });
   }
 
@@ -83,6 +87,15 @@ export class InvoiceDetailPage {
       await expectToHaveValue('the City field', this.city_input, expected.city);
       await expectToHaveValue('the State field', this.state_input, expected.state);
       await expectToHaveValue('the Country field', this.country_input, expected.country);
+    });
+  }
+
+  /** `expected` values are plain amounts (`59.50`); the page puts the currency symbol in front, with or without a space. */
+  async verifyDiscountedTotals(expected: { subtotal: string; discount: string; total: string }) {
+    await step('Verify the invoice shows the subtotal, the discount and the final total', async () => {
+      await expectToHaveValue('the invoice subtotal', this.subtotal_input, new RegExp(`^\\$\\s?${expected.subtotal.replace('.', '\\.')}$`));
+      await expectToHaveValue('the invoice discount', this.discount_input, new RegExp(`^\\$\\s?${expected.discount.replace('.', '\\.')}$`));
+      await this.verifyInvoiceTotal(expected.total);
     });
   }
 

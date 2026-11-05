@@ -89,5 +89,69 @@
     "cartItemCount": "1",
     "expectedLineTotal": "$14.15",
     "expectedCartTotal": "$14.15"
+  },
+  "tcCART8": {
+    "brandName": "Cart Brand TC-CART-8 {uuid}",
+    "categoryName": "Cart Category TC-CART-8 {uuid}",
+    "products": [
+      {
+        "name": "Cart Proceed Product TC-CART-8 {uuid}",
+        "description": "Seeded for the cart case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1"
+  },
+  "tcCART10": {
+    "brandName": "Cart Brand TC-CART-10 {uuid}",
+    "categoryName": "Cart Category TC-CART-10 {uuid}",
+    "products": [
+      {
+        "name": "Cart Rental TC-CART-10 {uuid}",
+        "description": "Seeded for the cart case.",
+        "price": 50.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Cart Tool TC-CART-10 {uuid}",
+        "description": "Seeded for the cart case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "2",
+    "expectedDiscountLabel": "Discount (15%)",
+    "expectedDiscountAmount": "- $10.50"
+  },
+  "tcCART11": {
+    "brandName": "Cart Brand TC-CART-11 {uuid}",
+    "categoryName": "Cart Category TC-CART-11 {uuid}",
+    "products": [
+      {
+        "name": "Cart Rental TC-CART-11 {uuid}",
+        "description": "Seeded for the cart case.",
+        "price": 50.0,
+        "co2Rating": "B",
+        "stock": 10,
+        "isRental": true
+      },
+      {
+        "name": "Cart Tool TC-CART-11 {uuid}",
+        "description": "Seeded for the cart case.",
+        "price": 20.0,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "2",
+    "expectedSubtotal": "$70.00",
+    "expectedDiscountAmount": "- $10.50",
+    "expectedCartTotal": "$59.50",
+    "expectedDiscountLabel": "Discount (15%)"
   }
 }

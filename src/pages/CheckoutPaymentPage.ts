@@ -116,6 +116,16 @@ export class CheckoutPaymentPage {
     });
   }
 
+  /** The invoice number the order confirmation announces (`INV-...`). */
+  async readPlacedInvoiceNumber(): Promise<string> {
+    return await step('Read the invoice number from the order confirmation', async () => {
+      const text = (await this.orderConfirmation_txt.textContent()) ?? '';
+      const invoiceNumber = /INV-\d+/.exec(text)?.[0];
+      if (!invoiceNumber) throw new Error(`The order confirmation shows no invoice number: "${text}"`);
+      return invoiceNumber;
+    });
+  }
+
   async verifyOrderPlaced() {
     await step('Verify the order is placed and its invoice number is shown', async () => {
       await expectToBeVisible('the order confirmation with its invoice number', this.orderConfirmation_txt);
