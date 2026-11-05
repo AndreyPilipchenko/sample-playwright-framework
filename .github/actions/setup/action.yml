@@ -1,5 +1,5 @@
 name: Set up the project
-description: Node, npm dependencies and the requested Playwright browsers (cached by Playwright version). Run after actions/checkout.
+description: Node, npm dependencies, the requested Playwright browsers and their system packages (both cached). Run after actions/checkout.
 
 inputs:
   browsers:
@@ -48,16 +48,76 @@ runs:
         path: ~/.cache/ms-playwright
         key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.key }}
 
-    - name: Install browsers and system dependencies
+    - name: Install browsers
       if: inputs.browsers != 'none' && steps.browsers.outputs.cache-hit != 'true'
       shell: bash
-      run: npx playwright install --with-deps ${{ steps.playwright.outputs.browsers }}
+      env:
+        BROWSERS: ${{ steps.playwright.outputs.browsers }}
+      run: |
+        # shellcheck disable=SC2086 # BROWSERS is a space-separated list
+        timeout 10m npx playwright install $BROWSERS || {
+          echo "::error::Downloading the Playwright browsers failed or took longer than 10 minutes."
+          exit 1
+        }
 
-    # System packages (apt) are not part of the cache, so install them even on a hit.
-    - name: Install system dependencies only
-      if: inputs.browsers != 'none' && steps.browsers.outputs.cache-hit == 'true'
+    # The system packages the browsers need (about 200 for webkit) come from the Ubuntu package
+    # mirror on every run, and a slow mirror once stretched webkit's setup past 15 minutes.
+    # apt keeps the downloaded .deb files in our own directory, which is cached: a hit installs
+    # without downloading, and a near miss (new runner image) downloads only what changed.
+    - name: Keep downloaded system packages for the cache
+      if: inputs.browsers != 'none'
+      id: apt
       shell: bash
-      run: npx playwright install-deps ${{ steps.playwright.outputs.browsers }}
+      env:
+        RUNNER_OS_NAME: ${{ runner.os }}
+        PLAYWRIGHT_VERSION: ${{ steps.playwright.outputs.version }}
+        BROWSER_KEY: ${{ steps.playwright.outputs.key }}
+      run: |
+        dir="$HOME/.cache/playwright-apt"
+        mkdir -p "$dir/partial"
+        # The download sandbox user (_apt) cannot write under $HOME, so apt downloads as root.
+        printf '%s\n' \
+          "Dir::Cache::Archives \"$dir/\";" \
+          'APT::Keep-Downloaded-Packages "true";' \
+          'Binary::apt::APT::Keep-Downloaded-Packages "true";' \
+          'APT::Sandbox::User "root";' \
+          | sudo tee /etc/apt/apt.conf.d/99-playwright-apt-cache > /dev/null
+        # ImageOS / ImageVersion are the hosted runner image's own variables: packages are built
+        # for one Ubuntu release, and each weekly image refresh starts a new key (the prefix
+        # still restores the previous one, so only changed packages download).
+        prefix="playwright-apt-$RUNNER_OS_NAME-${ImageOS:-unknown}-$PLAYWRIGHT_VERSION-$BROWSER_KEY"
+        echo "prefix=$prefix-" >> "$GITHUB_OUTPUT"
+        echo "key=$prefix-${ImageVersion:-unknown}" >> "$GITHUB_OUTPUT"
+
+    - name: Restore cached system packages
+      if: inputs.browsers != 'none'
+      id: apt-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ~/.cache/playwright-apt/*.deb
+        key: ${{ steps.apt.outputs.key }}
+        restore-keys: ${{ steps.apt.outputs.prefix }}
+
+    - name: Install system dependencies
+      if: inputs.browsers != 'none'
+      shell: bash
+      env:
+        BROWSERS: ${{ steps.playwright.outputs.browsers }}
+      run: |
+        # shellcheck disable=SC2086 # BROWSERS is a space-separated list
+        timeout 10m npx playwright install-deps $BROWSERS || {
+          echo "::error::Installing the browsers' system packages failed or took longer than 10 minutes; a slow Ubuntu package mirror is the usual cause. Re-run the job."
+          exit 1
+        }
+        echo "Cached system packages: $(find "$HOME/.cache/playwright-apt" -maxdepth 1 -name '*.deb' | wc -l)"
+
+    # Saved right away rather than at the end of the job, so a red test run still keeps it.
+    - name: Save system packages to the cache
+      if: inputs.browsers != 'none' && steps.apt-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.cache/playwright-apt/*.deb
+        key: ${{ steps.apt.outputs.key }}
 
     # Fail here, with the browser named, rather than inside the first spec that launches it
     # (headless chromium runs the headless shell, so that is the binary checked for it).

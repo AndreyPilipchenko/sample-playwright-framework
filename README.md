@@ -185,7 +185,7 @@ The steps both workflows share are composite actions in `.github/actions/`:
 
 | Action | What it does |
 |---|---|
-| `setup` | Node, `npm ci`, and the requested Playwright browsers (cached; chromium is always added, because the auth setup runs on it) |
+| `setup` | Node, `npm ci`, the requested Playwright browsers and their Ubuntu system packages (both cached, so a slow package mirror can't stall a job; chromium is always added, because the auth setup runs on it) |
 | `static-checks` | Conventions check, typecheck and lint |
 | `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
 
