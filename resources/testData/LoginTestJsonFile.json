@@ -13,5 +13,22 @@
       "email": "tc-login-2.{uuid}@example.test",
       "password": "Sup3r-Secret!Login2"
     }
+  },
+  "tcLogin4": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-login-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Login4"
+    },
+    "wrongPassword": "Wr0ng-Secret!Login4",
+    "expectedError": "Invalid email or password"
   }
 }

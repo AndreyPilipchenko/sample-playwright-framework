@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToHaveURL } from '../utils/Expects';
+import { expectToBeVisible, expectToHaveText, expectToHaveURL } from '../utils/Expects';
 
 export class LoginPage {
   readonly page: Page;
@@ -11,12 +11,14 @@ export class LoginPage {
   private readonly email_input: Locator;
   private readonly password_input: Locator;
   private readonly login_button: Locator;
+  private readonly loginError_txt: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.email_input = page.getByTestId('email');
     this.password_input = page.getByTestId('password');
     this.login_button = page.getByTestId('login-submit');
+    this.loginError_txt = page.getByTestId('login-error');
   }
 
   ///// Actions
@@ -41,6 +43,19 @@ export class LoginPage {
   async verifyPageOpened() {
     await step('Verify the login page is open', async () => {
       await expectToHaveURL(this.page, this.url);
+    });
+  }
+
+  async verifyEmailAndPasswordFieldsShown() {
+    await step('Verify the login form shows the email and password fields', async () => {
+      await expectToBeVisible('the email field', this.email_input);
+      await expectToBeVisible('the password field', this.password_input);
+    });
+  }
+
+  async verifyLoginError(expectedMessage: string) {
+    await step('Verify the login error is shown', async () => {
+      await expectToHaveText('the login error', this.loginError_txt, expectedMessage);
     });
   }
 }

@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "id": "toolshop-account-access-passing",
+  "title": "Toolshop account access: cases that pass against the product (login form, invalid login, wrong current password, successful change)",
+  "scenarios": [
+    {
+      "id": "TC-LOGIN-1",
+      "title": "Login form shows email and password fields",
+      "steps": [
+        {
+          "action": "Open the login page (#/auth/login) as an anonymous visitor",
+          "expected": [
+            "The login form shows an email field",
+            "The login form shows a password field"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-LOGIN-1"
+        },
+        {
+          "system": "upstream user story v5: User Login",
+          "id": "AC1"
+        }
+      ]
+    },
+    {
+      "id": "TC-LOGIN-4",
+      "title": "Invalid credentials show \"Invalid email or password\"",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Open the login page and sign in with that account's email and a wrong password",
+          "expected": [
+            "The error \"Invalid email or password\" is shown"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-LOGIN-4"
+        },
+        {
+          "system": "upstream user story v5: User Login",
+          "id": "AC3"
+        }
+      ]
+    },
+    {
+      "id": "TC-CPW-4",
+      "title": "Wrong current password is rejected with its message",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API and sign in with it",
+          "expected": []
+        },
+        {
+          "action": "On the profile page, enter a wrong current password and a valid new password with a matching confirmation, then submit the change password form",
+          "expected": [
+            "The error \"Your current password does not matches with the password.\" is shown"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPW-4"
+        },
+        {
+          "system": "upstream user story v5: Change Password",
+          "id": "AC4"
+        }
+      ]
+    },
+    {
+      "id": "TC-CPW-6",
+      "title": "Successful change confirms and logs out after 5s",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API and sign in with it",
+          "expected": []
+        },
+        {
+          "action": "On the profile page, enter the current password and a valid new password with a matching confirmation, then submit the change password form",
+          "expected": [
+            "A success message is shown",
+            "The user is logged out after about 5 seconds"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPW-6"
+        },
+        {
+          "system": "upstream user story v5: Change Password",
+          "id": "AC6"
+        }
+      ]
+    }
+  ]
+}

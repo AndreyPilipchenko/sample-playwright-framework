@@ -24,6 +24,25 @@ let testData: typeof import('../resources/testData/LoginTestJsonFile.json');
 test.describe('User Login', () => {
   test.describe.configure({ retries: 0 });
 
+  test('Login form shows email and password fields', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-1');
+
+    await loginPage.navigate();
+    await loginPage.verifyEmailAndPasswordFieldsShown();
+  });
+
+  test('Invalid credentials show "Invalid email or password"', { tag: ['@regression'] }, async () => {
+    await allure.feature('User Login');
+    await allure.testCaseId('TC-LOGIN-4');
+    const user = { ...testData.tcLogin4.user, email: withUuid(testData.tcLogin4.user.email, newUuid()) };
+
+    await apisUserAccount.registerUser(user);
+    await loginPage.navigate();
+    await loginPage.login(user.email, testData.tcLogin4.wrongPassword);
+    await loginPage.verifyLoginError(testData.tcLogin4.expectedError);
+  });
+
   test('Valid user credentials redirect to the customer account page', { tag: ['@smoke'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-2');
