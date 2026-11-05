@@ -2,7 +2,7 @@
 # workflow sends a `repository_dispatch` of type `product-main-push` here (a sample to copy is
 # docs/ci/product-repo-trigger.yml; README "CI" explains the token it needs). The full suite
 # runs nightly (nightly.yml). This repository is the test project, not the product, so its own
-# commits and pull requests run nothing.
+# commits and pull requests run nothing but the static checks (`lint.yml`).
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers) and run-specs
 # (run Playwright, publish the reports, reflect the outcome).

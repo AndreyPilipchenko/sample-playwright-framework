@@ -31,7 +31,7 @@ requests run no tests. When reviewing, flag these in particular:
   an account after one failed login, so login flows are never retried.
 
 ## CI (.github/)
-- No `push` or `pull_request` triggers on the test workflows: smoke runs on the product
+- No `push` or `pull_request` triggers on the test workflows (only `lint.yml` runs on pull requests, static checks only): smoke runs on the product
   repository's dispatch, the full suite nightly, both by hand.
 - Shared steps live in composite actions in `.github/actions/`. Workflow inputs reach scripts
   through `env`, never spliced into `run:` text.
