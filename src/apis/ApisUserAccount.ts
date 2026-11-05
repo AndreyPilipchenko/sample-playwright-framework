@@ -2,7 +2,7 @@ import { type APIRequestContext, type APIResponse } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeTruthy } from '../utils/Expects';
+import { expectToBe, expectToBeAtMost, expectToBeTruthy } from '../utils/Expects';
 
 /** Body of a successful `POST /users/login` (Swagger: TokenResponse). */
 interface LoginTokenResponse {
@@ -31,6 +31,7 @@ export class ApisUserAccount {
 
   readonly login_serviceName = `${applications.app.apiUrl}/users/login`;
   readonly register_serviceName = `${applications.app.apiUrl}/users/register`;
+  readonly refresh_serviceName = `${applications.app.apiUrl}/users/refresh`;
 
   constructor(request: APIRequestContext) {
     this.apiActions = new ApiActions(request);
@@ -70,6 +71,24 @@ export class ApisUserAccount {
     });
   }
 
+  /**
+   * The lifetime, in minutes, of the token a login hands out and of the token a refresh hands out
+   * (`expires_in` is in seconds). Never retry: a failed login counts against the account.
+   */
+  async getTokenLifetimesMinutes(email: string, password: string): Promise<{ access: number; refreshed: number }> {
+    return await allure.step('Get the lifetime of the access and the refreshed token', async () => {
+      const loginResponse = await this.login(email, password);
+      expectToBe('the login response status', loginResponse.status(), 200);
+      const login = (await loginResponse.json()) as LoginTokenResponse;
+      const refreshResponse = await this.apiActions.get(this.refresh_serviceName, {
+        headers: { Authorization: `Bearer ${login.access_token}` },
+      });
+      expectToBe('the refresh response status', refreshResponse.status(), 200);
+      const refreshed = (await refreshResponse.json()) as LoginTokenResponse;
+      return { access: login.expires_in / 60, refreshed: refreshed.expires_in / 60 };
+    });
+  }
+
   /** A wrong password is refused with HTTP 401. */
   async verifyLoginRejected(email: string, password: string) {
     await allure.step('Verify the API sign-in is rejected', async () => {
@@ -91,6 +110,13 @@ export class ApisUserAccount {
     await allure.step('Verify the account is locked for API sign-in', async () => {
       const response = await this.login(email, password);
       expectToBe('the login response status', response.status(), 423);
+    });
+  }
+
+  async verifyTokenLifetimesWithin(lifetimes: { access: number; refreshed: number }, maxMinutes: number) {
+    await allure.step(`Verify the access and the refreshed token live at most ${maxMinutes} minutes`, async () => {
+      expectToBeAtMost('the access token lifetime in minutes', lifetimes.access, maxMinutes);
+      expectToBeAtMost('the refreshed token lifetime in minutes', lifetimes.refreshed, maxMinutes);
     });
   }
 

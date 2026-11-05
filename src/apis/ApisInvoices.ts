@@ -2,7 +2,7 @@ import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
-import { expectToBe, expectToContain, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToBeAtLeast, expectToBeAtMost, expectToContain, expectToContainAll, expectToEqual } from '../utils/Expects';
 
 /** One line item of an invoice (Swagger: InvoiceItem). */
 export interface InvoiceLineSeed {
@@ -67,24 +67,21 @@ export class ApisInvoices {
   async createInvoice(userId: number, seed: InvoiceSeed, lines: InvoiceLineSeed[]): Promise<CreatedInvoice> {
     return await allure.step('Create an invoice through the API', async () => {
       const total = Number(lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0).toFixed(2));
-      const response = await this.apiActions.post(this.invoices_serviceName, {
-        data: {
-          user_id: userId,
-          billing_address: seed.billingAddress,
-          billing_city: seed.billingCity,
-          billing_state: seed.billingState,
-          billing_country: seed.billingCountry,
-          billing_postcode: seed.billingPostcode,
-          total,
-          payment_method: 'Bank Transfer',
-          payment_account_name: seed.paymentAccountName,
-          payment_account_number: seed.paymentAccountNumber,
-          invoice_items: lines.map((line) => ({ product_id: line.productId, unit_price: line.unitPrice, quantity: line.quantity })),
-        },
-      });
+      const response = await this.apiActions.post(this.invoices_serviceName, { data: this.invoicePayload(userId, seed, lines, total) });
       expectToBe('the create invoice response status', response.status(), 201);
       const body = (await response.json()) as { id: number; invoice_number: string; invoice_date: string };
       return { id: body.id, invoiceNumber: body.invoice_number, invoiceDate: body.invoice_date };
+    });
+  }
+
+  /**
+   * Creates an invoice whose unit price and total are not the product's real ones, and resolves to the
+   * response status. Records created by a defective build are left behind like every other invoice.
+   */
+  async createInvoiceWithForgedAmounts(userId: number, seed: InvoiceSeed, line: InvoiceLineSeed, forgedTotal: number): Promise<number> {
+    return await allure.step('Create an invoice with a client-supplied unit price and total', async () => {
+      const response = await this.apiActions.post(this.invoices_serviceName, { data: this.invoicePayload(userId, seed, [line], forgedTotal) });
+      return response.status();
     });
   }
 
@@ -106,6 +103,15 @@ export class ApisInvoices {
     });
   }
 
+  /** How many invoices the caller's list reports (`total` of `GET /invoices`), across every page. */
+  async getInvoiceCount(): Promise<number> {
+    return await allure.step('Get the number of invoices listed', async () => {
+      const response = await this.apiActions.get(this.invoices_serviceName);
+      expectToBe('the invoice list response status', response.status(), 200);
+      return ((await response.json()) as { total: number }).total;
+    });
+  }
+
   /** Creating an invoice without its required fields is refused; resolves to the field names the API complained about. */
   async createInvoiceWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create an invoice without its required fields', async () => {
@@ -115,7 +121,45 @@ export class ApisInvoices {
     });
   }
 
+  private invoicePayload(userId: number, seed: InvoiceSeed, lines: InvoiceLineSeed[], total: number) {
+    return {
+      user_id: userId,
+      billing_address: seed.billingAddress,
+      billing_city: seed.billingCity,
+      billing_state: seed.billingState,
+      billing_country: seed.billingCountry,
+      billing_postcode: seed.billingPostcode,
+      total,
+      payment_method: 'Bank Transfer',
+      payment_account_name: seed.paymentAccountName,
+      payment_account_number: seed.paymentAccountNumber,
+      invoice_items: lines.map((line) => ({ product_id: line.productId, unit_price: line.unitPrice, quantity: line.quantity })),
+    };
+  }
+
   ///// Validations
+
+  /** The owner's list is not empty, so an empty list for a customer who owns none proves scoping, not a broken list. */
+  async verifyOwnInvoicesListed(count: number) {
+    await allure.step('Verify the owner sees their own invoice in the list', async () => {
+      expectToBeAtLeast('the number of invoices listed for the owner', count, 1);
+    });
+  }
+
+  /** A customer who owns no invoice sees none, however many invoices other customers own. */
+  async verifyNoInvoicesListed(count: number) {
+    await allure.step('Verify a customer without invoices sees no invoice in the list', async () => {
+      expectToBe('the number of invoices listed for a customer who owns none', count, 0);
+    });
+  }
+
+  /** The client's unit price and total are refused with a 4xx status, so no invoice carries them. */
+  async verifyForgedAmountsRefused(status: number) {
+    await allure.step('Verify an invoice with a client-supplied unit price and total is refused', async () => {
+      expectToBeAtLeast('the status of the forged invoice', status, 400);
+      expectToBeAtMost('the status of the forged invoice', status, 499);
+    });
+  }
 
   /** The number is `INV-` and digits; the date starts with the calendar day (the create response writes the time with dashes, the read with colons). */
   async verifyInvoiceIssued(created: CreatedInvoice) {

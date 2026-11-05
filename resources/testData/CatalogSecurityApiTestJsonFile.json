@@ -1,0 +1,20 @@
+{
+  "tcApi4": {
+    "brandName": "Security Brand TC-API-4 {uuid}",
+    "categoryName": "Security Category TC-API-4 {uuid}",
+    "products": []
+  },
+  "tcApi6": {
+    "brandName": "Security Brand TC-API-6 {uuid}",
+    "categoryName": "Security Category TC-API-6 {uuid}",
+    "products": [
+      {
+        "name": "Security Product TC-API-6 {uuid}",
+        "description": "Seeded for the API security case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ]
+  }
+}

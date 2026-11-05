@@ -3,7 +3,7 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { searchTokenOf, withUuid } from '../utils/UniqueData';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeGreaterThan, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToBeGreaterThan, expectToBeOneOf, expectToContainAll, expectToEqual } from '../utils/Expects';
 
 /** One page of `GET /products` (Swagger: ProductResponse list, paginated). */
 interface ProductPage {
@@ -220,6 +220,22 @@ export class ApisProductCatalog {
     });
   }
 
+  /** The status of deleting a brand with no token at all. */
+  async deleteBrandWithoutToken(brandId: number): Promise<number> {
+    return await allure.step(`Delete the brand ${brandId} without a token`, async () => {
+      const response = await this.apiActions.delete(`${this.brands_serviceName}/${brandId}`);
+      return response.status();
+    });
+  }
+
+  /** The status of deleting a product with no token at all. */
+  async deleteProductWithoutToken(productId: string): Promise<number> {
+    return await allure.step(`Delete the product ${productId} without a token`, async () => {
+      const response = await this.apiActions.delete(`${this.products_serviceName}/${productId}`);
+      return response.status();
+    });
+  }
+
   /** Creating a brand without its required fields is refused; resolves to the field names the API complained about. */
   async createBrandWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create a brand without its required fields', async () => {
@@ -283,6 +299,13 @@ export class ApisProductCatalog {
     await allure.step(`Verify every product listed for category ${categorySlug} belongs to it`, async () => {
       expectToBeGreaterThan('the number of products in the category', listing.categorySlugs.length, 0);
       expectToEqual('the category of every listed product', listing.categorySlugs, listing.categorySlugs.map(() => categorySlug));
+    });
+  }
+
+  /** Deleting without an admin token is refused: 401 or 403. */
+  async verifyDeleteRefused(subject: string, status: number) {
+    await allure.step(`Verify deleting ${subject} without a token is refused`, async () => {
+      expectToBeOneOf(`the status of deleting ${subject} without a token`, status, [401, 403]);
     });
   }
 

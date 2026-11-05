@@ -1,0 +1,82 @@
+{
+  "tcApi1": {
+    "owner": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-1a.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec1A"
+    },
+    "other": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-1b.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec1B"
+    }
+  },
+  "tcApi2": {
+    "user": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-2.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec2"
+    },
+    "maxLifetimeMinutes": 60
+  },
+  "tcApi3": {
+    "user": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec3"
+    },
+    "adminOnlyFields": [
+      "enabled",
+      "failed_login_attempts"
+    ]
+  },
+  "tcApi9": {
+    "user": {
+      "firstName": "Security",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "sec-9.{uuid}@example.test",
+      "password": "Sup3r-Secret!Sec9"
+    },
+    "injectionSuffix": "' -- ",
+    "wrongPassword": "Wr0ng-Secret!Sec9"
+  }
+}

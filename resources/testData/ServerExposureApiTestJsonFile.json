@@ -1,0 +1,9 @@
+{
+  "tcApi16": {
+    "expectedMessage": "Unauthenticated.",
+    "userQuery": "{ user(id: 1) { id } }",
+    "usersQuery": "{ users { id } }",
+    "invoicesQuery": "{ invoices { id } }",
+    "contactRequestsQuery": "{ contactRequests { id } }"
+  }
+}
