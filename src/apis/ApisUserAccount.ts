@@ -70,6 +70,22 @@ export class ApisUserAccount {
     });
   }
 
+  /** A wrong password is refused with HTTP 401. */
+  async verifyLoginRejected(email: string, password: string) {
+    await allure.step('Verify the API sign-in is rejected', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 401);
+    });
+  }
+
+  /** A disabled account is refused with HTTP 403, even with the right password. */
+  async verifyLoginDisabled(email: string, password: string) {
+    await allure.step('Verify the account is disabled for API sign-in', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 403);
+    });
+  }
+
   /** A locked account is refused with HTTP 423 (Locked), even with the right password. */
   async verifyLoginLocked(email: string, password: string) {
     await allure.step('Verify the account is locked for API sign-in', async () => {

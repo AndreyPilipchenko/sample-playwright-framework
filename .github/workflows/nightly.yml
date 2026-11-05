@@ -217,10 +217,12 @@ jobs:
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the hosted target.
+        # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL: the
+        # disabled-account case (customer-account-api-6) disables its account in the database.
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+          APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Run the @smoke specs against the local instance
         if: always()

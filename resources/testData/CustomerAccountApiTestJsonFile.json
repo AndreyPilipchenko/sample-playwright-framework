@@ -28,5 +28,68 @@
       "email": "acct-2.{uuid}@example.test",
       "password": "Sup3r-Secret!Api"
     }
+  },
+  "customerAccountApi3": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "acct-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api3"
+    },
+    "wrongPassword": "Wr0ng-Secret!Api3"
+  },
+  "customerAccountApi4": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "acct-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api4"
+    },
+    "wrongPassword": "Wr0ng-Secret!Api4"
+  },
+  "customerAccountApi5": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "acct-5.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api5"
+    },
+    "wrongPassword": "Wr0ng-Secret!Api5"
+  },
+  "customerAccountApi6": {
+    "user": {
+      "firstName": "Api",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "acct-6.{uuid}@example.test",
+      "password": "Sup3r-Secret!Api6"
+    }
   }
 }
