@@ -76,10 +76,19 @@ import { test } from '../src/fixtures/test';
 test.use({ role: 'customer' }); // or 'admin'
 ```
 
-Credentials come from `.env` (`APP_CUSTOMER_*`, `APP_ADMIN_*`, see `.env.example`); an unset
-role is skipped. The setup never retries, because this target locks an account after **one**
-failed login (known defect #21). On CI the same four variables come from the repository's
-GitHub Actions secrets, mapped onto the spec-running steps of both workflows.
+The customer is a disposable account the setup registers through the API every run, so no
+shared customer credential is needed or reported. The admin cannot be created that way: it
+comes from `.env` (`APP_ADMIN_*`, see `.env.example`) and is skipped when unset. The setup
+never retries, because this target locks an account after **one** failed login (known defect
+#21). On CI the two admin variables come from the repository's GitHub Actions secrets, mapped
+onto the spec-running steps of both workflows.
+
+Native report detail can contain the admin credentials: Playwright step titles
+(`Fill "<value>"`), failure pages and traces, in both the HTML and the Allure report. This
+repository is public, so CI publishes those reports only from jobs that don't sign in, unless
+the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is private).
+The run's Summary page always shows the results. See
+[docs/harness-change-requests/report-credential-masking.md](docs/harness-change-requests/report-credential-masking.md).
 
 ## Running the app locally
 
@@ -143,6 +152,25 @@ Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke
 / `gh workflow run nightly.yml`). Smoke runs queue behind each other, and a burst of product
 commits tests only the newest one; nightly runs have their own queue, so a product commit never
 cancels a waiting nightly run.
+
+A manual run takes optional inputs (all blank = as configured):
+
+| Input | Effect |
+|---|---|
+| `app_url`, `api_url` | Test another deployment: become `APP_URL` / `APP_API_URL` (`src/config/targets.ts`). Not applied to `regression-local`, which always tests its own Docker stack. |
+| `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
+| `name` | Only tests whose title contains this text, case-insensitive |
+| `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/LoginTests.spec.ts:38`) |
+
+The filters narrow each stage's own selection (smoke-on-commit never leaves `@smoke`); a stage
+left with nothing to run passes, and its summary says no tests matched. Every job writes its
+results (counts, failed tests with the assertion, skipped tests with the reason) to the run's
+Summary page.
+
+```sh
+gh workflow run nightly.yml -f tag=@regression -f path=tests/CartTests.spec.ts
+gh workflow run smoke-on-commit.yml -f name="admin credentials" --ref <branch>
+```
 
 The nightly stages; each starts only when the one before it passed:
 

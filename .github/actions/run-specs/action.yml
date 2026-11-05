@@ -1,8 +1,8 @@
 name: Run Playwright specs
 description: >-
-  Runs Playwright headless and non-interactively, publishes the HTML and Allure reports as
-  artifacts whatever the outcome, then fails the step if the specs failed. Run after the
-  setup action.
+  Runs Playwright headless and non-interactively, writes a results summary to the job's
+  Summary page and publishes the HTML and Allure reports as artifacts whatever the outcome,
+  then fails the step if the specs failed. Run after the setup action.
 
 inputs:
   command:
@@ -14,6 +14,23 @@ inputs:
   report-name:
     description: Suffix of the artifact names (playwright-report-<name>, allure-report-<name>); must be unique within the run.
     required: true
+  stage-tag:
+    description: The tag this stage always runs (e.g. @smoke); the filters below narrow it further.
+    default: ''
+  tag:
+    description: Manual-run filter. Tags, separated by commas or spaces; a test matches if it has any of them (e.g. "@smoke, @regression").
+    default: ''
+  name:
+    description: Manual-run filter. Text the test title must contain, case-insensitive (e.g. "admin credentials").
+    default: ''
+  publish-reports:
+    description: >-
+      'true' uploads the HTML and Allure reports as artifacts. Pass 'false' when the run signs in
+      with shared credentials and the artifacts would be public: native report detail can contain them.
+    default: 'true'
+  paths:
+    description: Manual-run filter. Spec files or folders, separated by spaces, optionally with :line (e.g. "tests/LoginTests.spec.ts:38").
+    default: ''
 
 outputs:
   exit-code:
@@ -23,9 +40,13 @@ outputs:
 runs:
   using: composite
   steps:
-    # The exit code is captured, not acted on, so the reports below always publish; the last
+    # The exit code is captured, not acted on, so the summary and reports below always run; the last
     # step fails the action. CI=true turns on retries and the CI trace policy; the other two
     # variables stop the Allure and HTML report viewers from opening (they would hang a runner).
+    #
+    # Selection: Playwright takes a single --grep, so the stage tag, the tag filter and the name
+    # filter become lookaheads of one expression (a test must match all of them). Paths are
+    # positional file filters. Inputs arrive through env, never spliced into the script.
     - name: Run the specs
       id: run
       shell: bash
@@ -35,18 +56,80 @@ runs:
         PW_TEST_HTML_REPORT_OPEN: never
         COMMAND: ${{ inputs.command }}
         ARGS: ${{ inputs.args }}
+        STAGE_TAG: ${{ inputs.stage-tag }}
+        TAGS: ${{ inputs.tag }}
+        NAME: ${{ inputs.name }}
+        PATHS: ${{ inputs.paths }}
       run: |
         set +e
+        # Regex-escapes literal text.
+        escape() { printf '%s' "$1" | sed 's/[][\\.*^$+?(){}|/]/\\&/g'; }
+        # One lookahead requiring any of the given tags as a whole word of the title.
+        tag_lookahead() {
+          local alternatives='' tag
+          for tag in ${1//,/ }; do
+            [[ $tag == @* ]] || tag="@$tag"
+            alternatives+="${alternatives:+|}$(escape "$tag")"
+          done
+          [ -n "$alternatives" ] && printf '(?=.*(?:^|\\s)(?:%s)(?:\\s|$))' "$alternatives"
+        }
+
+        lookaheads="$(tag_lookahead "$STAGE_TAG")$(tag_lookahead "$TAGS")"
+        [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
+        selection=()
+        [ -n "$lookaheads" ] && selection+=(--grep "^$lookaheads")
+
+        read -ra paths <<< "$PATHS"
+        for spec in "${paths[@]}"; do
+          if [[ $spec == -* ]]; then
+            echo "::error::The path filter takes spec files or folders, not options: '$spec'."
+            echo "exit-code=2" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        done
+        selection+=("${paths[@]}")
+
+        # A filtered manual run may leave a stage with nothing to run; that stage passes and
+        # its summary shows 0 tests.
+        if [ -n "$TAGS$NAME$PATHS" ]; then
+          selection+=(--pass-with-no-tests)
+          echo "Manual selection: tag='$TAGS' name='$NAME' path='$PATHS'"
+        fi
+
         # Word splitting is intended: COMMAND and ARGS are space-separated argument lists.
         # shellcheck disable=SC2086
-        $COMMAND $ARGS
+        $COMMAND $ARGS "${selection[@]}"
         code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         exit 0
 
+    # Passed/failed/flaky/skipped counts and the failing tests on the run's Summary page,
+    # read from the JSON report. Never fails the job; the last step does that.
+    - name: Summarize results
+      if: always()
+      shell: bash
+      env:
+        REPORT_NAME: ${{ inputs.report-name }}
+        TAGS: ${{ inputs.tag }}
+        NAME: ${{ inputs.name }}
+        PATHS: ${{ inputs.paths }}
+        PUBLISH_REPORTS: ${{ inputs.publish-reports }}
+      run: |
+        # APP_URL / APP_API_URL come from the calling step's env on a manual run with overrides.
+        note=''
+        if [ -n "$TAGS$NAME$PATHS" ]; then
+          note="Manual selection: tag \`${TAGS:-any}\`, name \`${NAME:-any}\`, path \`${PATHS:-any}\`. "
+        fi
+        [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
+        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
+        if [ "$PUBLISH_REPORTS" != "true" ]; then
+          note+="Reports not published: they can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS)."
+        fi
+        CI_SUMMARY_NOTE="$note" node scripts/ci-summary.mjs "$REPORT_NAME"
+
     # A selection with no specs writes no reports; that is not an error.
     - name: Publish HTML report
-      if: always()
+      if: always() && inputs.publish-reports == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report-${{ inputs.report-name }}
@@ -55,7 +138,7 @@ runs:
         if-no-files-found: ignore
 
     - name: Publish current Allure report
-      if: always()
+      if: always() && inputs.publish-reports == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: allure-report-${{ inputs.report-name }}

@@ -1,0 +1,17 @@
+{
+  "customer": {
+    "user": {
+      "firstName": "Setup",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "City",
+      "state": "State",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "setup.{uuid}@example.test",
+      "password": "Sup3r-Secret!Setup1"
+    }
+  }
+}

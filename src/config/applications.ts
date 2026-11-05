@@ -21,12 +21,12 @@ export const applications = {
     url: appUrl('app'),
     /** REST API base URL; API service classes build their `_serviceName` endpoints on it. */
     apiUrl: apiUrl('app'),
-    /** Pre-existing accounts per role; setup/auth.setup.ts signs each one in once per run. */
+    /**
+     * Pre-existing accounts, for roles the API cannot create; setup/auth.setup.ts signs each
+     * one in once per run. The customer role needs none: the setup registers a disposable
+     * customer every run, so no shared customer credential reaches a report.
+     */
     accounts: {
-      customer: {
-        username: process.env.APP_CUSTOMER_USERNAME ?? '',
-        password: process.env.APP_CUSTOMER_PASSWORD ?? '',
-      },
       admin: {
         username: process.env.APP_ADMIN_USERNAME ?? '',
         password: process.env.APP_ADMIN_PASSWORD ?? '',

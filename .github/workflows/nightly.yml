@@ -15,13 +15,27 @@
 #
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
 #
+# Manual-run inputs (all optional; blank means "as configured"):
+#   app_url, api_url  test another deployment (APP_URL / APP_API_URL, src/config/targets.ts)
+#   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
+#                     containing the text, in the given spec files/folders (:line allowed).
+#                     They narrow each stage's own selection, so a stage can end up empty;
+#                     an empty stage passes and its summary says no tests matched.
+#   regression-local takes the filters but never the URL overrides (it tests its own stack).
+#   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/CartTests.spec.ts
+#
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
 #
-# SECRETS: the repository secrets APP_CUSTOMER_USERNAME/_PASSWORD and APP_ADMIN_USERNAME/_PASSWORD
-# (the demo accounts, docs/test-plan.md §1.2) are mapped onto the run-specs step of every
-# browser job only, so no other step sees them. A role whose secrets are empty is skipped by the auth setup, not
-# failed. Mind defect #21: one failed login locks the account, so check a value before saving it.
+# SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
+# §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
+# registers a disposable one every run. An empty admin secret skips the admin specs. Mind
+# defect #21: one failed login locks the account, so check a value before saving it.
+#
+# REPORTS: native report detail (Playwright step titles, failure pages, traces) can contain the
+# admin credentials, and this repository is public, so the jobs that sign in publish their
+# HTML and Allure reports only when the repository variable PUBLISH_REPORTS is 'true' (set it
+# once the repository is private). The run's Summary page always shows the results.
 #
 # WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
 # this low per job; the regression stage scales by adding shards (matrix `shard`, and the
@@ -32,7 +46,29 @@ name: Nightly tests
 on:
   schedule:
     - cron: '0 2 * * *' # 02:00 UTC every day
-  workflow_dispatch: {}
+  workflow_dispatch:
+    # Manual runs only; every other trigger leaves them empty, which means "as configured".
+    inputs:
+      app_url:
+        description: App base URL to test instead of the configured target (blank = configured)
+        type: string
+        default: ''
+      api_url:
+        description: API base URL to use instead of the configured target (blank = configured)
+        type: string
+        default: ''
+      tag:
+        description: Only tests with any of these tags, comma-separated (e.g. @smoke, @regression)
+        type: string
+        default: ''
+      name:
+        description: Only tests whose title contains this text, case-insensitive
+        type: string
+        default: ''
+      path:
+        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/LoginTests.spec.ts:38)
+        type: string
+        default: ''
 
 # Its own group, separate from smoke-on-commit.yml's: GitHub keeps one pending run per group,
 # so a shared group would let a product push cancel a waiting nightly run. A nightly run may
@@ -63,6 +99,12 @@ jobs:
         with:
           args: --project=api
           report-name: api
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+        env:
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
 
   # Stage 2. The critical-path subset in every browser, side by side; fail-fast is off so one
   # browser's failure does not hide another's result.
@@ -85,13 +127,18 @@ jobs:
       - name: Run the @smoke specs on ${{ matrix.browser }}
         uses: ./.github/actions/run-specs
         with:
-          args: --project=${{ matrix.browser }} --grep @smoke
+          args: --project=${{ matrix.browser }}
+          stage-tag: '@smoke'
           report-name: smoke-${{ matrix.browser }}
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          publish-reports: ${{ vars.PUBLISH_REPORTS == 'true' }}
         env:
-          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
 
   # Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
   # chromium-only, see playwright.config.ts), in parallel shards that start together once
@@ -117,11 +164,15 @@ jobs:
         with:
           args: --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
           report-name: regression-${{ matrix.shard }}
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          publish-reports: ${{ vars.PUBLISH_REPORTS == 'true' }}
         env:
-          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
 
   # Brings the application under test up on the runner itself and runs the whole suite against
   # that private instance instead of the shared public one. A separate job rather than a stage:
@@ -155,10 +206,12 @@ jobs:
         with:
           command: node scripts/app.mjs test
           report-name: local
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          publish-reports: ${{ vars.PUBLISH_REPORTS == 'true' }}
         # The local stack seeds the same demo accounts as the hosted target.
         env:
-          APP_CUSTOMER_USERNAME: ${{ secrets.APP_CUSTOMER_USERNAME }}
-          APP_CUSTOMER_PASSWORD: ${{ secrets.APP_CUSTOMER_PASSWORD }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
