@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "id": "toolshop-registration-invoices",
+  "title": "Toolshop registration and invoices: valid registration, invoice detail header and line items (P1 cases from docs/test-cases.md with no known defect; disposable customers, invoices created through the API)",
+  "scenarios": [
+    {
+      "id": "TC-REG-9",
+      "title": "Valid submission creates the account and redirects to login",
+      "steps": [
+        {
+          "action": "Open the registration page (#/auth/register) as an anonymous visitor",
+          "expected": []
+        },
+        {
+          "action": "Fill every registration field with valid values (a unique email) and click Register",
+          "expected": [
+            "The user is redirected to the login page",
+            "The new account exists and can be used to sign in"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-REG-9"
+        },
+        {
+          "system": "upstream user story v5: User Registration",
+          "id": "AC6"
+        }
+      ]
+    },
+    {
+      "id": "TC-INV-3",
+      "title": "Invoice detail shows number, date and total",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Create an invoice for that customer through the API (one line item of a seeded product, quantity 2)",
+          "expected": []
+        },
+        {
+          "action": "Sign in as that customer in the browser",
+          "expected": []
+        },
+        {
+          "action": "Open the invoices list (#/account/invoices) and click Details of the invoice",
+          "expected": [
+            "The invoice detail shows the invoice number",
+            "The invoice detail shows the invoice date",
+            "The invoice detail shows the invoice total"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-INV-3"
+        },
+        {
+          "system": "upstream user story v5: Invoices",
+          "id": "AC2"
+        }
+      ]
+    },
+    {
+      "id": "TC-INV-6",
+      "title": "Line items show quantity, name, price and line total",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Create an invoice for that customer through the API (one line item of a seeded product, quantity 2)",
+          "expected": []
+        },
+        {
+          "action": "Sign in as that customer in the browser",
+          "expected": []
+        },
+        {
+          "action": "Open the invoices list (#/account/invoices) and click Details of the invoice",
+          "expected": [
+            "The invoice detail lists the line item with its quantity",
+            "The invoice detail lists the line item with its product name",
+            "The invoice detail lists the line item with its price",
+            "The invoice detail lists the line item with its line total"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-INV-6"
+        },
+        {
+          "system": "upstream user story v5: Invoices",
+          "id": "AC2"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "tcREG9": {
+    "form": {
+      "firstName": "Register",
+      "lastName": "Customer",
+      "dateOfBirth": "1990-01-01",
+      "address": "Street 1",
+      "postcode": "1234AA",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "Netherlands (the)",
+      "phone": "0987654321",
+      "email": "tc-reg-9.{uuid}@example.test",
+      "password": "Sup3r-Secret!Reg9"
+    }
+  }
+}

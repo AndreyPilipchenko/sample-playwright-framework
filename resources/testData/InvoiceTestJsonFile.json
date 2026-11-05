@@ -1,0 +1,86 @@
+{
+  "tcINV3": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-3.{uuid}@example.test",
+      "password": "Sup3r-Secret!Inv3"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-3 {uuid}",
+      "categoryName": "Invoice Category TC-INV-3 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-3 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2,
+    "expectedInvoiceTotal": "28.30",
+    "expectedPrice": "$14.15",
+    "expectedLineTotal": "$28.30",
+    "expectedQuantity": "2"
+  },
+  "tcINV6": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-6.{uuid}@example.test",
+      "password": "Sup3r-Secret!Inv6"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-6 {uuid}",
+      "categoryName": "Invoice Category TC-INV-6 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-6 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Street 1",
+      "billingCity": "Amsterdam",
+      "billingState": "Noord-Holland",
+      "billingCountry": "NL",
+      "billingPostcode": "1234AA",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 2,
+    "expectedInvoiceTotal": "28.30",
+    "expectedPrice": "$14.15",
+    "expectedLineTotal": "$28.30",
+    "expectedQuantity": "2"
+  }
+}
