@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "toolshop-account-access-defects",
+  "title": "Toolshop account access: change password cases that fail against the product (labels and required fields, mismatch message); tests stay red until the product is fixed",
+  "scenarios": [
+    {
+      "id": "TC-CPW-1",
+      "title": "Form shows current, new and confirm password fields",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API and sign in with it",
+          "expected": []
+        },
+        {
+          "action": "Open the profile page and look at the change password section",
+          "expected": [
+            "The section shows a required \"Current password\" field",
+            "The section shows a required \"New password\" field",
+            "The section shows a required \"Confirm new password\" field"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPW-1"
+        },
+        {
+          "system": "upstream user story v5: Change Password",
+          "id": "AC1"
+        }
+      ]
+    },
+    {
+      "id": "TC-CPW-3",
+      "title": "Mismatched confirmation shows \"Passwords do not match.\"",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API and sign in with it",
+          "expected": []
+        },
+        {
+          "action": "On the profile page, enter the current password, a valid new password and a different confirmation, then submit the change password form",
+          "expected": [
+            "The error \"Passwords do not match.\" is shown"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPW-3"
+        },
+        {
+          "system": "upstream user story v5: Change Password",
+          "id": "AC3"
+        }
+      ]
+    }
+  ]
+}

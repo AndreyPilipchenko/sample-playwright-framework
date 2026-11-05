@@ -1,0 +1,84 @@
+import { test } from '@playwright/test';
+import * as allure from 'allure-js-commons';
+import * as fs from 'fs';
+import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
+import { AccountPage } from '../src/pages/AccountPage';
+import { LoginPage } from '../src/pages/LoginPage';
+import { ProfilePage } from '../src/pages/ProfilePage';
+import { newUuid, withUuid } from '../src/utils/UniqueData';
+
+let apisUserAccount: ApisUserAccount;
+let accountPage: AccountPage;
+let loginPage: LoginPage;
+let profilePage: ProfilePage;
+
+let testData: typeof import('../resources/testData/ChangePasswordTestJsonFile.json');
+
+/**
+ * Each test registers its own customer through the API (unique email per run, left behind on
+ * purpose), signs in once in a fresh anonymous context and opens the profile page.
+ * Never retried: this target locks an account after ONE failed login (known defect #21).
+ */
+async function openProfileAsNewCustomer(seed: UserSeed): Promise<void> {
+  const user = { ...seed, email: withUuid(seed.email, newUuid()) };
+  await apisUserAccount.registerUser(user);
+  await loginPage.navigate();
+  await loginPage.login(user.email, user.password);
+  await accountPage.verifyPageOpened(); // the sign-in must finish before navigating away from it
+  await profilePage.navigate();
+}
+
+test.describe('Change Password', () => {
+  test.describe.configure({ retries: 0 });
+
+  test('Form shows current, new and confirm password fields', { tag: ['@regression'] }, async () => {
+    await allure.feature('Change Password');
+    await allure.testCaseId('TC-CPW-1');
+
+    await openProfileAsNewCustomer(testData.tcCPW1.user);
+    await profilePage.verifyChangePasswordFieldsShown(testData.tcCPW1.labels);
+    await profilePage.verifyChangePasswordFieldsRequired(testData.tcCPW1.labels);
+  });
+
+  test('Mismatched confirmation shows "Passwords do not match."', { tag: ['@regression'] }, async () => {
+    await allure.feature('Change Password');
+    await allure.testCaseId('TC-CPW-3');
+    const { user, newPassword, confirmation, expectedError } = testData.tcCPW3;
+
+    await openProfileAsNewCustomer(user);
+    await profilePage.changePassword(user.password, newPassword, confirmation);
+    await profilePage.verifyErrorShown(expectedError);
+  });
+
+  test('Wrong current password is rejected with its message', { tag: ['@regression'] }, async () => {
+    await allure.feature('Change Password');
+    await allure.testCaseId('TC-CPW-4');
+    const { user, wrongCurrentPassword, newPassword, expectedError } = testData.tcCPW4;
+
+    await openProfileAsNewCustomer(user);
+    await profilePage.changePassword(wrongCurrentPassword, newPassword, newPassword);
+    await profilePage.verifyErrorShown(expectedError);
+  });
+
+  test('Successful change confirms and logs out after 5s', { tag: ['@regression'] }, async () => {
+    await allure.feature('Change Password');
+    await allure.testCaseId('TC-CPW-6');
+    const { user, newPassword } = testData.tcCPW6;
+
+    await openProfileAsNewCustomer(user);
+    await profilePage.changePassword(user.password, newPassword, newPassword);
+    await profilePage.verifySuccessMessageShown();
+    await profilePage.verifyLoggedOutAfterAbout(testData.tcCPW6.logoutWindow);
+  });
+
+  test.beforeAll(async () => {
+    testData = JSON.parse(fs.readFileSync('./resources/testData/ChangePasswordTestJsonFile.json', 'utf8'));
+  });
+
+  test.beforeEach(({ page, request }) => {
+    apisUserAccount = new ApisUserAccount(request);
+    accountPage = new AccountPage(page);
+    loginPage = new LoginPage(page);
+    profilePage = new ProfilePage(page);
+  });
+});
