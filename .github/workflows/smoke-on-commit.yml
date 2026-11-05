@@ -81,7 +81,7 @@ jobs:
       matrix:
         browser: [chromium, firefox, webkit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node, dependencies and ${{ matrix.browser }}
         uses: ./.github/actions/setup
