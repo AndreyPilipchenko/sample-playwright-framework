@@ -79,6 +79,18 @@ export class CheckoutAddressPage {
     });
   }
 
+  /** Every required field is shown; the postcode must show the saved postcode, not a placeholder text. */
+  async verifyRequiredAddressFieldsShown(savedPostcode: string) {
+    await step('Verify every required address field is shown and the postcode holds the saved value', async () => {
+      await expectToBeVisible('the Address field', this.address_input);
+      await expectToBeVisible('the City field', this.city_input);
+      await expectToBeVisible('the State field', this.state_input);
+      await expectToBeVisible('the Country field', this.country_input);
+      await expectToBeVisible('the Postcode field', this.postcode_input);
+      await expectToHaveValue('the Postcode field', this.postcode_input, savedPostcode);
+    });
+  }
+
   async verifyRequiredFieldError(expectedMessage: string) {
     await step('Verify the missing required field is flagged', async () => {
       await expectToHaveText('the required field error', this.fieldError_txt, expectedMessage);
