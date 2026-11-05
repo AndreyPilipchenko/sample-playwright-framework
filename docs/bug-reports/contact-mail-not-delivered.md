@@ -8,7 +8,7 @@
 | Area | Contact form, API mail queue |
 | Environment | Local Docker stack (`sprint5-with-bugs`, `node scripts/app.mjs up`), with mailcatcher as the mail sink. Chromium (Playwright). |
 | Observed | 2026-11-06 |
-| Reproduction | 8 of 8 recorded runs of TC-CONT-8 failed on delivery, plus 1 of 1 controlled script run. The hosted instance was not checked: it has no inbox these checks can read. |
+| Reproduction | 8 of 8 runs of TC-CONT-8 failed on delivery, plus 1 of 1 controlled script run. Counted from this session's run output; no run record was kept. The hosted instance was not checked: it has no inbox these checks can read. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
 
 ## Summary
@@ -41,18 +41,22 @@ the address they gave. The story's AC7 requires both the message and the email.
 
 ## Cause
 
-There are two causes, and fixing only one does not deliver the mail:
+Three conditions were found. The first two were read in source, the third was seen by running it. Fixing both of the last two
+was not tested, so whether that delivers the mail is unknown.
 
-1. The API queues this mail (`Mail::to(...)->queue(new Contact(...))`, `QUEUE_CONNECTION=database`), and the stack runs no
+1. The mail is only queued when the environment is `local` (`if (App::environment('local'))` in the with-bugs
+   `ContactController.php`, and at upstream `ContactService.php` line 30). A production-configured instance would queue
+   nothing at all.
+2. The API queues this mail (`Mail::to(...)->queue(new Contact(...))`, `QUEUE_CONNECTION=database`), and the stack runs no
    queue worker.
-2. The with-bugs build's `config/app.php` leaves out `Illuminate\Bus\BusServiceProvider`, so a worker cannot run the job.
+3. The with-bugs build's `config/app.php` leaves out `Illuminate\Bus\BusServiceProvider`, so a worker cannot run the job.
 
 ## Evidence
 
 - Temporary experiment on 2026-11-06: a `php artisan queue:work --tries=1` service was added to the stack and every job it
-  picked up failed, 226 in total, including a new contact message. The service was then removed. Those queued jobs were
-  discarded by the attempt.
-- Running one queued `Contact` mail synchronously raised `BindingResolutionException: Target
+  picked up failed, 226 in total, including a new contact message, as its log showed. The service was then removed. Those queued
+  jobs were discarded by the attempt, and nothing records why each failed: the `failed_jobs` table does not exist locally.
+- The only exception seen comes from a synchronous run, not the worker: running one queued `Contact` mail that way raised `BindingResolutionException: Target
   [Illuminate\Contracts\Bus\Dispatcher] is not instantiable`.
 - Sending the same mail directly with `Mail::send` reached the inbox with the subject `Contact`, so the mail sink and the
   template work.
@@ -61,7 +65,8 @@ There are two causes, and fixing only one does not deliver the mail:
 
 ## Open points before filing
 
-- Whether cause 1 is a product defect or a property of the local stack is for whoever files this. A deployed instance may
-  run a worker, but cause 2 would still stop it.
+- Upstream has the same `local` gate, so AC7 may not be met on any production-configured build. That was read in source, not
+  run, and it may decide where this report belongs.
+- Whether the missing worker is a product defect or a property of the local stack is for whoever files this.
 - The hosted instance was not checked.
 - Severity and priority need the project's scale; none is invented here.

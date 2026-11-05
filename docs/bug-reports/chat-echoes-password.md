@@ -8,7 +8,7 @@
 | Area | Chat widget, sign-in during checkout |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |
-| Reproduction | 2 of 2 controlled script runs. The hosted instance was not checked. |
+| Reproduction | 2 of 2 controlled script runs. Counted from this session's run output; no run record was kept. The hosted instance was not checked. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
 
 ## Summary
@@ -40,7 +40,7 @@ not repeated on screen.
 
 - Controlled script run: `chat-input` had `type="text"`, and the password was visible in `chat-window` as exact text.
 - Test failure output of an earlier TC-CHAT-6 run (`error-context.md`) showed the disposable test password in the page
-  snapshot, so it can also reach screenshots, videos and traces.
+  snapshot, so it can also reach screenshots, videos and traces. That output was not retained.
 - Source comparison, not run: upstream `sprint5/UI/src/app/chat-widget/chat-widget.component.html` also uses
   `type="text"`, and `chat-widget.component.ts` calls `addUserMessage(input)` before handling the input, so this does not look
   specific to the with-bugs build.

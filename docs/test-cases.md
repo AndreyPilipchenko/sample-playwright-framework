@@ -589,7 +589,7 @@ is used.
 | Favorites | 3 | 0 |
 | Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |
-| Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60; TC-CONT-8 failing on a local finding, mail not delivered) |
+| Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60, TC-CONT-3 also on the story's "Status of order" wording; TC-CONT-8 failing on a local finding, mail not delivered) |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
 | Chat Widget | 8 | 1 (TC-CHAT-6 — sign-in route passes; guest route failing on a local finding) |
 | Discounts | 8 | 5 (TC-DISC-1, 4, 5, 6, 8 — TC-DISC-4 passes; the rest fail locally) |

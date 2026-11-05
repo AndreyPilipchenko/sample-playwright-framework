@@ -1,4 +1,4 @@
-# BUG: `POST /messages` accepts an invalid email address
+# BUG: Contact form and `POST /messages` accept an invalid email address
 
 | Field | Value |
 |---|---|
@@ -8,17 +8,20 @@
 | Area | Contact API |
 | Environment | Local Docker stack (`sprint5-with-bugs`), API on `http://localhost:8091`. |
 | Observed | 2026-11-06 |
-| Reproduction | 6 of 6: 4 runs of `contact-api-5` and 2 controlled requests. The hosted instance was not checked. |
+| Reproduction | API: 6 of 6, from 4 runs of `contact-api-5` and 2 controlled requests. Form: 1 of 1 controlled run. Counted from this session's run output; no run record was kept. The hosted instance was not checked. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
 
 ## Summary
 
-The contact API stores a message whose email is not an email address. The form rejects such a value, but a direct API call
-does not, and the stored address could not receive a reply.
+The contact form and the contact API both store a message whose email is not an email address. The visitor gets the normal
+confirmation, and the stored address could not receive a reply.
 
 ## Steps to reproduce
 
-Send `POST /messages` with no token:
+Through the form: open `#/contact` as a guest, enter `not-an-email-address` as the email, fill in the other fields with valid
+values and click **Send**.
+
+Through the API, send `POST /messages` with no token:
 
 ```json
 {
@@ -38,16 +41,21 @@ a response.
 
 ## Actual result
 
-200, and the message is stored with `"email":"not-an-email-address"`.
+- API: 200, and the message is stored with `"email":"not-an-email-address"`.
+- Form: `POST /messages` returns 200 and "Thanks for your message! We will contact you shortly." is shown.
 
 ## Evidence
 
 - Controlled request on 2026-11-06: status 200, message id 28.
+- Controlled form run on 2026-11-06: the request carried the invalid email and returned 200.
+- Local bundle, read not run: the form starts with a pattern check on the email, but for a guest `setValidators(required)`
+  replaces it, which fits what the form does.
 - Source comparison, not run: upstream `sprint5/API/app/Http/Requests/Contact/StoreContact.php` has
   `'email' => ['sometimes', 'email', 'max:256', ...]`. `sprint5-with-bugs` has `'email' => 'max:120'`.
 
 ## Open points before filing
 
-- The stories state no API rule for this, so the expected result rests on the upstream source.
+- The stories state no rule for this, so the expected result rests on the upstream source.
+- Whether the upstream form has the same gap was not checked.
 - Whether this is an intended with-bugs defect is for whoever files it; it is not in the register.
 - Severity and priority need the project's scale; none is invented here.

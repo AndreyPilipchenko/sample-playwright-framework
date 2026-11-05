@@ -8,7 +8,7 @@
 | Area | Contact API |
 | Environment | Local Docker stack (`sprint5-with-bugs`), API on `http://localhost:8091`, `APP_ENV=local`. |
 | Observed | 2026-11-06 |
-| Reproduction | 2 of 2 with neither field, 1 of 1 with only a name, 1 of 1 with only an email. The hosted instance was not checked. |
+| Reproduction | 2 of 2 with neither field, 1 of 1 with only a name, 1 of 1 with only an email. Counted from this session's run output; no run record was kept. The hosted instance was not checked. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
 
 ## Summary
@@ -60,5 +60,5 @@ missing name or email (`app('auth')->user()->email`), and a guest has no user.
 
 - The fallback only runs in the `local` environment, so a production-configured instance may not crash. The stack trace in the
   response also depends on debug settings.
-- The form requires these fields for a guest, so only direct API calls reach this.
+- Per the local bundle, read not run, the form requires these fields for a guest, so only direct API calls reach this.
 - Severity and priority need the project's scale; none is invented here.

@@ -8,7 +8,7 @@
 | Area | Chat widget, checkout |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |
-| Reproduction | 6 of 6 recorded runs of the guest test failed, plus 1 of 1 controlled script run. The hosted instance was not checked. |
+| Reproduction | 6 of 6 runs of the guest test failed, plus 1 of 1 controlled script run. Counted from this session's run output; no run record was kept. The hosted instance was not checked. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
 
 ## Summary
