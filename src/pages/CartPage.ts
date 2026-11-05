@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToHaveCount, expectToHaveText } from '../utils/Expects';
+import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
 
 /** Checkout step 1: the cart review table (`#/checkout`). The cart is client-side state, so it must be filled in the same browser session. */
 export class CartPage {
@@ -11,11 +11,15 @@ export class CartPage {
   // Locators
   private readonly columnHeaders_list: Locator;
   private readonly cartTotal_txt: Locator;
+  private readonly proceed_button: Locator;
+  private readonly emptyCart_msg: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.columnHeaders_list = page.getByRole('columnheader');
     this.cartTotal_txt = page.getByTestId('cart-total');
+    this.proceed_button = page.getByTestId('proceed-1');
+    this.emptyCart_msg = page.getByText(/cart is empty/i);
   }
 
   /** The table row of the cart item named exactly `productName`. */
@@ -33,6 +37,12 @@ export class CartPage {
   async navigate() {
     await step('Navigate to the Cart Page', async () => {
       await this.page.goto(this.url);
+    });
+  }
+
+  async proceed() {
+    await step('Click Proceed to checkout on the cart step', async () => {
+      await this.proceed_button.click();
     });
   }
 
@@ -67,6 +77,14 @@ export class CartPage {
   async verifyCartTotal(expectedTotal: string) {
     await step(`Verify the cart total is ${expectedTotal}`, async () => {
       await expectToHaveText('the cart total', this.cartTotal_txt, expectedTotal);
+    });
+  }
+
+  async verifyCartEmpty() {
+    await step('Verify the cart shows no items', async () => {
+      await expectToBeVisible('the empty cart message', this.emptyCart_msg);
+      await expectToHaveCount('the cart totals', this.cartTotal_txt, 0, 'total');
+      await expectToHaveCount('the Proceed to checkout buttons', this.proceed_button, 0, 'button');
     });
   }
 

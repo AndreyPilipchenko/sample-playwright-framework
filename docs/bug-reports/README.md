@@ -10,3 +10,4 @@ separate, explicitly approved preview. Reports are written even when the defect 
 | [Cart table header has a blank extra column; remove column labelled "Total"](L1-cart-table-header.md) | L1 | TC-CART-1 | Open, not filed |
 | [Cart line total always shows `$00.00`](cart-line-total-zero.md) | 8 | TC-CART-2, TC-CART-7 | Open, not filed |
 | [Cart delete button does nothing](cart-delete-button-no-effect.md) | 7 | TC-CART-4, TC-CART-5 | Open, not filed |
+| [Checkout order is not placed with the prefilled billing address (`POST /invoices` 500)](checkout-order-not-placed-prefilled-address.md) | new (related to 10) | TC-CPAY-12, TC-CPAY-13 | Open, not filed |

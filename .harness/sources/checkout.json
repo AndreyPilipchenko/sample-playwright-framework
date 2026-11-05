@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "id": "toolshop-checkout",
+  "title": "Toolshop checkout: sign-in step, billing address validation and placing an order with Bank Transfer (P1 cases from docs/test-cases.md with no known defect; TC-CPAY-7 excluded: the product renders no credit card form)",
+  "scenarios": [
+    {
+      "id": "TC-CSI-1",
+      "title": "Guest proceeding from cart sees the login step",
+      "steps": [
+        {
+          "action": "As a guest, open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": [
+            "The sign-in step shows the customer login form"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CSI-1"
+        },
+        {
+          "system": "upstream user story v5: Checkout Sign In",
+          "id": "AC1"
+        }
+      ]
+    },
+    {
+      "id": "TC-CSI-2",
+      "title": "Login step shows email, password and submit",
+      "steps": [
+        {
+          "action": "As a guest, open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": [
+            "The login step shows an email field",
+            "The login step shows a password field",
+            "The login step shows a submit button"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CSI-2"
+        },
+        {
+          "system": "upstream user story v5: Checkout Sign In",
+          "id": "AC2"
+        }
+      ]
+    },
+    {
+      "id": "TC-CSI-3",
+      "title": "Valid credentials authenticate and allow proceeding",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "Log in on the sign-in step with the customer's email and password",
+          "expected": [
+            "The user can proceed to the next checkout step"
+          ]
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": [
+            "The billing address step is shown"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CSI-3"
+        },
+        {
+          "system": "upstream user story v5: Checkout Sign In",
+          "id": "AC4"
+        }
+      ]
+    },
+    {
+      "id": "TC-CBA-3",
+      "title": "Empty required field is flagged and Proceed is disabled",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "On the sign-in step, log in with the customer's email and password",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout on the sign-in step",
+          "expected": []
+        },
+        {
+          "action": "On the billing address step, clear the Address field",
+          "expected": [
+            "The error \"Address is required.\" is shown",
+            "The Proceed button is disabled"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CBA-3"
+        },
+        {
+          "system": "upstream user story v5: Checkout Billing Address",
+          "id": "AC2"
+        }
+      ]
+    },
+    {
+      "id": "TC-CPAY-12",
+      "title": "Valid payment places the order and shows the invoice number",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "On the sign-in step, log in with the customer's email and password",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout on the sign-in step",
+          "expected": []
+        },
+        {
+          "action": "On the billing address step, enter a valid address (street, city, state, country and postcode) and click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "On the payment step, choose Bank Transfer, enter an account name and account number, then confirm the payment twice (payment, then order)",
+          "expected": [
+            "The order is placed and its invoice number is shown"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPAY-12"
+        },
+        {
+          "system": "upstream user story v5: Checkout Payment",
+          "id": "AC9"
+        }
+      ]
+    },
+    {
+      "id": "TC-CPAY-13",
+      "title": "Cart is cleared after a successful order",
+      "steps": [
+        {
+          "action": "Register a new customer account through the API (disposable account owned by this case)",
+          "expected": []
+        },
+        {
+          "action": "Open the detail page of an in-stock product and add it to the cart, then open the cart (checkout, step 1)",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "On the sign-in step, log in with the customer's email and password",
+          "expected": []
+        },
+        {
+          "action": "Click Proceed to checkout on the sign-in step",
+          "expected": []
+        },
+        {
+          "action": "On the billing address step, enter a valid address (street, city, state, country and postcode) and click Proceed to checkout",
+          "expected": []
+        },
+        {
+          "action": "On the payment step, choose Bank Transfer, enter an account name and account number, then confirm the payment twice (payment, then order)",
+          "expected": [
+            "The cart is empty after the order"
+          ]
+        }
+      ],
+      "externalReferences": [
+        {
+          "system": "docs/test-cases.md",
+          "id": "TC-CPAY-13"
+        },
+        {
+          "system": "upstream user story v5: Checkout Payment",
+          "id": "AC9"
+        }
+      ]
+    }
+  ]
+}
