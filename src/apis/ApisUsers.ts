@@ -34,7 +34,22 @@ export class ApisUsers {
     });
   }
 
+  /** The status of listing every user, a call only an admin may make. */
+  async getUserListStatus(): Promise<number> {
+    return await allure.step('List all users as the signed-in customer', async () => {
+      const response = await this.apiActions.get(this.users_serviceName);
+      return response.status();
+    });
+  }
+
   ///// Validations
+
+  /** A customer calling an admin-only endpoint gets 403 (forbidden), not 401 (known defect 83). */
+  async verifyWrongRoleForbidden(status: number) {
+    await allure.step('Verify an admin-only call with a customer token is forbidden', async () => {
+      expectToBe('the status of an admin-only call with a customer token', status, 403);
+    });
+  }
 
   /** Another customer's record is refused: 401, 403 or 404 (the defect-free build answers 404 "not authorized"), never 200. */
   async verifyOtherUserRecordRefused(status: number) {

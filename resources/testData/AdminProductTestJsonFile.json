@@ -1,0 +1,20 @@
+{
+  "tcADM2": {
+    "catalog": {
+      "brandName": "Admin Brand TC-ADM-2 {uuid}",
+      "categoryName": "Admin Category TC-ADM-2 {uuid}",
+      "products": []
+    },
+    "product": {
+      "name": "Admin Product TC-ADM-2 {uuid}",
+      "description": "Created by the admin product case.",
+      "stock": "5",
+      "price": "9.99"
+    },
+    "listedPrice": "$9.99",
+    "editedPrice": "11.11",
+    "editedListedPrice": "$11.11",
+    "savedMessage": "Product saved!",
+    "deletedMessage": "Product deleted."
+  }
+}
