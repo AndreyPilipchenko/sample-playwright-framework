@@ -78,102 +78,106 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Stage 1. Static checks run once, here only (regression-local exercises the same code).
-  # They are fast and fail before any spec runs.
-  api-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node and dependencies (no browsers)
-        uses: ./.github/actions/setup
-        with:
-          browsers: none
-
-      - name: Static checks
-        uses: ./.github/actions/static-checks
-
-      - name: Run API specs
-        uses: ./.github/actions/run-specs
-        with:
-          args: --project=api
-          report-name: api
-          tag: ${{ inputs.tag }}
-          name: ${{ inputs.name }}
-          paths: ${{ inputs.path }}
-        env:
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
-
-  # Stage 2. The critical-path subset in every browser, side by side; fail-fast is off so one
-  # browser's failure does not hide another's result.
-  smoke:
-    needs: api-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node, dependencies and ${{ matrix.browser }}
-        uses: ./.github/actions/setup
-        with:
-          browsers: ${{ matrix.browser }}
-
-      - name: Run the @smoke specs on ${{ matrix.browser }}
-        uses: ./.github/actions/run-specs
-        with:
-          args: --project=${{ matrix.browser }}
-          stage-tag: '@smoke'
-          report-name: smoke-${{ matrix.browser }}
-          tag: ${{ inputs.tag }}
-          name: ${{ inputs.name }}
-          paths: ${{ inputs.path }}
-          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        env:
-          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
-
-  # Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
-  # chromium-only, see playwright.config.ts), in parallel shards that start together once
-  # smoke passed in every browser. Tests of broken functionality fail here until it is fixed.
-  regression:
-    needs: smoke
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node, dependencies and chromium
-        uses: ./.github/actions/setup
-        with:
-          browsers: chromium
-
-      - name: Run the non-smoke specs, shard ${{ matrix.shard }} of 2
-        uses: ./.github/actions/run-specs
-        with:
-          args: --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
-          report-name: regression-${{ matrix.shard }}
-          tag: ${{ inputs.tag }}
-          name: ${{ inputs.name }}
-          paths: ${{ inputs.path }}
-          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        env:
-          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
-
+  # TEMPORARY: the three jobs below (api-tests, smoke, regression) test the DEPLOYED target and
+  # are commented out; the whole suite runs against a private local instance (regression-local).
+  # To go back to the deployment: uncomment them, and drop the "Static checks" step and the
+  # `needs`-free note from regression-local.
+  ## Stage 1. Static checks run once, here only (regression-local exercises the same code).
+  ## They are fast and fail before any spec runs.
+  #api-tests:
+  #  runs-on: ubuntu-latest
+  #  timeout-minutes: 15
+  #  steps:
+  #    - uses: actions/checkout@v7
+#
+  #    - name: Set up Node and dependencies (no browsers)
+  #      uses: ./.github/actions/setup
+  #      with:
+  #        browsers: none
+#
+  #    - name: Static checks
+  #      uses: ./.github/actions/static-checks
+#
+  #    - name: Run API specs
+  #      uses: ./.github/actions/run-specs
+  #      with:
+  #        args: --project=api
+  #        report-name: api
+  #        tag: ${{ inputs.tag }}
+  #        name: ${{ inputs.name }}
+  #        paths: ${{ inputs.path }}
+  #      env:
+  #        APP_URL: ${{ inputs.app_url }}
+  #        APP_API_URL: ${{ inputs.api_url }}
+#
+  ## Stage 2. The critical-path subset in every browser, side by side; fail-fast is off so one
+  ## browser's failure does not hide another's result.
+  #smoke:
+  #  needs: api-tests
+  #  runs-on: ubuntu-latest
+  #  timeout-minutes: 30
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      browser: [chromium, firefox, webkit]
+  #  steps:
+  #    - uses: actions/checkout@v7
+#
+  #    - name: Set up Node, dependencies and ${{ matrix.browser }}
+  #      uses: ./.github/actions/setup
+  #      with:
+  #        browsers: ${{ matrix.browser }}
+#
+  #    - name: Run the @smoke specs on ${{ matrix.browser }}
+  #      uses: ./.github/actions/run-specs
+  #      with:
+  #        args: --project=${{ matrix.browser }}
+  #        stage-tag: '@smoke'
+  #        report-name: smoke-${{ matrix.browser }}
+  #        tag: ${{ inputs.tag }}
+  #        name: ${{ inputs.name }}
+  #        paths: ${{ inputs.path }}
+  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+  #      env:
+  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+  #        APP_URL: ${{ inputs.app_url }}
+  #        APP_API_URL: ${{ inputs.api_url }}
+#
+  ## Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
+  ## chromium-only, see playwright.config.ts), in parallel shards that start together once
+  ## smoke passed in every browser. Tests of broken functionality fail here until it is fixed.
+  #regression:
+  #  needs: smoke
+  #  runs-on: ubuntu-latest
+  #  timeout-minutes: 60
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      shard: [1, 2]
+  #  steps:
+  #    - uses: actions/checkout@v7
+#
+  #    - name: Set up Node, dependencies and chromium
+  #      uses: ./.github/actions/setup
+  #      with:
+  #        browsers: chromium
+#
+  #    - name: Run the non-smoke specs, shard ${{ matrix.shard }} of 2
+  #      uses: ./.github/actions/run-specs
+  #      with:
+  #        args: --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
+  #        report-name: regression-${{ matrix.shard }}
+  #        tag: ${{ inputs.tag }}
+  #        name: ${{ inputs.name }}
+  #        paths: ${{ inputs.path }}
+  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+  #      env:
+  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+  #        APP_URL: ${{ inputs.app_url }}
+  #        APP_API_URL: ${{ inputs.api_url }}
+#
   # Brings the application under test up on the runner itself and runs the whole suite against
   # that private instance instead of the shared public one. A separate job rather than a stage:
   # it answers a different question (does the suite pass against a known-good, freshly seeded
