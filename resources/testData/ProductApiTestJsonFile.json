@@ -1,0 +1,44 @@
+{
+  "productApi1": {
+    "brandName": "Stored Brand PRODUCT-API-1 {uuid}",
+    "categoryName": "Stored Category PRODUCT-API-1 {uuid}",
+    "products": [
+      {
+        "name": "Stored Product PRODUCT-API-1 {uuid}",
+        "description": "Seeded to check price, stock, category and brand are stored.",
+        "price": 21.75,
+        "co2Rating": "B",
+        "stock": 7
+      }
+    ]
+  },
+  "productApi2": {
+    "requiredFields": [
+      "name",
+      "price",
+      "category_id",
+      "brand_id",
+      "product_image_id"
+    ]
+  },
+  "productApi3": {
+    "brandName": "Catalog Api Brand 1 {uuid}",
+    "categoryName": "Catalog Api Category 1 {uuid}",
+    "products": [
+      {
+        "name": "Catalog Api Product 1 {uuid}",
+        "description": "Seeded for the catalog API case.",
+        "price": 12.5,
+        "co2Rating": "B",
+        "stock": 3
+      }
+    ],
+    "newStock": 9
+  },
+  "productApi4": {
+    "queryPrefix": "zzqq-nomatch-"
+  },
+  "productApi5": {
+    "unknownProductId": "99999999"
+  }
+}

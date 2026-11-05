@@ -6,32 +6,30 @@ import { newUuid } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 
-let seedData: typeof import('../../../resources/testData/CatalogSeedingTestJsonFile.json');
-let catalogData: typeof import('../../../resources/testData/ProductCatalogApiTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/BrandApiTestJsonFile.json');
 
 /** Brand calls: records carry a per-run UUID and are left behind on purpose (deleting needs an admin token). */
 test.describe('Brand API', () => {
 
   test('A created brand is stored with its name and slug', { tag: ['@regression'] }, async () => {
-    await allure.feature('Seeding API');
-    await allure.testCaseId('seed-api-1');
+    await allure.feature('Brand API');
+    await allure.testCaseId('brand-api-1');
 
-    const catalog = await apisProductCatalog.seedCatalog(newUuid(), seedData.seedApi1);
+    const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.brandApi1);
     const brand = await apisProductCatalog.getBrand(catalog.brandId);
     await apisProductCatalog.verifyBrand(brand, catalog.brandId, catalog.brandName);
   });
 
   test('A brand without its required fields is rejected', { tag: ['@regression'] }, async () => {
-    await allure.feature('Product catalog API');
-    await allure.testCaseId('catalog-api-2');
+    await allure.feature('Brand API');
+    await allure.testCaseId('brand-api-2');
 
     const reportedFields = await apisProductCatalog.createBrandWithoutRequiredFields();
-    await apisProductCatalog.verifyRequiredFieldsReported('brand', reportedFields, catalogData.catalogApi2.requiredFields);
+    await apisProductCatalog.verifyRequiredFieldsReported('brand', reportedFields, testData.brandApi2.requiredFields);
   });
 
   test.beforeAll(async () => {
-    seedData = loadTestData('CatalogSeedingTestJsonFile.json');
-    catalogData = loadTestData('ProductCatalogApiTestJsonFile.json');
+    testData = loadTestData('BrandApiTestJsonFile.json');
   });
 
   test.beforeEach(({ request }) => {
