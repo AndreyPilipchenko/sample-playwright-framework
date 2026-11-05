@@ -212,6 +212,35 @@ export class ApisProductCatalog {
     });
   }
 
+  /** Changes the stock of the first seeded product through `PUT /products/{id}`, which replaces the whole record, so the rest is sent as it was seeded. */
+  async restockSeededProduct(catalog: SeededCatalog, template: ProductSeed, stock: number) {
+    await allure.step(`Restock the seeded product ${catalog.products[0].name} to ${stock}`, async () => {
+      const imageId = await this.getAnyProductImageId();
+      await this.setStock(Number(catalog.products[0].id), { ...template, name: catalog.products[0].name, stock }, catalog.categoryId, catalog.brandId, imageId);
+    });
+  }
+
+  /** Creating a brand without its required fields is refused; resolves to the field names the API complained about. */
+  async createBrandWithoutRequiredFields(): Promise<string[]> {
+    return await allure.step('Create a brand without its required fields', async () => {
+      return await this.postEmptyAndGetReportedFields(this.brands_serviceName, 'the create brand without fields response status');
+    });
+  }
+
+  /** Creating a category without its required fields is refused; resolves to the field names the API complained about. */
+  async createCategoryWithoutRequiredFields(): Promise<string[]> {
+    return await allure.step('Create a category without its required fields', async () => {
+      return await this.postEmptyAndGetReportedFields(this.categories_serviceName, 'the create category without fields response status');
+    });
+  }
+
+  /** The status `GET /products/{id}` answers for an id that does not exist. */
+  async getProductStatus(productId: string): Promise<number> {
+    return await allure.step(`Get the status of the product ${productId}`, async () => {
+      return (await this.apiActions.get(`${this.products_serviceName}/${productId}`)).status();
+    });
+  }
+
   /** Creating a product without its required fields is refused; resolves to the field names the API complained about. */
   async createProductWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create a product without its required fields', async () => {
@@ -219,6 +248,12 @@ export class ApisProductCatalog {
       expectToBe('the create product without fields response status', response.status(), 422);
       return Object.keys((await response.json()) as Record<string, string[]>);
     });
+  }
+
+  private async postEmptyAndGetReportedFields(url: string, statusSubject: string): Promise<string[]> {
+    const response = await this.apiActions.post(url, { data: {} });
+    expectToBe(statusSubject, response.status(), 422);
+    return Object.keys((await response.json()) as Record<string, string[]>);
   }
 
   private productPayload(product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
@@ -286,6 +321,24 @@ export class ApisProductCatalog {
   async verifyRequiredProductFieldsReported(reportedFields: string[], requiredFields: string[]) {
     await allure.step(`Verify the missing required fields are reported: ${requiredFields.join(', ')}`, async () => {
       expectToContainAll('the fields the API reported', reportedFields, requiredFields);
+    });
+  }
+
+  async verifyRequiredFieldsReported(entity: string, reportedFields: string[], requiredFields: string[]) {
+    await allure.step(`Verify the missing required ${entity} fields are reported: ${requiredFields.join(', ')}`, async () => {
+      expectToContainAll(`the ${entity} fields the API reported`, reportedFields, requiredFields);
+    });
+  }
+
+  async verifyProductStock(product: ProductRecord, expectedStock: number) {
+    await allure.step(`Verify the product ${product.name} has the stock ${expectedStock}`, async () => {
+      expectToBe('the stored stock', product.stock, expectedStock);
+    });
+  }
+
+  async verifyNotFound(subject: string, status: number) {
+    await allure.step(`Verify ${subject} is not found`, async () => {
+      expectToBe(`the status for ${subject}`, status, 404);
     });
   }
 }
