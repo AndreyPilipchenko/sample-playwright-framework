@@ -27,6 +27,19 @@ const projectRoot = path.resolve(import.meta.dirname, '..');
 /** Gitignored scratch directory holding the compose file and its .env. */
 const workDir = path.join(projectRoot, '.app');
 const composeFile = 'docker-compose.prod.yml';
+/**
+ * Local addition to the upstream file. The API's .env points its mail at host `mailcatcher`
+ * (SMTP 1025), but the upstream prod compose file defines no such service, so every request that
+ * sends mail (creating an invoice, ...) fails with a 500. This sink accepts that mail and drops it
+ * in a web inbox on :1080.
+ */
+const mailComposeFile = 'docker-compose.mail.yml';
+const mailCompose = `services:
+  mailcatcher:
+    image: sj26/mailcatcher
+    ports:
+      - 1080:1080
+`;
 /** Compose project name — keeps `down` deterministic and avoids clashing with other stacks. */
 const composeProject = 'pst-local';
 
@@ -93,7 +106,7 @@ function requireDocker() {
 }
 
 /** Compose invocation shared by every subcommand. */
-const compose = (...args) => ['compose', '-f', composeFile, '--project-name', composeProject, ...args];
+const compose = (...args) => ['compose', '-f', composeFile, '-f', mailComposeFile, '--project-name', composeProject, ...args];
 
 /**
  * Writes the compose file and its .env into the work directory.
@@ -107,6 +120,7 @@ async function prepareWorkDir(variant) {
     fail(`could not download ${composeFile} from ${composeRef} (HTTP ${response.status}).`);
   }
   writeFileSync(path.join(workDir, composeFile), await response.text());
+  writeFileSync(path.join(workDir, mailComposeFile), mailCompose);
 
   // DISABLE_LOGGING is interpolated by the compose file without a default; setting it
   // explicitly keeps compose from warning about an unset variable.

@@ -99,7 +99,7 @@ application under test on your own machine in Docker — useful for a clean, fre
 seeded dataset, for offline work, and for avoiding interference from other users of
 the public instance.
 
-Requires Docker and free ports `4200`, `8091`, `3306`.
+Requires Docker and free ports `4200`, `8091`, `3306`, `1080`.
 
 
 ```sh
@@ -134,7 +134,9 @@ To point a single run at another address without adding an environment, override
 per name: `APP_URL` for the UI, `APP_API_URL` for the API.
 
 The stack starts the UI on `4200`, the REST API on `8091` (Swagger at
-`:8091/api/documentation`) and MariaDB on `3306`. Note that the upstream `web` (nginx)
+`:8091/api/documentation`) and MariaDB on `3306`. A `mailcatcher` sink (inbox on `1080`) is added
+because the API sends mail on checkout and the upstream compose file defines no mail host; without it
+`POST /invoices` returns 500. Note that the upstream `web` (nginx)
 and `cron` images are published for **linux/arm64 only** — Docker Desktop emulates
 them transparently, but a bare amd64 Linux host needs binfmt handlers registered
 (`docker run --privileged --rm tonistiigi/binfmt --install arm64`), which is what the
