@@ -443,25 +443,25 @@ is used.
 | Product Detail | 18 | 1 (TC-PD-3, smoke) |
 | Rentals | 7 | 0 |
 | Checkout — Cart | 12 | 5 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8) |
-| Checkout — Sign In | 4 | 0 |
-| Checkout — Address | 10 | 0 |
-| Checkout — Payment | 14 | 0 |
-| Registration | 14 | 0 |
-| Login | 13 | 2 (TC-LOGIN-2, 3 — smoke) |
+| Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
+| Checkout — Address | 10 | 1 (TC-CBA-3) |
+| Checkout — Payment | 14 | 2 (TC-CPAY-12, 13) |
+| Registration | 14 | 1 (TC-REG-9) |
+| Login | 13 | 4 (TC-LOGIN-1, 4; TC-LOGIN-2, 3 — smoke) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 0 |
-| Change Password | 7 | 0 |
+| Change Password | 7 | 4 (TC-CPW-1, 3, 4, 6) |
 | Favorites | 3 | 0 |
-| Invoices | 11 | 0 |
+| Invoices | 11 | 2 (TC-INV-3, 6) |
 | Messages | 4 | 0 |
 | Contact Form | 12 | 0 |
 | Admin | 12 | 0 |
 | Chat Widget | 8 | 0 |
 | Discounts | 8 | 0 |
-| API | 16 | 0 |
+| API | 16 | 0 (the 17 tests in `tests/api/` cover seeding, catalog and invoice calls, not these security cases) |
 | Accessibility | 11 | 0 |
 | Email | 4 | 0 |
-| **Total** | **234** | **13** |
+| **Total** | **234** | **28** |
 
 This is a test-design inventory, not a commitment to automate all of it. Sequence by
 priority: P1 checkout, authentication and API-security cases first.
