@@ -23,10 +23,11 @@ inputs:
   name:
     description: Manual-run filter. Text the test title must contain, case-insensitive (e.g. "admin credentials").
     default: ''
-  publish-reports:
+  publish-html-report:
     description: >-
-      'true' uploads the HTML and Allure reports as artifacts. Pass 'false' when the run signs in
-      with shared credentials and the artifacts would be public: native report detail can contain them.
+      'true' uploads the Playwright HTML report as an artifact. Pass 'false' when the run signs in
+      with shared credentials and the artifacts would be public: its failure pages and traces can
+      contain them. The Allure report is always published.
     default: 'true'
   paths:
     description: Manual-run filter. Spec files or folders, separated by spaces, optionally with :line (e.g. "tests/LoginTests.spec.ts:38").
@@ -113,7 +114,7 @@ runs:
         TAGS: ${{ inputs.tag }}
         NAME: ${{ inputs.name }}
         PATHS: ${{ inputs.paths }}
-        PUBLISH_REPORTS: ${{ inputs.publish-reports }}
+        PUBLISH_HTML_REPORT: ${{ inputs.publish-html-report }}
       run: |
         # APP_URL / APP_API_URL come from the calling step's env on a manual run with overrides.
         note=''
@@ -122,14 +123,14 @@ runs:
         fi
         [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
         [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
-        if [ "$PUBLISH_REPORTS" != "true" ]; then
-          note+="Reports not published: they can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS)."
+        if [ "$PUBLISH_HTML_REPORT" != "true" ]; then
+          note+="HTML report not published: its failure pages and traces can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report is attached."
         fi
         CI_SUMMARY_NOTE="$note" node scripts/ci-summary.mjs "$REPORT_NAME"
 
     # A selection with no specs writes no reports; that is not an error.
     - name: Publish HTML report
-      if: always() && inputs.publish-reports == 'true'
+      if: always() && inputs.publish-html-report == 'true'
       uses: actions/upload-artifact@v7
       with:
         name: playwright-report-${{ inputs.report-name }}
@@ -138,7 +139,7 @@ runs:
         if-no-files-found: ignore
 
     - name: Publish current Allure report
-      if: always() && inputs.publish-reports == 'true'
+      if: always()
       uses: actions/upload-artifact@v7
       with:
         name: allure-report-${{ inputs.report-name }}

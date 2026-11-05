@@ -14,6 +14,14 @@ export const REDACTED_HEADERS: ReadonlySet<string> = new Set([
   'authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'x-api-key', 'api-key', 'x-auth-token',
 ]);
 
+/**
+ * Locator text that marks a secret form field (e.g. `getByTestId('password')`). AllureReport
+ * masks the value Playwright prints in the title of an input step on such a field
+ * (`Fill "<value>"` → `Fill "***"`). Allure step titles only: the HTML report, traces and
+ * failure-page snapshots keep the raw value (utility-classes practice 20).
+ */
+export const REDACTED_FIELD_LOCATOR = /password|passwd|passcode|secret|token|api[-_]?key/i;
+
 /** Object keys (API bodies, DB params and row columns) whose values are masked, at any nesting depth. */
 export const REDACTED_KEYS: ReadonlySet<string> = new Set([
   'password', 'token', 'access_token', 'refresh_token', 'client_secret', 'secret', 'apikey', 'api_key',

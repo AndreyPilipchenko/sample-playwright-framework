@@ -84,10 +84,12 @@ never retries, because this target locks an account after **one** failed login (
 onto the spec-running steps of both workflows.
 
 Native report detail can contain the admin credentials: Playwright step titles
-(`Fill "<value>"`), failure pages and traces, in both the HTML and the Allure report. This
-repository is public, so CI publishes those reports only from jobs that don't sign in, unless
-the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is private).
-The run's Summary page always shows the results. See
+(`Fill "<value>"`), failure pages and traces. The Allure report masks what is typed into a
+password-like field (`Fill "***"`, see `REDACTED_FIELD_LOCATOR` in `src/utils/RedactedKeys.ts`),
+so CI always attaches it; account emails stay readable there. This repository is
+public, so the jobs that sign in attach the Playwright HTML report (failure pages, traces) only
+when the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is
+private). The run's Summary page always shows the results. See
 [docs/harness-change-requests/report-credential-masking.md](docs/harness-change-requests/report-credential-masking.md).
 
 ## Running the app locally
