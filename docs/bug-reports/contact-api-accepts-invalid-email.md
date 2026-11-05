@@ -4,9 +4,9 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | `contact-api-5` in `tests/api/contact/ContactApiTests.spec.ts`. Outside the [test case](../test-cases.md) inventory. |
-| Automation | The test expects 422 and fails on the 200. |
-| Area | Contact API |
-| Environment | Local Docker stack (`sprint5-with-bugs`), API on `http://localhost:8091`. |
+| Automation | The API test expects 422 and fails on the 200. No test covers the form route. |
+| Area | Contact form and contact API |
+| Environment | Local Docker stack (`sprint5-with-bugs`), API on `http://localhost:8091`, form in Chromium (Playwright). |
 | Observed | 2026-11-06 |
 | Reproduction | API: 6 of 6, from 4 runs of `contact-api-5` and 2 controlled requests. Form: 1 of 1 controlled run. Counted from this session's run output; no run record was kept. The hosted instance was not checked. |
 | Severity / priority / type | Not set. Tracker fields are unresolved. |
@@ -34,10 +34,9 @@ Through the API, send `POST /messages` with no token:
 
 ## Expected result
 
-422 with the error `The email field must be a valid email address.`
-
-This comes from the upstream rule below. The error text is the framework's default wording for that rule and was not seen in
-a response.
+- API: 422 with the error `The email field must be a valid email address.` This comes from the upstream rule below. The error
+  text is the framework's default wording for that rule and was not seen in a response.
+- Form: no source states this. The usual expectation, not from a source, is an inline error with nothing sent.
 
 ## Actual result
 
