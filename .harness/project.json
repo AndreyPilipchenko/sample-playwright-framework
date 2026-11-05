@@ -18,7 +18,8 @@
         "app-local"
       ],
       "apiTargets": [
-        "app-local"
+        "app-local",
+        "mail-local"
       ],
       "databaseTargets": [
         "appDb-local"

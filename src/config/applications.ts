@@ -33,4 +33,10 @@ export const applications = {
       },
     },
   },
+  /** The local stack's mail sink (mailcatcher). Only the `local` environment has one, so it resolves on first use. */
+  mailInbox: {
+    get apiUrl(): string {
+      return apiUrl('mail');
+    },
+  },
 };

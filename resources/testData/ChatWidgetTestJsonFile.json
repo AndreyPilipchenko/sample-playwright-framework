@@ -1,0 +1,78 @@
+{
+  "tcCHAT6SignIn": {
+    "brandName": "Chat Brand TC-CHAT-6 {uuid}",
+    "categoryName": "Chat Category TC-CHAT-6 {uuid}",
+    "products": [
+      {
+        "name": "Chat Checkout Product TC-CHAT-6 {uuid}",
+        "description": "Seeded for the chat checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "expectedCartTotal": "$14.15",
+    "customer": {
+      "firstName": "Chat",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "chat-6.{uuid}@example.test",
+      "password": "Sup3r-Secret!Chat6"
+    },
+    "expectedSignedIn": "You're now signed in!",
+    "prompts": {
+      "street": "Please enter your street address:",
+      "city": "Please enter your city:",
+      "state": "Please enter your state/province:",
+      "country": "Please enter your country:",
+      "postcode": "Please enter your postal code:",
+      "paymentMethod": "Please select your payment method:",
+      "accountName": "Please enter the account name:",
+      "accountNumber": "Please enter the account number:"
+    },
+    "address": {
+      "street": "Chat Street 2",
+      "city": "Utrecht",
+      "state": "Province Chat",
+      "country": "NL",
+      "postcode": "3511AA"
+    },
+    "addressHeading": "Please confirm your billing address:",
+    "expectedAddressLines": ["Chat Street 2", "Utrecht, Province Chat", "NL 3511AA"],
+    "paymentMethod": "Bank Transfer",
+    "accountName": "Chat Customer",
+    "accountNumber": "1234567890",
+    "summaryHeading": "Order Summary:",
+    "expectedSummaryLines": ["Total:", "$14.15", "Shipping to:", "Chat Street 2, Utrecht", "Payment method:", "Bank Transfer"],
+    "expectedSuccess": "Your order has been placed successfully!"
+  },
+  "tcCHAT6Guest": {
+    "brandName": "Chat Brand TC-CHAT-6 guest {uuid}",
+    "categoryName": "Chat Category TC-CHAT-6 guest {uuid}",
+    "products": [
+      {
+        "name": "Chat Guest Product TC-CHAT-6 {uuid}",
+        "description": "Seeded for the guest chat checkout case.",
+        "price": 14.15,
+        "co2Rating": "B",
+        "stock": 10
+      }
+    ],
+    "cartItemCount": "1",
+    "expectedCartTotal": "$14.15",
+    "email": "chat-6-g.{uuid}@example.test",
+    "firstName": "Chat",
+    "lastName": "Guest",
+    "expectedEmailPrompt": "Please enter your email address for order confirmation:",
+    "expectedFirstNamePrompt": "Please enter your first name:",
+    "expectedLastNamePrompt": "Please enter your last name:",
+    "expectedStreetPrompt": "Please enter your street address:"
+  }
+}

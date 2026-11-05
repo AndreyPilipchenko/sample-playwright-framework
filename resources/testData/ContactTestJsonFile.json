@@ -1,0 +1,20 @@
+{
+  "tcCONT3": {
+    "expectedSubjects": ["Customer service", "Webmaster", "Return", "Payments", "Warranty", "Status of my order"]
+  },
+  "tcCONT8": {
+    "contact": {
+      "firstName": "Contact",
+      "lastName": "Guest",
+      "email": "cont-8.{uuid}@example.test",
+      "subject": "Webmaster",
+      "message": "Please tell me where I can find the documentation for this hammer."
+    },
+    "expectedConfirmation": "Thanks for your message! We will contact you shortly.",
+    "expectedMailSubject": "Contact"
+  },
+  "tcCONT9": {
+    "error101Subject": "Error 101",
+    "error202Subject": "Error 202"
+  }
+}
