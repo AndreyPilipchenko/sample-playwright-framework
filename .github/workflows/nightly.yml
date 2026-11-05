@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node and dependencies (no browsers)
         uses: ./.github/actions/setup
@@ -117,7 +117,7 @@ jobs:
       matrix:
         browser: [chromium, firefox, webkit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node, dependencies and ${{ matrix.browser }}
         uses: ./.github/actions/setup
@@ -152,7 +152,7 @@ jobs:
       matrix:
         shard: [1, 2]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node, dependencies and chromium
         uses: ./.github/actions/setup
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Node, dependencies and browsers
         uses: ./.github/actions/setup
@@ -194,7 +194,7 @@ jobs:
       # container — the proxy that serves the API on 8091 — fails to start and the
       # stack never becomes ready. Verified locally: web/cron are arm64, ui/api amd64.
       - name: Enable arm64 emulation for the upstream nginx/cron images
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
 
@@ -223,7 +223,7 @@ jobs:
 
       - name: Publish application logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-logs-local
           path: app-logs.txt

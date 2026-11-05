@@ -13,7 +13,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v7
       with:
         node-version: '24'
         cache: npm
@@ -43,7 +43,7 @@ runs:
     - name: Cache Playwright browsers
       if: inputs.browsers != 'none'
       id: browsers
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.cache/ms-playwright
         key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ steps.playwright.outputs.key }}
@@ -92,7 +92,7 @@ runs:
     - name: Restore cached system packages
       if: inputs.browsers != 'none'
       id: apt-cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: ~/.cache/playwright-apt/*.deb
         key: ${{ steps.apt.outputs.key }}
@@ -114,7 +114,7 @@ runs:
     # Saved right away rather than at the end of the job, so a red test run still keeps it.
     - name: Save system packages to the cache
       if: inputs.browsers != 'none' && steps.apt-cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ~/.cache/playwright-apt/*.deb
         key: ${{ steps.apt.outputs.key }}
