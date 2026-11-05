@@ -82,5 +82,249 @@
     "expectedPrice": "$14.15",
     "expectedLineTotal": "$28.30",
     "expectedQuantity": "2"
+  },
+  "tcINV4": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-4.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcinv4"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-4 {uuid}",
+      "categoryName": "Invoice Category TC-INV-4 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-4 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Invoice Street 7",
+      "billingCity": "Utrecht",
+      "billingState": "Noord-Brabant",
+      "billingCountry": "NL",
+      "billingPostcode": "3511AB",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1,
+    "expectedAddress": {
+      "address": "Invoice Street 7",
+      "postcode": "3511AB",
+      "city": "Utrecht",
+      "state": "Noord-Brabant",
+      "country": "NL"
+    }
+  },
+  "tcINV5": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-5.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcinv5"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-5 {uuid}",
+      "categoryName": "Invoice Category TC-INV-5 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-5 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Invoice Street 7",
+      "billingCity": "Utrecht",
+      "billingState": "Noord-Brabant",
+      "billingCountry": "NL",
+      "billingPostcode": "3511AB",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1,
+    "expectedPayment": {
+      "method": "Bank Transfer",
+      "accountName": "Invoice Customer",
+      "accountNumber": "12345678"
+    }
+  },
+  "tcINV10": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-10.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcinv10"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-10 {uuid}",
+      "categoryName": "Invoice Category TC-INV-10 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-10 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Invoice Street 7",
+      "billingCity": "Utrecht",
+      "billingState": "Noord-Brabant",
+      "billingCountry": "NL",
+      "billingPostcode": "3511AB",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1,
+    "expectedCity": "Utrecht",
+    "expectedCountry": "NL"
+  },
+  "tcINV11": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-11.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcinv11"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-11 {uuid}",
+      "categoryName": "Invoice Category TC-INV-11 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-11 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Invoice Street 7",
+      "billingCity": "Utrecht",
+      "billingState": "Noord-Brabant",
+      "billingCountry": "NL",
+      "billingPostcode": "3511AB",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1
+  },
+  "tcINV7": {
+    "user": {
+      "firstName": "Account",
+      "lastName": "Customer",
+      "address": "Street 1",
+      "city": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "NL",
+      "postcode": "1234AA",
+      "phone": "0987654321",
+      "dob": "1990-01-01",
+      "email": "tc-inv-7.{uuid}@example.test",
+      "password": "Sup3r-Secret!Tcinv7"
+    },
+    "catalog": {
+      "brandName": "Invoice Brand TC-INV-7 {uuid}",
+      "categoryName": "Invoice Category TC-INV-7 {uuid}",
+      "products": [
+        {
+          "name": "Invoice Product TC-INV-7 {uuid}",
+          "description": "Seeded for the invoice case.",
+          "price": 14.15,
+          "co2Rating": "B",
+          "stock": 10
+        }
+      ]
+    },
+    "invoice": {
+      "billingAddress": "Invoice Street 7",
+      "billingCity": "Utrecht",
+      "billingState": "Noord-Brabant",
+      "billingCountry": "NL",
+      "billingPostcode": "3511AB",
+      "paymentAccountName": "Invoice Customer",
+      "paymentAccountNumber": "12345678"
+    },
+    "quantity": 1,
+    "foreign": {
+      "user": {
+        "firstName": "Account",
+        "lastName": "Customer",
+        "address": "Street 1",
+        "city": "Amsterdam",
+        "state": "Noord-Holland",
+        "country": "NL",
+        "postcode": "1234AA",
+        "phone": "0987654321",
+        "dob": "1990-01-01",
+        "email": "tc-inv-7b.{uuid}@example.test",
+        "password": "Sup3r-Secret!Tcinv7Other"
+      },
+      "catalog": {
+        "brandName": "Invoice Brand TC-INV-7B {uuid}",
+        "categoryName": "Invoice Category TC-INV-7B {uuid}",
+        "products": [
+          {
+            "name": "Invoice Product TC-INV-7B {uuid}",
+            "description": "Seeded for the invoice case.",
+            "price": 14.15,
+            "co2Rating": "B",
+            "stock": 10
+          }
+        ]
+      },
+      "invoice": {
+        "billingAddress": "Invoice Street 7",
+        "billingCity": "Utrecht",
+        "billingState": "Noord-Brabant",
+        "billingCountry": "NL",
+        "billingPostcode": "3511AB",
+        "paymentAccountName": "Invoice Customer",
+        "paymentAccountNumber": "12345678"
+      },
+      "quantity": 1
+    },
+    "missingInvoiceId": 999999999,
+    "expectedMessage": "This invoice doesn't exist."
   }
 }

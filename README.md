@@ -228,11 +228,12 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 | `ProductOverviewTests.spec.ts` | 4 | Search, category filter and opening a product card from either | `@smoke` |
 | `ProductDetailTests.spec.ts` | 1 | Quantity selector defaults to 1 | `@smoke` |
 | `LoginTests.spec.ts` | TC-LOGIN-1..5, 7, 8, 10 | Form fields, invalid credentials message, customer and admin sign-in redirects, empty-form validation, locking after 3 failures, disabled account. **TC-LOGIN-5 and 8 are red** (known defects; the local build never locks) | `@regression`, sign-ins `@smoke` |
-| `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6 | Form fields, mismatched confirmation, wrong current password, successful change and logout. **TC-CPW-1 and TC-CPW-3 are red** (known defects) | `@regression` |
+| `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6, 7 | Form fields, mismatched confirmation, wrong current password, successful change and logout, the new password on the next login. **TC-CPW-1, 3 and 7 are red** (TC-CPW-7: defect 39) | `@regression` |
+| `ProfileTests.spec.ts` | TC-PROF-1, 4, 5, 7 | Account details, valid update with its fading confirmation, first and last name fields, address update. **All four are red** (defects 36, 37, 38) | `@regression` |
 | `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7 | Cart table, quantity change, delete, totals. **All five are red** (known defects) | `@regression` |
 | `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-1, 3, 4, TC-CPAY-1, 4, 7, 12, 13 | Guest sign-in step, billing address fields and validation, proceeding to payment, payment methods, credit card form and expiry check, placing an order, cart cleared afterwards. **TC-CBA-1 and TC-CPAY-1, 4, 7 are red** (known defects) | `@regression` |
 | `RegistrationTests.spec.ts` | TC-REG-1, 7, 8, 9 | Field labels, duplicate-email message without a password hint, a valid registration that lands on login and can sign in. **TC-REG-1, 7, 8 are red** (known defects) | `@regression` |
-| `InvoiceTests.spec.ts` | TC-INV-3, 6 | Invoice detail shows number, date, total and its line items | `@regression` |
+| `InvoiceTests.spec.ts` | TC-INV-3, 4, 5, 6, 7, 10, 11 | Invoice detail shows number, date, total, line items, billing address, payment details, and "not found" for a missing or foreign invoice. **TC-INV-4, 5, 7, 10 and 11 are red** (defects 14, 15, 16; TC-INV-7 a local finding) | `@regression` |
 | `AdminProductTests.spec.ts` | TC-ADM-2 | Admin creates, edits and deletes a product. **Red locally** (suspected: the edited price is not stored) | `@regression` |
 | `AdminOrderTests.spec.ts` | TC-ADM-5, 6 | Orders are listed and viewed; the initial status, then each of the other four | `@regression` |
 | `AdminUserTests.spec.ts` | TC-ADM-7, 8, 9 | Admin lists, edits and deletes a user; disabling and re-enabling decide whether the user can sign in. **All three red locally** (suspected: the user edit is refused with 422) | `@regression` |
@@ -264,7 +265,7 @@ Run only these with `npx playwright test --project=api`. UI specs sign in throug
 
 ### Not automated yet
 
-57 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+67 of the 234 designed cases are automated; the per-area count is the Coverage summary in
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-*), discounts
 (TC-DISC-*), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the cart still has open P1 cases
