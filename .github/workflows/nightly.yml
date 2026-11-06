@@ -8,7 +8,8 @@
 #   2. smoke       the @smoke subset on chromium, firefox and webkit
 #   3. regression  every other spec on chromium, in parallel shards
 # api-local, smoke-local (one job per browser) and regression-local run the same three selections,
-# each against its own private Docker instance. They start together and gate nothing.
+# each against its own private Docker instance. They start together and gate nothing. publish-site
+# then puts the results on GitHub Pages.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers),
 # static-checks (conventions, type-check, lint) and run-specs (run Playwright, publish the
@@ -37,6 +38,7 @@
 # admin credentials. They are the published demo account, so the Allure report and the traces of
 # failed tests (`traces-*`, 7 days) are always attached; this repository is public, so the jobs that
 # sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
+# publish-site puts the Allure reports on a public page, so it checks them for secrets first.
 #
 # WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
 # this low per job; the regression stage scales by adding shards (matrix `shard`, and the
@@ -308,3 +310,65 @@ jobs:
       - name: Stop the application under test
         if: always()
         run: node scripts/app.mjs down --volumes || true
+
+  # Publishes the latest full run to GitHub Pages: the results dashboard and each job's Allure report.
+  # A failing test doesn't stop it, since failures are what the site shows, but a filtered run or
+  # one against another URL would replace the full results, so those don't publish. It needs
+  # Settings > Pages > Source set to GitHub Actions.
+  publish-site:
+    needs: [api-local, smoke-local, regression-local]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.app_url == '' && inputs.api_url == '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Download the Allure reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: allure-report-local-*
+          path: artifacts
+
+      - name: Download the results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: results-local-*
+          path: artifacts
+
+      - name: Build the site
+        run: node scripts/build-site.mjs artifacts site
+
+      - name: Check the site for secrets
+        run: node scripts/check-site-secrets.mjs site
+        env:
+          APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy the site
+        id: deploy
+        uses: actions/deploy-pages@v5
+
+      - name: Link the dashboard from the run's summary
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          {
+            echo '### Results dashboard'
+            echo "[Open the dashboard]($PAGE_URL). It always shows the latest published run, which may be newer than this one."
+          } >> "$GITHUB_STEP_SUMMARY"

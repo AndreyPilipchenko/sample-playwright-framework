@@ -7,6 +7,9 @@ A Playwright + TypeScript demo framework, built for training and interview pract
 [Toolshop "with-bugs"](https://with-bugs.practicesoftwaretesting.com), a public demo store that
 ships with 90+ intentional defects.
 
+**[See the latest results](https://andreypilipchenko.github.io/sample-playwright-framework/)**: the pass and fail counts, why each test failed, and the full Allure
+reports, updated every night.
+
 **The tests run against a local copy of the shop in Docker.** The public site is too unstable to test
 against: many people use it at once, and it sometimes breaks completely.
 
@@ -107,7 +110,7 @@ job's failure doesn't stop the others.
 |---|---|---|
 | **Allure** | `reports/allure-report/index.html`; CI artifact `allure-report-<job>` | Main report, with business-titled steps. Opens after a local run (`AUTO_ALLURE_OPEN=false` turns that off) |
 | **Traces** | `test-results/`; CI artifact `traces-<job>`, kept for 7 days | One per failed test. Open with `npx playwright show-trace trace.zip` |
-| **Results dashboard** | `reports/quality-dashboard/index.html`: run `node scripts/quality-dashboard.mjs local=reports/json-report/test-results.json` after a run | Pass and fail counts by area, and the recorded reason for each failure |
+| **Results dashboard** | [Live site](https://andreypilipchenko.github.io/sample-playwright-framework/), or locally `reports/quality-dashboard/index.html`: run `node scripts/quality-dashboard.mjs local=reports/json-report/test-results.json` after a run | Pass and fail counts by area, and the recorded reason for each failure |
 | **CI summary** | The run's Summary page | Counts, failures with their assertion, and what changed since the last run |
 | **Playwright HTML** | `reports/playwright-report/`; CI only when `PUBLISH_REPORTS` is `true` | Open with `npx playwright show-report reports/playwright-report` |
 | **JSON, JUnit, CTRF** | `reports/json-report/`, `reports/junit/`, `ctrf/` | For other tools |
@@ -249,7 +252,7 @@ Two workflows run the tests. This repository is the test project, not the produc
 | Workflow | Runs | When |
 |---|---|---|
 | `smoke-on-commit.yml` | `@smoke` tests on chromium | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
-| `nightly.yml` | all tests, in separate jobs | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
+| `nightly.yml` | all tests, in separate jobs, then publishes the results to GitHub Pages | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
 
 Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke-on-commit.yml`
 / `gh workflow run nightly.yml`). Smoke runs queue behind each other, and a burst of product
@@ -284,6 +287,7 @@ The nightly jobs start together, and each tests its own private Docker instance 
 | `api-local` | The browserless API specs (`tests/api`) |
 | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
 | `regression-local` | Every other spec on chromium |
+| `publish-site` | Runs after them: publishes the dashboard and Allure reports to GitHub Pages, unless the run was filtered or the secret check fails |
 
 `nightly.yml` also keeps three jobs for the deployed site (`api-tests`, `smoke`, `regression`),
 which run as stages. They are commented out for now.
