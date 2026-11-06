@@ -136,20 +136,12 @@ src/fixtures/ Reusable core: the suite's `test` with the `role` option (signed-i
 tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only
 setup/        Setup project — signs each role in once per run
 resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (team libraries)
-.harness/     Harness-managed project config, targets and the vendored package
+.harness/     Project config, targets and a vendored package
 ```
 
-The framework was built with AI agents working from the `playwright-pom-harness` skill library, so
-its conventions are written down and checked. See `AGENTS.md` / `CLAUDE.md` for the skill routing, and
-`node_modules/playwright-pom-harness/docs/` for the full conventions reference.
-
 Run Playwright from the repository root. Specs load their test data from
-repo-root-relative paths (`./resources/testData/...`, the harness test-data
-convention, which `check-conventions` verifies), so launching from a subfolder with
+repo-root-relative paths (`./resources/testData/...`), so launching from a subfolder with
 `-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
-
-Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
-conventions with `npx --no pom-harness check-conventions`.
 
 ## Test documentation
 
@@ -230,7 +222,7 @@ node scripts/app.mjs up --variant sprint5 --timeout 900   # a different upstream
 node scripts/app.mjs test -- --headed --project=chromium  # pass args through to Playwright
 ```
 
-The local instance is a harness environment, `local`, defined in
+The local instance is an environment, `local`, defined in
 `.harness/project.json`. Its browser and API targets are `app-local` in
 `.harness/targets.json`. `TEST_ENV` selects the environment, and
 `src/config/targets.ts` resolves every address from it; without `TEST_ENV` the
