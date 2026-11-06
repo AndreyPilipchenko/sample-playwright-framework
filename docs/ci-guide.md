@@ -19,7 +19,7 @@ A manual run takes optional inputs (all blank = the local stack and every test):
 | `name` | Only tests whose title contains this text, case-insensitive |
 | `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
 
-The filters narrow each stage's own selection (smoke-on-commit never leaves `@smoke`); a stage
+The filters narrow each job's own selection (smoke-on-commit never leaves `@smoke`); a job
 left with nothing to run passes, and its summary says no tests matched. Every job writes its
 results (counts, failed tests with the assertion, skipped tests with the reason) to the run's
 Summary page. Failures are split into newly failing, fixed and still failing by comparing with
@@ -42,17 +42,14 @@ The nightly jobs start together, and each tests its own private Docker instance 
 | `regression-local` | Every other spec on chromium |
 | `publish-site` | Runs after them: publishes the dashboard and Allure reports to GitHub Pages, unless the run was filtered or the secret check fails |
 
-`nightly.yml` also keeps three jobs for the deployed site (`api-tests`, `smoke`, `regression`),
-which run as stages. They are commented out for now.
-
 ## Shared steps
 
-The steps both workflows share are composite actions in `.github/actions/`:
+The steps the workflows share are composite actions in `.github/actions/`:
 
 | Action | What it does |
 |---|---|
 | `setup` | Node, `npm ci`, the requested Playwright browsers and their Ubuntu system packages (both cached, so a slow package mirror can't stall a job; chromium is always added, because the auth setup runs on it) |
-| `static-checks` | Conventions check, core boundary check, script tests, typecheck and lint |
+| `static-checks` | For `lint.yml`: conventions check, core boundary check, script tests, typecheck and lint |
 | `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
 | `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
 | `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |

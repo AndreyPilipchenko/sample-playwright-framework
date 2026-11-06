@@ -9,13 +9,13 @@ inputs:
     description: The command that runs the specs.
     default: npx playwright test
   args:
-    description: Arguments appended to the command (projects, --grep, --shard, ...).
+    description: Arguments appended to the command (projects, --grep, ...).
     default: ''
   report-name:
     description: Suffix of the artifact names (playwright-report-<name>, allure-report-<name>); must be unique within the run.
     required: true
   stage-tag:
-    description: The tag this stage always runs (e.g. @smoke); the filters below narrow it further.
+    description: The tag this job always runs (e.g. @smoke); the filters below narrow it further.
     default: ''
   tag:
     description: Manual-run filter. Tags, separated by commas or spaces; a test matches if it has any of them (e.g. "@smoke, @regression").
@@ -45,7 +45,7 @@ runs:
     # step fails the action. CI=true turns on retries and the CI trace policy; the other two
     # variables stop the Allure and HTML report viewers from opening (they would hang a runner).
     #
-    # Selection: Playwright takes a single --grep, so the stage tag, the tag filter and the name
+    # Selection: Playwright takes a single --grep, so the job tag, the tag filter and the name
     # filter become lookaheads of one expression (a test must match all of them). Paths are
     # positional file filters. Inputs arrive through env, never spliced into the script.
     - name: Run the specs
@@ -73,9 +73,9 @@ runs:
           fi
           export APP_URL="${APP_URL%/}" APP_API_URL="${APP_API_URL%/}"
         fi
-        # Several stages can share a job. Without this, a stage that writes no report would be
-        # summarized, and saved for the next comparison, with the previous stage's results, and
-        # a stage whose Allure report fails would publish the previous stage's report as its own.
+        # A job can call this action more than once. Without this, a call that writes no report would be
+        # summarized, and saved for the next comparison, with the previous call's results, and
+        # a call whose Allure report fails would publish the previous call's report as its own.
         rm -f reports/json-report/test-results.json reports/json-report/results-slim.json reports/ci-baseline/results.json reports/allure-report/index.html
         # Regex-escapes literal text.
         escape() { printf '%s' "$1" | sed 's/[][\\.*^$+?(){}|/]/\\&/g'; }
@@ -106,7 +106,7 @@ runs:
         done
         selection+=("${paths[@]}")
 
-        # A filtered manual run may leave a stage with nothing to run; that stage passes and
+        # A filtered manual run may leave a job with nothing to run; that job passes and
         # its summary shows 0 tests.
         if [ -n "$TAGS$NAME$PATHS" ]; then
           selection+=(--pass-with-no-tests)

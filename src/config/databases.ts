@@ -1,4 +1,3 @@
-// Example skeleton — adapt to your project (ships with the harness package).
 import type { DBConnectionConfig } from '../utils/DBActions';
 import type { MySqlConnectionConfig } from '../utils/MySqlActions';
 import { databaseTarget } from './targets';

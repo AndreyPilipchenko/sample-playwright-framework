@@ -166,7 +166,7 @@ compiled from the upstream Practice Software Testing docs:
 
 ### Not automated yet
 
-116 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+The per-area count of automated cases is the Coverage summary in
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
 (TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.

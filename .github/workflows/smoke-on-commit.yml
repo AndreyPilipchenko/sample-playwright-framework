@@ -4,8 +4,9 @@
 # runs nightly (nightly.yml). This repository is the test project, not the product, so its own
 # commits and pull requests run nothing but the static checks (`lint.yml`).
 #
-# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers) and run-specs
-# (run Playwright, publish the reports, reflect the outcome).
+# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
+# (the Docker stack), run-specs (run Playwright, publish the reports, reflect the outcome) and
+# publish-app-logs.
 #
 # Run it by hand: Actions → Smoke on product commit → Run workflow, or
 # `gh workflow run smoke-on-commit.yml`.
@@ -21,8 +22,8 @@
 #                     They narrow the @smoke selection; nothing outside @smoke runs here.
 #   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f app_url=https://staging.example.com -f api_url=https://api.staging.example.com
 #
-# RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
-# fine since it's a public site — no self-hosted runner needed.
+# RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
+# the shop's images need.
 #
 # SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
 # §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
@@ -75,9 +76,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # TEMPORARY: the smoke subset runs against a private local instance started on the runner
-  # (chromium only). The hosted-target job below is commented out; to go back to the
-  # deployment, uncomment it and delete this job.
+  # The smoke subset on chromium, against a private local instance started on the runner.
   smoke-local:
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -117,36 +116,3 @@ jobs:
       - name: Stop the application under test
         if: always()
         run: node scripts/app.mjs down --volumes || true
-
-  ## The critical-path subset in every browser, side by side; fail-fast is off so one
-  ## browser's failure does not hide another's result.
-  #smoke:
-  #  runs-on: ubuntu-latest
-  #  timeout-minutes: 30
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      browser: [chromium, firefox, webkit]
-  #  steps:
-  #    - uses: actions/checkout@v7
-#
-  #    - name: Set up Node, dependencies and ${{ matrix.browser }}
-  #      uses: ./.github/actions/setup
-  #      with:
-  #        browsers: ${{ matrix.browser }}
-#
-  #    - name: Run the @smoke specs on ${{ matrix.browser }}
-  #      uses: ./.github/actions/run-specs
-  #      with:
-  #        args: --project=${{ matrix.browser }}
-  #        stage-tag: '@smoke'
-  #        report-name: smoke-${{ matrix.browser }}
-  #        tag: ${{ inputs.tag }}
-  #        name: ${{ inputs.name }}
-  #        paths: ${{ inputs.path }}
-  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-  #      env:
-  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-  #        APP_URL: ${{ inputs.app_url }}
-  #        APP_API_URL: ${{ inputs.api_url }}

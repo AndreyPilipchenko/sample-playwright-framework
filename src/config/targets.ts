@@ -1,4 +1,3 @@
-// Example skeleton — adapt to your project (ships with the harness package).
 import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import type { DBConnectionConfig } from '../utils/DBActions';
