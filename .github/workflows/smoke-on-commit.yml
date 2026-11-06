@@ -83,14 +83,8 @@ jobs:
       - name: Set up Node, dependencies and browsers
         uses: ./.github/actions/setup
 
-      # The upstream web/cron images are arm64-only; see nightly.yml regression-local.
-      - name: Enable arm64 emulation for the upstream nginx/cron images
-        uses: docker/setup-qemu-action@v4
-        with:
-          platforms: arm64
-
       - name: Start the application under test
-        run: node scripts/app.mjs up --timeout 900
+        uses: ./.github/actions/start-local-app
 
       - name: Run the @smoke specs against the local instance
         uses: ./.github/actions/run-specs
@@ -107,17 +101,11 @@ jobs:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
-      - name: Capture application logs
-        if: failure()
-        run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
-
       - name: Publish application logs
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: ./.github/actions/publish-app-logs
         with:
-          name: app-logs-smoke-local
-          path: app-logs.txt
-          retention-days: 30
+          artifact-name: app-logs-smoke-local
 
       - name: Stop the application under test
         if: always()

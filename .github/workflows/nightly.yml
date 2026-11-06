@@ -7,7 +7,8 @@
 #   1. api-tests   static checks, then the browserless API specs (tests/api)
 #   2. smoke       the @smoke subset on chromium, firefox and webkit
 #   3. regression  every other spec on chromium, in parallel shards
-# regression-local runs the whole suite against a private Docker instance; it gates nothing.
+# api-local, smoke-local and regression-local run the same three selections, each against its
+# own private Docker instance. They start together and gate nothing.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers),
 # static-checks (conventions, type-check, lint) and run-specs (run Playwright, publish the
@@ -21,7 +22,7 @@
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow each stage's own selection, so a stage can end up empty;
 #                     an empty stage passes and its summary says no tests matched.
-#   regression-local takes the filters but never the URL overrides (it tests its own stack).
+#   The local jobs take the filters but never the URL overrides (they test their own stacks).
 #   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
 #
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
@@ -79,10 +80,9 @@ concurrency:
 
 jobs:
   # TEMPORARY: the three jobs below (api-tests, smoke, regression) test the DEPLOYED target and
-  # are commented out; the whole suite runs against a private local instance (regression-local).
-  # To go back to the deployment: uncomment them, and drop the "Static checks" step and the
-  # `needs`-free note from regression-local.
-  ## Stage 1. Static checks run once, here only (regression-local exercises the same code).
+  # are commented out; the whole suite runs against private local instances (api-local, smoke-local,
+  # regression-local). To go back to the deployment: uncomment them and remove those three.
+  ## Stage 1. Static checks run once, here only (the local jobs exercise the same code).
   ## They are fast and fail before any spec runs.
   #api-tests:
   #  runs-on: ubuntu-latest
@@ -178,35 +178,23 @@ jobs:
   #        APP_URL: ${{ inputs.app_url }}
   #        APP_API_URL: ${{ inputs.api_url }}
 #
-  # Brings the application under test up on the runner itself and runs the whole suite against
-  # that private instance instead of the shared public one. A separate job rather than a stage:
-  # it answers a different question (does the suite pass against a known-good, freshly seeded
-  # instance), must not share a failure with the hosted-target stages, and carries a much
-  # heavier setup cost. It has no `needs`, so it runs alongside stage 1 and gates nothing.
-  regression-local:
+  # These three bring the application under test up on their own runners and test that private
+  # instance, not the shared public one. Each has its own stack, report and summary. They start
+  # together and have no `needs`, so one job's failure hides no other job's results.
+  api-local:
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Node, dependencies and browsers
+      - name: Set up Node and dependencies (no browsers)
         uses: ./.github/actions/setup
-
-      # The upstream `web` (nginx) and `cron` images are published for linux/arm64
-      # only, while this runner is amd64. Docker Desktop emulates arm64 out of the
-      # box; a GitHub-hosted runner does not, so without binfmt handlers the `web`
-      # container — the proxy that serves the API on 8091 — fails to start and the
-      # stack never becomes ready. Verified locally: web/cron are arm64, ui/api amd64.
-      - name: Enable arm64 emulation for the upstream nginx/cron images
-        uses: docker/setup-qemu-action@v4
         with:
-          platforms: arm64
+          browsers: none
 
       - name: Start the application under test
-        run: node scripts/app.mjs up --timeout 900
+        uses: ./.github/actions/start-local-app
 
-      # The same three selections the hosted stages used, as separate steps against one stack, so
-      # each has its own report and summary. Later steps run even when an earlier one failed.
       - name: Run API specs against the local instance
         uses: ./.github/actions/run-specs
         with:
@@ -224,8 +212,29 @@ jobs:
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
-      - name: Run the @smoke specs against the local instance
+      - name: Publish application logs
+        if: failure()
+        uses: ./.github/actions/publish-app-logs
+        with:
+          artifact-name: app-logs-local-api
+
+      - name: Stop the application under test
         if: always()
+        run: node scripts/app.mjs down --volumes || true
+
+  smoke-local:
+    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node, dependencies and browsers
+        uses: ./.github/actions/setup
+
+      - name: Start the application under test
+        uses: ./.github/actions/start-local-app
+
+      - name: Run the @smoke specs against the local instance
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -241,8 +250,31 @@ jobs:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
-      - name: Run the non-smoke specs against the local instance
+      - name: Publish application logs
+        if: failure()
+        uses: ./.github/actions/publish-app-logs
+        with:
+          artifact-name: app-logs-local-smoke
+
+      - name: Stop the application under test
         if: always()
+        run: node scripts/app.mjs down --volumes || true
+
+  regression-local:
+    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node, dependencies and chromium
+        uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+
+      - name: Start the application under test
+        uses: ./.github/actions/start-local-app
+
+      - name: Run the non-smoke specs against the local instance
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -260,19 +292,11 @@ jobs:
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
-      # Container logs are the only way to diagnose an application-side failure after the
-      # runner is torn down, so capture them whenever the run did not pass.
-      - name: Capture application logs
-        if: failure()
-        run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
-
       - name: Publish application logs
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: ./.github/actions/publish-app-logs
         with:
-          name: app-logs-local
-          path: app-logs.txt
-          retention-days: 30
+          artifact-name: app-logs-local-regression
 
       - name: Stop the application under test
         if: always()

@@ -134,8 +134,8 @@ TEST_ENV=local npx playwright test
 
 The local stack also has a database (target `appDb-local`). Specs that need it read its credentials
 as JSON from `APP_DB_LOCAL` in `.env`, shaped `APP_DB_LOCAL='{"user":"…","password":"…"}'`, with the
-`MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `regression-local`
-job reads the secret of the same name.
+`MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `api-local` and
+`regression-local` jobs read the secret of the same name.
 Only the disabled-account cases use it (TC-LOGIN-10, `customer-account-api-6`): this build's admin
 API cannot disable an account. Without it they fail with a database connection error.
 
@@ -170,7 +170,7 @@ A manual run takes optional inputs (all blank = as configured):
 
 | Input | Effect |
 |---|---|
-| `app_url`, `api_url` | Test another deployment: become `APP_URL` / `APP_API_URL` (`src/config/targets.ts`). Not applied to `regression-local`, which always tests its own Docker stack. |
+| `app_url`, `api_url` | Test another deployment: become `APP_URL` / `APP_API_URL` (`src/config/targets.ts`). Not applied to the local jobs (`api-local`, `smoke-local`, `regression-local`), which always test their own Docker stacks. |
 | `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
 | `name` | Only tests whose title contains this text, case-insensitive |
 | `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
@@ -194,7 +194,9 @@ The nightly stages; each starts only when the one before it passed:
 | 1 | `api-tests` | Conventions check, typecheck and lint, then the browserless API specs (`tests/api`) |
 | 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
 | 3 | `regression` | Every other spec on chromium, in 2 parallel shards |
-| - | `regression-local` | Brings the application up on the runner with Docker, seeds it, and runs the whole suite against that private instance; independent of the stages, gates nothing |
+| - | `api-local` | The API specs against a private Docker instance on the runner, seeded fresh; gates nothing |
+| - | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit against its own private instance; gates nothing |
+| - | `regression-local` | Every other spec on chromium against its own private instance; gates nothing |
 
 The steps both workflows share are composite actions in `.github/actions/`:
 
@@ -202,12 +204,14 @@ The steps both workflows share are composite actions in `.github/actions/`:
 |---|---|
 | `setup` | Node, `npm ci`, the requested Playwright browsers and their Ubuntu system packages (both cached, so a slow package mirror can't stall a job; chromium is always added, because the auth setup runs on it) |
 | `static-checks` | Conventions check, typecheck and lint |
+| `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
+| `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
 | `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
 
 Tests of broken functionality assert the documented behaviour, so they fail, and the run
 is red, until the product fixes them (see [test plan §4.1](docs/test-plan.md)). All jobs run
 headless and publish HTML and Allure reports as artifacts (named per job, browser or shard;
-`regression-local` also uploads container logs when the run does not pass).
+the local jobs also upload container logs when they do not pass).
 
 ### Connecting the product repository
 
