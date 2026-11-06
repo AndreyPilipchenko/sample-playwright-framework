@@ -18,6 +18,10 @@ let dbsUserAccount: DbsUserAccount;
 
 let testData: typeof import('../resources/testData/LoginTestJsonFile.json');
 
+// No trace for this file: TC-LOGIN-3's would record the admin password, Allure publishes traces, and this option
+// (worker-scoped) cannot be set per test or describe. Failures keep their screenshot and video.
+test.use({ trace: 'off' });
+
 /**
  * Each test signs in once, in a fresh anonymous context. The customer is registered by the
  * test itself through the API (unique email per run, left behind on purpose); the admin

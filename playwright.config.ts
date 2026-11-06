@@ -69,8 +69,9 @@ export default defineConfig({
     /* A page that does not load fails as a navigation error, well before the test budget. */
     navigationTimeout: NAVIGATION_DEFAULT_MS,
     /* Native traces, screenshots, videos and report details may contain credentials; restrict artifact access and retention. */
-    /* CI retries, so the retry records the trace; local runs never retry, so keep the failing attempt's trace. */
-    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+    /* Every failure keeps a trace. On CI that is the first attempt's, because many specs set `retries: 0`
+     * and a policy that records only on a retry would leave their failures without one. */
+    trace: process.env.CI ? 'retain-on-first-failure' : 'retain-on-failure',
     headless: true,
     // viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
@@ -88,7 +89,8 @@ export default defineConfig({
       testDir: './setup',
       testMatch: /.*\.setup\.ts/,
       retries: 0, // an account locks after ONE failed login (known defect #21) — never retry
-      use: { ...devices['Desktop Chrome'] },
+      /* No trace: it would record the admin password typed by a failed login. */
+      use: { ...devices['Desktop Chrome'], trace: 'off' },
     },
     /* Browserless API specs (tests/api): no UI, no signed-in sessions, so no setup dependency.
      * Run alone with `npx playwright test --project=api` (the separate CI job does). */
