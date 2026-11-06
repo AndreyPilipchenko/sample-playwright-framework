@@ -50,7 +50,7 @@ Route: `#/`
 | TC-PO-22 | Product names wrap correctly (Firefox) | P3 | 35 | — |
 
 Smoke coverage: `tests/ui/catalog/HomeTests.spec.ts` (`home1`) checks that the home page loads with a product; TC-PO-2, TC-PO-5 and
-TC-PO-8 in `tests/ui/catalog/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests
+TC-PO-8 in `tests/ui/catalog/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests, TC-PO-2a and TC-PO-2b
 that differ only in how the product card is reached: through the search box and through the
 product's own category filter. Each smoke case seeds its own brand, category and products
 through the API with a per-run UUID in their names, and leaves them behind (deleting needs
@@ -211,7 +211,7 @@ TOTP during checkout (upstream AC3) is **out of scope** — absent from this bui
 
 Automated in `tests/ui/checkout/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
 are shown and that the postcode shows the saved postcode; it fails while defect 10 is open (it reads "missing value").
-TC-CBA-4 runs as two tests: one reaches the payment step and passes, the other checks the button's text, "Proceed to
+TC-CBA-4 runs as two tests: TC-CBA-4a reaches the payment step and passes, TC-CBA-4b checks the button's text, "Proceed to
 checkout" in the upstream source, and fails while defect 11 is open.
 
 ## 9. Checkout — Payment
@@ -504,7 +504,7 @@ Expected behaviour comes from the defect-free upstream source: statuses only mov
 | TC-CHAT-7 | Checkout with an empty cart shows "Your cart is empty" | P3 | — | AC5 |
 | TC-CHAT-8 | Support collects subject, 50-char message and optional `.txt` | P2 | — | AC6 |
 
-Automated in `tests/ui/contact/ChatWidgetTests.spec.ts` (`@regression`): TC-CHAT-6, one test per route. A customer who signs in
+Automated in `tests/ui/contact/ChatWidgetTests.spec.ts` (`@regression`): TC-CHAT-6, one test per route (TC-CHAT-6a signs in, TC-CHAT-6b is the guest route). A customer who signs in
 from the chat passes through cart total, address, payment and the order number. A guest fails on a local finding
 ([bug report](bug-reports/chat-no-guest-checkout.md)): the
 local build only offers "Sign in", while the story and the upstream source also offer "Continue as guest", which asks
