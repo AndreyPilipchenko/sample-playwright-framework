@@ -27,7 +27,7 @@ inputs:
     description: >-
       'true' uploads the Playwright HTML report as an artifact. Pass 'false' when the run signs in
       with shared credentials and the artifacts would be public: its failure pages and traces can
-      contain them. The Allure report is always published.
+      contain them. The Allure report and the traces of failed tests are always published.
     default: 'true'
   paths:
     description: Manual-run filter. Spec files or folders, separated by spaces, optionally with :line (e.g. "tests/ui/accounts/LoginTests.spec.ts:38").
@@ -64,8 +64,9 @@ runs:
       run: |
         set +e
         # Several stages can share a job. Without this, a stage that writes no report would be
-        # summarized, and saved for the next comparison, with the previous stage's results.
-        rm -f reports/json-report/test-results.json reports/ci-baseline/results.json
+        # summarized, and saved for the next comparison, with the previous stage's results, and
+        # a stage whose Allure report fails would publish the previous stage's report as its own.
+        rm -f reports/json-report/test-results.json reports/ci-baseline/results.json reports/allure-report/index.html
         # Regex-escapes literal text.
         escape() { printf '%s' "$1" | sed 's/[][\\.*^$+?(){}|/]/\\&/g'; }
         # One lookahead requiring any of the given tags as a whole word of the title.
@@ -139,7 +140,7 @@ runs:
         [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
         [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
         if [ "$PUBLISH_HTML_REPORT" != "true" ]; then
-          note+="HTML report not published: its failure pages and traces can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report is attached."
+          note+="HTML report not published: its failure pages and step titles can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report and the traces of failed tests are attached."
         fi
         # A filtered run or one against another URL is not a fair comparison for the next run.
         update=true
@@ -170,6 +171,18 @@ runs:
         name: allure-report-${{ inputs.report-name }}
         path: reports/allure-report/index.html
         retention-days: 30
+        # A missing report is either a selection with no specs or a failed generation (see the run's log).
+        if-no-files-found: warn
+
+    # Too large for the Allure report (src/utils/AllureReport.ts). `setup` and LoginTests, which
+    # type the admin password, record none. Open one with `npx playwright show-trace trace.zip`.
+    - name: Publish traces of failed tests
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: traces-${{ inputs.report-name }}
+        path: test-results/**/trace.zip
+        retention-days: 7
         if-no-files-found: ignore
 
     - name: Reflect test outcome

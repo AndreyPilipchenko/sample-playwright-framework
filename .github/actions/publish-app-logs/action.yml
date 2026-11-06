@@ -1,0 +1,24 @@
+name: Publish application logs
+description: >-
+  Uploads the Docker stack's container logs, the only way to diagnose an application-side
+  failure after the runner is torn down. Call it with `if: failure()`: inside a composite
+  action that check would only see this action's own steps.
+
+inputs:
+  artifact-name:
+    description: Artifact name, unique within the workflow run
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Capture the logs
+      shell: bash
+      run: node scripts/app.mjs logs > app-logs.txt 2>&1 || true
+
+    - name: Upload the logs
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: app-logs.txt
+        retention-days: 30
