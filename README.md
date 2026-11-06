@@ -197,7 +197,7 @@ The nightly stages; each starts only when the one before it passed:
 | 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
 | 3 | `regression` | Every other spec on chromium, in 2 parallel shards |
 | - | `api-local` | The API specs against a private Docker instance on the runner, seeded fresh; gates nothing |
-| - | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit against its own private instance; gates nothing |
+| - | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser, each against its own private instance; gates nothing |
 | - | `regression-local` | Every other spec on chromium against its own private instance; gates nothing |
 
 The steps both workflows share are composite actions in `.github/actions/`:
