@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
 import { CategoryPage } from '../src/pages/CategoryPage';
