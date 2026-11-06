@@ -87,9 +87,11 @@ onto the spec-running steps of both workflows.
 Native report detail can contain the admin credentials: Playwright step titles
 (`Fill "<value>"`), failure pages and traces. The Allure report masks what is typed into a
 password-like field (`Fill "***"`, see `REDACTED_FIELD_LOCATOR` in `src/utils/RedactedKeys.ts`),
-so CI always attaches it; account emails stay readable there. It leaves traces out, and `setup`
-and `tests/ui/accounts/LoginTests.spec.ts`, which type the admin password, record none. This repository is
-public, so the jobs that sign in attach the Playwright HTML report (failure pages, traces) only
+so CI always attaches it; account emails stay readable there. It leaves traces out: CI attaches
+failed tests' traces as a separate `traces-<report-name>` artifact, kept for 7 days (open one with
+`npx playwright show-trace trace.zip`). `setup` and `tests/ui/accounts/LoginTests.spec.ts`, which type
+the admin password, record none. This repository is
+public, so the jobs that sign in attach the Playwright HTML report (failure pages, step titles) only
 when the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is
 private). The run's Summary page always shows the results. See
 [docs/harness-change-requests/report-credential-masking.md](docs/harness-change-requests/report-credential-masking.md).
@@ -206,7 +208,7 @@ The steps both workflows share are composite actions in `.github/actions/`:
 | `static-checks` | Conventions check, typecheck and lint |
 | `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
 | `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
-| `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
+| `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
 
 Tests of broken functionality assert the documented behaviour, so they fail, and the run
 is red, until the product fixes them (see [test plan §4.1](docs/test-plan.md)). All jobs run

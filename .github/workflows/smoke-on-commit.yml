@@ -26,9 +26,9 @@
 # defect #21: one failed login locks the account, so check a value before saving it.
 #
 # REPORTS: native report detail (Playwright step titles, failure pages, traces) can contain the
-# admin credentials. They are the published demo account, so the Allure report is always
-# attached; this repository is public, so the jobs that sign in attach the Playwright HTML report
-# (failure pages, traces) only when the repository variable PUBLISH_REPORTS is 'true'.
+# admin credentials. They are the published demo account, so the Allure report and the traces of
+# failed tests (`traces-*`, 7 days) are always attached; this repository is public, so the jobs that
+# sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
 
 name: Smoke on product commit
 

@@ -24,7 +24,7 @@ export default class AllureReport extends AllureReporter {
    * Keep everything except traces and, unless enabled, videos; the original array is not changed.
    * Traces stay out because a full run's exceed the harness limit on Allure results (128 MiB, 16 MiB a
    * file), which leaves no report, and because they can show credentials, while this report is
-   * always published. They remain in `test-results/` and the Playwright HTML report.
+   * always published. They remain in `test-results/`, which CI publishes as a separate artifact, and the HTML report.
    */
   private reportAttachments(attachments: TestResult['attachments']): TestResult['attachments'] {
     return attachments.filter(attachment => attachment.name !== 'trace'
