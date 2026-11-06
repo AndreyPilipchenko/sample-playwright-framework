@@ -1,5 +1,7 @@
 # Known Defects Register — Toolshop (with-bugs)
 
+> Derived from Testsmith's documentation and not covered by this repository's MIT license; see [NOTICE](../NOTICE.md).
+
 The `with-bugs` build ships **90+ intentional defects**. This register is transcribed
 from the
 [upstream known-bugs documentation](https://github.com/testsmith-io/practice-software-testing/blob/main/docs/sprints/sprint5-with-bugs.md)
