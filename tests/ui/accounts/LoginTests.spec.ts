@@ -1,6 +1,5 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { applications } from '../../../src/config/applications';
 import { LoginPage } from '../../../src/pages/LoginPage';
 import { AccountPage } from '../../../src/pages/AccountPage';
@@ -8,7 +7,8 @@ import { AdminDashboardPage } from '../../../src/pages/AdminDashboardPage';
 import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
 import { databases } from '../../../src/config/databases';
 import { DbsUserAccount } from '../../../src/dbs/DbsUserAccount';
-import { newUuid, withUuid } from '../../../src/utils/UniqueData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let loginPage: LoginPage;
 let accountPage: AccountPage;
@@ -42,7 +42,7 @@ test.describe('User Login', () => {
   test('Invalid credentials show "Invalid email or password"', { tag: ['@regression'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-4');
-    const user = { ...testData.tcLogin4.user, email: withUuid(testData.tcLogin4.user.email, newUuid()) };
+    const user = withUniqueEmail(testData.tcLogin4.user, newUuid());
 
     await apisUserAccount.registerUser(user);
     await loginPage.navigate();
@@ -53,7 +53,7 @@ test.describe('User Login', () => {
   test('Valid user credentials redirect to the customer account page', { tag: ['@smoke'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-2');
-    const user = { ...testData.tcLogin2.user, email: withUuid(testData.tcLogin2.user.email, newUuid()) };
+    const user = withUniqueEmail(testData.tcLogin2.user, newUuid());
 
     await apisUserAccount.registerUser(user);
     await loginPage.navigate();
@@ -86,7 +86,7 @@ test.describe('User Login', () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-7');
     const { wrongPassword, expectedError } = testData.tcLogin7;
-    const user = { ...testData.tcLogin7.user, email: withUuid(testData.tcLogin7.user.email, newUuid()) };
+    const user = withUniqueEmail(testData.tcLogin7.user, newUuid());
 
     await apisUserAccount.registerUser(user);
     await loginPage.navigate();
@@ -102,7 +102,7 @@ test.describe('User Login', () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-8');
     const { wrongPassword, expectedError, expectedLockMessage } = testData.tcLogin8;
-    const user = { ...testData.tcLogin8.user, email: withUuid(testData.tcLogin8.user.email, newUuid()) };
+    const user = withUniqueEmail(testData.tcLogin8.user, newUuid());
 
     await apisUserAccount.registerUser(user);
     await loginPage.navigate();
@@ -120,7 +120,7 @@ test.describe('User Login', () => {
   test('Disabled account shows "Account disabled." and is not authenticated', { tag: ['@regression'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-10');
-    const user = { ...testData.tcLogin10.user, email: withUuid(testData.tcLogin10.user.email, newUuid()) };
+    const user = withUniqueEmail(testData.tcLogin10.user, newUuid());
 
     await apisUserAccount.registerUser(user);
     await dbsUserAccount.disableUser(user.email);
@@ -132,7 +132,7 @@ test.describe('User Login', () => {
 
   test.beforeAll(async () => {
     dbsUserAccount = new DbsUserAccount(databases.appDb);
-    testData = JSON.parse(fs.readFileSync('./resources/testData/LoginTestJsonFile.json', 'utf8'));
+    testData = loadTestData('LoginTestJsonFile.json');
   });
 
   test.afterAll(async () => {

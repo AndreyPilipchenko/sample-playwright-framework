@@ -29,7 +29,7 @@
 #
 # SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
 # §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
-# registers a disposable one every run. An empty admin secret skips the admin specs. Mind
+# registers a disposable one every run. With an empty admin secret, the admin specs fail with "No saved session". Mind
 # defect #21: one failed login locks the account, so check a value before saving it.
 #
 # REPORTS: native report detail (Playwright step titles, failure pages, traces) can contain the

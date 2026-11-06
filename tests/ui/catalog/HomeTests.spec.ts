@@ -1,8 +1,8 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { HomePage } from '../../../src/pages/HomePage';
 import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let homePage: HomePage;
 let headerPage: HeaderPage;
@@ -22,7 +22,7 @@ test.describe('Home', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/HomeTestJsonFile.json', 'utf8'));
+    testData = loadTestData('HomeTestJsonFile.json');
   });
 
   test.beforeEach(({ page }) => {

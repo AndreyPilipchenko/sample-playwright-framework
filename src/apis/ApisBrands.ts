@@ -3,7 +3,8 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { slugOf } from '../utils/UniqueData';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeOneOf, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectRefusedWithoutToken, postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** A brand as `GET /brands/{id}` returned it. */
 export interface BrandRecord {
@@ -50,9 +51,7 @@ export class ApisBrands {
   /** Creating a brand without its required fields is refused; resolves to the field names the API complained about. */
   async createBrandWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create a brand without its required fields', async () => {
-      const response = await this.apiActions.post(this.brands_serviceName, { data: {} });
-      expectToBe('the create brand without fields response status', response.status(), 422);
-      return Object.keys((await response.json()) as Record<string, string[]>);
+      return await postEmptyAndGetReportedFields(this.apiActions, this.brands_serviceName, 'the create brand without fields response status');
     });
   }
 
@@ -61,7 +60,7 @@ export class ApisBrands {
   /** Deleting without an admin token is refused: 401 or 403. */
   async verifyDeleteRefused(brandId: number, status: number) {
     await allure.step(`Verify deleting the brand ${brandId} without a token is refused`, async () => {
-      expectToBeOneOf(`the status of deleting the brand ${brandId} without a token`, status, [401, 403]);
+      expectRefusedWithoutToken(`the status of deleting the brand ${brandId} without a token`, status);
     });
   }
 

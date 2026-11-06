@@ -2,15 +2,8 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectNotToHaveValue, expectToBeVisible, expectToHaveValue, expectToHaveText } from '../utils/Expects';
-
-/** The billing address the invoice detail shows, as stored with the invoice. */
-export interface InvoiceBillingAddress {
-  address: string;
-  postcode: string;
-  city: string;
-  state: string;
-  country: string;
-}
+import { expectAddressFieldsToShow, type AddressValues } from './AddressFields';
+import { rowWithCell } from '../utils/TableRows';
 
 /** The payment values the invoice detail shows. */
 export interface InvoicePayment {
@@ -60,7 +53,7 @@ export class InvoiceDetailPage {
 
   /** The Products table row of the line item named exactly `productName`. */
   private line_row(productName: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name: productName, exact: true }) });
+    return rowWithCell(this.page, productName);
   }
 
   ///// Actions
@@ -80,13 +73,12 @@ export class InvoiceDetailPage {
 
   ///// Validations
 
-  async verifyBillingAddress(expected: InvoiceBillingAddress) {
+  async verifyBillingAddress(expected: AddressValues) {
     await step('Verify the billing address fields show the stored values', async () => {
-      await expectToHaveValue('the Address field', this.address_input, expected.address);
-      await expectToHaveValue('the Postcode field', this.postcode_input, expected.postcode);
-      await expectToHaveValue('the City field', this.city_input, expected.city);
-      await expectToHaveValue('the State field', this.state_input, expected.state);
-      await expectToHaveValue('the Country field', this.country_input, expected.country);
+      await expectAddressFieldsToShow(
+        { address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_input },
+        expected,
+      );
     });
   }
 

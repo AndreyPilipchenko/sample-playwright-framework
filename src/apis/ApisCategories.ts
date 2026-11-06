@@ -4,6 +4,7 @@ import { ApiActions } from '../utils/ApiActions';
 import { slugOf } from '../utils/UniqueData';
 import { applications } from '../config/applications';
 import { expectToBe, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** A category as `GET /categories/{id}` returned it. */
 export interface CategoryRecord {
@@ -46,9 +47,7 @@ export class ApisCategories {
   /** Creating a category without its required fields is refused; resolves to the field names the API complained about. */
   async createCategoryWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create a category without its required fields', async () => {
-      const response = await this.apiActions.post(this.categories_serviceName, { data: {} });
-      expectToBe('the create category without fields response status', response.status(), 422);
-      return Object.keys((await response.json()) as Record<string, string[]>);
+      return await postEmptyAndGetReportedFields(this.apiActions, this.categories_serviceName, 'the create category without fields response status');
     });
   }
 

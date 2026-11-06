@@ -18,6 +18,7 @@ so don't be surprised when something looks broken — that's the point.
 src/pages/    GUI business layer — page classes (locators + actions + validations)
 src/apis/     API business layer — service classes per domain (accounts, catalog, invoices, users, logs, GraphQL)
 src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
+src/helpers/  Flows across the API and several pages, shared by specs (CustomerFlows)
 src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
 src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
 src/fixtures/ The suite's `test` with the `role` option (signed-in sessions)

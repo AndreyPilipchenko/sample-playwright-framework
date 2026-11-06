@@ -1,10 +1,10 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
 import { LoginPage } from '../../../src/pages/LoginPage';
 import { RegisterPage } from '../../../src/pages/RegisterPage';
-import { newUuid, withUuid } from '../../../src/utils/UniqueData';
+import { newUuid, withUniqueEmail, withUuid } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let apisUserAccount: ApisUserAccount;
 let loginPage: LoginPage;
@@ -23,7 +23,7 @@ test.describe('User Registration', () => {
   test('Valid submission creates the account and redirects to login', { tag: ['@regression'] }, async () => {
     await allure.feature('User Registration');
     await allure.testCaseId('TC-REG-9');
-    const form = { ...testData.tcREG9.form, email: withUuid(testData.tcREG9.form.email, newUuid()) };
+    const form = withUniqueEmail(testData.tcREG9.form, newUuid());
 
     await registerPage.navigate();
     await registerPage.register(form);
@@ -62,7 +62,7 @@ test.describe('User Registration', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/RegistrationTestJsonFile.json', 'utf8'));
+    testData = loadTestData('RegistrationTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {

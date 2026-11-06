@@ -1,6 +1,5 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { HeaderPage } from '../../../src/pages/HeaderPage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
 import { CartPage } from '../../../src/pages/CartPage';
@@ -9,7 +8,8 @@ import { CheckoutAddressPage } from '../../../src/pages/CheckoutAddressPage';
 import { CheckoutPaymentPage } from '../../../src/pages/CheckoutPaymentPage';
 import { ApisProductCatalog, type CatalogSeed } from '../../../src/apis/ApisProductCatalog';
 import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
-import { newUuid, withUuid } from '../../../src/utils/UniqueData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let headerPage: HeaderPage;
 let productDetailPage: ProductDetailPage;
@@ -38,7 +38,7 @@ async function addSeededProductToCartAndOpenIt(seed: CatalogSeed & { cartItemCou
 
 /** A fresh customer for the case: unique email per run, left behind on purpose (deleting it needs an admin token). */
 async function registerCustomer(seed: UserSeed): Promise<UserSeed> {
-  const user = { ...seed, email: withUuid(seed.email, newUuid()) };
+  const user = withUniqueEmail(seed, newUuid());
   await apisUserAccount.registerUser(user);
   return user;
 }
@@ -229,7 +229,7 @@ test.describe('Checkout', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/CheckoutTestJsonFile.json', 'utf8'));
+    testData = loadTestData('CheckoutTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {
