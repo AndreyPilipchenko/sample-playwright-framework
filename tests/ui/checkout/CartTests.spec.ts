@@ -1,12 +1,12 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { CartPage } from '../src/pages/CartPage';
-import { CheckoutSignInPage } from '../src/pages/CheckoutSignInPage';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { newUuid } from '../src/utils/UniqueData';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { CartPage } from '../../../src/pages/CartPage';
+import { CheckoutSignInPage } from '../../../src/pages/CheckoutSignInPage';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { newUuid } from '../../../src/utils/UniqueData';
 
 let headerPage: HeaderPage;
 let productDetailPage: ProductDetailPage;
@@ -14,7 +14,7 @@ let cartPage: CartPage;
 let checkoutSignInPage: CheckoutSignInPage;
 let apisProductCatalog: ApisProductCatalog;
 
-let testData: typeof import('../resources/testData/CartTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/CartTestJsonFile.json');
 
 /**
  * They assert the documented cart behaviour and fail while defects L1, 7 and 8 are open

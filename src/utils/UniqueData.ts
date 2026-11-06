@@ -23,3 +23,8 @@ export function searchTokenOf(uuid: string): string {
 export function withUniqueEmail<T extends { email: string }>(user: T, uuid: string): T {
   return { ...user, email: withUuid(user.email, uuid) };
 }
+
+/** URL part of a name: lowercase words separated by hyphens (Swagger: slug). */
+export function slugOf(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}

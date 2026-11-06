@@ -16,9 +16,8 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
  */
 export default defineConfig({
   testDir: './tests',
-  /* Default testMatch already recurses into subfolders — a one-folder-deep spec
-   * layout (tests/<Suite Folder>/<Feature>Tests.spec.ts, design-conventions.md
-   * spec-folder ruling) needs no extra config. */
+  /* Default testMatch already recurses into subfolders — the spec layout
+   * (tests/api/<category>/ and tests/ui/<category>/<Feature>Tests.spec.ts) needs no extra config. */
   /* Budgets and their measurements live in src/config/timeouts.ts. The test budget stays
    * above the assertion budget, so a failing assertion reports its own message. */
   timeout: TEST_DEFAULT_MS,
@@ -101,7 +100,7 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      testIgnore: '**/api/**',
+      testDir: './tests/ui',
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } },
     },
@@ -110,7 +109,7 @@ export default defineConfig({
      * functional suite runs on chromium only. */
     {
       name: 'firefox',
-      testIgnore: '**/api/**',
+      testDir: './tests/ui',
       dependencies: ['setup'],
       grep: /@smoke/,
       use: { ...devices['Desktop Firefox'], viewport: { width: 1920, height: 1080 } },
@@ -118,7 +117,7 @@ export default defineConfig({
 
     {
       name: 'webkit',
-      testIgnore: '**/api/**',
+      testDir: './tests/ui',
       dependencies: ['setup'],
       grep: /@smoke/,
       use: { ...devices['Desktop Safari'], viewport: { width: 1920, height: 1080 } },

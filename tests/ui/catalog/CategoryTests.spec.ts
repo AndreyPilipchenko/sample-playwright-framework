@@ -1,18 +1,18 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { CategoryPage } from '../src/pages/CategoryPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { HomePage } from '../src/pages/HomePage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid } from '../src/utils/UniqueData';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { CategoryPage } from '../../../src/pages/CategoryPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 let categoryPage: CategoryPage;
 let headerPage: HeaderPage;
 let homePage: HomePage;
 
-let testData: typeof import('../resources/testData/CategoryTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/CategoryTestJsonFile.json');
 
 test.describe('Category', () => {
 

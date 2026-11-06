@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-CHAT-6 (checkout walks through cart, details, address, payment, confirmation) in [test cases](../test-cases.md), guest route. |
-| Automation | `tests/ChatWidgetTests.spec.ts`: the guest test fails on the missing button. The test for a customer who signs in from the chat passes. |
+| Automation | `tests/ui/contact/ChatWidgetTests.spec.ts`: the guest test fails on the missing button. The test for a customer who signs in from the chat passes. |
 | Area | Chat widget, checkout |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

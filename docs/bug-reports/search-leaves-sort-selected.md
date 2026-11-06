@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-PO-6 (search resets all active filters) in [test cases](../test-cases.md). |
-| Automation | `tests/ProductOverviewTests.spec.ts` passes on the category, brand and price reset, then fails on the sort dropdown. |
+| Automation | `tests/ui/catalog/ProductOverviewTests.spec.ts` passes on the category, brand and price reset, then fails on the sort dropdown. |
 | Area | Product overview, search and sort |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

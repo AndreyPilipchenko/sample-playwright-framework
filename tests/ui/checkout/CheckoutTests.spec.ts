@@ -1,15 +1,15 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { CartPage } from '../src/pages/CartPage';
-import { CheckoutSignInPage } from '../src/pages/CheckoutSignInPage';
-import { CheckoutAddressPage } from '../src/pages/CheckoutAddressPage';
-import { CheckoutPaymentPage } from '../src/pages/CheckoutPaymentPage';
-import { ApisProductCatalog, type CatalogSeed } from '../src/apis/ApisProductCatalog';
-import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { CartPage } from '../../../src/pages/CartPage';
+import { CheckoutSignInPage } from '../../../src/pages/CheckoutSignInPage';
+import { CheckoutAddressPage } from '../../../src/pages/CheckoutAddressPage';
+import { CheckoutPaymentPage } from '../../../src/pages/CheckoutPaymentPage';
+import { ApisProductCatalog, type CatalogSeed } from '../../../src/apis/ApisProductCatalog';
+import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let headerPage: HeaderPage;
 let productDetailPage: ProductDetailPage;
@@ -20,7 +20,7 @@ let checkoutPaymentPage: CheckoutPaymentPage;
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
 
-let testData: typeof import('../resources/testData/CheckoutTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/CheckoutTestJsonFile.json');
 
 /**
  * Each case seeds its own product through the API (per-run UUID in every name, left behind on

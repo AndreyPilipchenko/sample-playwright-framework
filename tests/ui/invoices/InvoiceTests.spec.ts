@@ -1,16 +1,16 @@
 import type { APIRequestContext } from '@playwright/test';
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { ApisInvoices, type CreatedInvoice } from '../src/apis/ApisInvoices';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { createOwnInvoice, type OwnInvoiceSeed } from '../src/apis/OwnInvoices';
-import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
-import { AccountPage } from '../src/pages/AccountPage';
-import { InvoiceDetailPage } from '../src/pages/InvoiceDetailPage';
-import { InvoicesPage } from '../src/pages/InvoicesPage';
-import { LoginPage } from '../src/pages/LoginPage';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { ApisInvoices, type CreatedInvoice } from '../../../src/apis/ApisInvoices';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { ApisOwnInvoices, type OwnInvoiceSeed } from '../../../src/apis/ApisOwnInvoices';
+import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { InvoiceDetailPage } from '../../../src/pages/InvoiceDetailPage';
+import { InvoicesPage } from '../../../src/pages/InvoicesPage';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let accountPage: AccountPage;
 let invoiceDetailPage: InvoiceDetailPage;
@@ -19,8 +19,9 @@ let loginPage: LoginPage;
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
 let apiRequest: APIRequestContext;
+let apisOwnInvoices: ApisOwnInvoices;
 
-let testData: typeof import('../resources/testData/InvoiceTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/InvoiceTestJsonFile.json');
 
 /**
  * Each case registers its own customer, seeds its own product and creates the invoice through the API
@@ -95,7 +96,7 @@ test.describe('Invoices', () => {
     const { foreign, missingInvoiceId, expectedMessage } = testData.tcINV7;
 
     await openOwnInvoiceDetail(testData.tcINV7);
-    const foreignInvoice = await createOwnInvoice(apiRequest, foreign);
+    const foreignInvoice = await apisOwnInvoices.createOwnInvoice(foreign);
     await invoiceDetailPage.navigate(missingInvoiceId);
     await invoiceDetailPage.verifyInvoiceDoesNotExist(expectedMessage);
     await invoiceDetailPage.navigate(foreignInvoice.created.id);
@@ -124,6 +125,7 @@ test.describe('Invoices', () => {
 
   test.beforeEach(({ page, request }) => {
     apiRequest = request;
+    apisOwnInvoices = new ApisOwnInvoices(request);
     apisProductCatalog = new ApisProductCatalog(request);
     apisUserAccount = new ApisUserAccount(request);
     accountPage = new AccountPage(page);

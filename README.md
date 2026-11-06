@@ -21,7 +21,7 @@ src/dbs/      DB business layer — DbsUserAccount (local stack only, see Runnin
 src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
 src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
 src/fixtures/ The suite's `test` with the `role` option (signed-in sessions)
-tests/        Spec files — orchestrate business flows, carry Allure metadata only
+tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only
 setup/        Setup project — signs each role in once per run
 resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (team libraries)
 .harness/     Harness-managed project config, targets and the vendored package
@@ -87,7 +87,7 @@ Native report detail can contain the admin credentials: Playwright step titles
 (`Fill "<value>"`), failure pages and traces. The Allure report masks what is typed into a
 password-like field (`Fill "***"`, see `REDACTED_FIELD_LOCATOR` in `src/utils/RedactedKeys.ts`),
 so CI always attaches it; account emails stay readable there. It also embeds failed tests'
-traces, so `setup` and `tests/LoginTests.spec.ts`, which type the admin password, record none. This repository is
+traces, so `setup` and `tests/ui/accounts/LoginTests.spec.ts`, which type the admin password, record none. This repository is
 public, so the jobs that sign in attach the Playwright HTML report (failure pages, traces) only
 when the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is
 private). The run's Summary page always shows the results. See
@@ -172,7 +172,7 @@ A manual run takes optional inputs (all blank = as configured):
 | `app_url`, `api_url` | Test another deployment: become `APP_URL` / `APP_API_URL` (`src/config/targets.ts`). Not applied to `regression-local`, which always tests its own Docker stack. |
 | `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
 | `name` | Only tests whose title contains this text, case-insensitive |
-| `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/LoginTests.spec.ts:38`) |
+| `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
 
 The filters narrow each stage's own selection (smoke-on-commit never leaves `@smoke`); a stage
 left with nothing to run passes, and its summary says no tests matched. Every job writes its
@@ -182,7 +182,7 @@ that step's previous unfiltered run, whose results stay in the Actions cache; a 
 one against another URL compares but does not replace them.
 
 ```sh
-gh workflow run nightly.yml -f tag=@regression -f path=tests/CartTests.spec.ts
+gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
 gh workflow run smoke-on-commit.yml -f name="admin credentials" --ref <branch>
 ```
 

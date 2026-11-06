@@ -1,13 +1,13 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisMailInbox } from '../src/apis/ApisMailInbox';
-import { ContactPage } from '../src/pages/ContactPage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { ApisMailInbox } from '../../../src/apis/ApisMailInbox';
+import { ContactPage } from '../../../src/pages/ContactPage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let contactPage: ContactPage;
 
-let testData: typeof import('../resources/testData/ContactTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ContactTestJsonFile.json');
 
 /** The contact form as a guest sees it. The subject texts are the ones the story's AC3 lists (test plan §4.1). */
 test.describe('Contact form', () => {

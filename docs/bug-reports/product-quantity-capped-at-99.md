@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-PD-7 (quantity accepts manual numeric entry) in [test cases](../test-cases.md). |
-| Automation | `tests/ProductDetailTests.spec.ts` passes typed entry and the lower limit, then fails on the upper limit. |
+| Automation | `tests/ui/catalog/ProductDetailTests.spec.ts` passes typed entry and the lower limit, then fails on the upper limit. |
 | Area | Product detail, quantity input |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

@@ -1,16 +1,16 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { LoginPage } from '../src/pages/LoginPage';
-import { RegisterPage } from '../src/pages/RegisterPage';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { RegisterPage } from '../../../src/pages/RegisterPage';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let apisUserAccount: ApisUserAccount;
 let loginPage: LoginPage;
 let registerPage: RegisterPage;
 
-let testData: typeof import('../resources/testData/RegistrationTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/RegistrationTestJsonFile.json');
 
 /**
  * The registered customer's email carries a per-run UUID; the account is left behind on purpose

@@ -1,9 +1,11 @@
 import { test } from '@playwright/test';
 import * as allure from 'allure-js-commons';
+import { ApisCategories } from '../../../src/apis/ApisCategories';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { loadTestData } from '../../../src/utils/TestData';
 import { newUuid } from '../../../src/utils/UniqueData';
 
+let apisCategories: ApisCategories;
 let apisProductCatalog: ApisProductCatalog;
 
 let testData: typeof import('../../../resources/testData/CategoryApiTestJsonFile.json');
@@ -16,8 +18,8 @@ test.describe('Category API', () => {
     await allure.testCaseId('category-api-1');
 
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.categoryApi1);
-    const category = await apisProductCatalog.getCategory(catalog.categoryId);
-    await apisProductCatalog.verifyTopLevelCategory(category, catalog.categoryId, catalog.categoryName);
+    const category = await apisCategories.getCategory(catalog.categoryId);
+    await apisCategories.verifyTopLevelCategory(category, catalog.categoryId, catalog.categoryName);
   });
 
   test('Created products are listed in their category and found by search', { tag: ['@regression'] }, async () => {
@@ -33,8 +35,8 @@ test.describe('Category API', () => {
     await allure.feature('Category API');
     await allure.testCaseId('category-api-3');
 
-    const reportedFields = await apisProductCatalog.createCategoryWithoutRequiredFields();
-    await apisProductCatalog.verifyRequiredFieldsReported('category', reportedFields, testData.categoryApi3.requiredFields);
+    const reportedFields = await apisCategories.createCategoryWithoutRequiredFields();
+    await apisCategories.verifyRequiredFieldsReported(reportedFields, testData.categoryApi3.requiredFields);
   });
 
   test.beforeAll(async () => {
@@ -42,6 +44,7 @@ test.describe('Category API', () => {
   });
 
   test.beforeEach(({ request }) => {
+    apisCategories = new ApisCategories(request);
     apisProductCatalog = new ApisProductCatalog(request);
   });
 

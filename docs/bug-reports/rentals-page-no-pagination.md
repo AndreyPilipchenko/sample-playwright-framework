@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-RENT-1 (rentals page is reachable), story AC1 "a list of all rental products", in [test cases](../test-cases.md). |
-| Automation | `tests/RentalTests.spec.ts`: TC-RENT-1 seeds 10 rentals, more than one API page holds, and fails because they are not all listed. |
+| Automation | `tests/ui/catalog/RentalTests.spec.ts`: TC-RENT-1 seeds 10 rentals, more than one API page holds, and fails because they are not all listed. |
 | Area | Rentals page |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

@@ -5,7 +5,7 @@
 | Status | Open, not yet filed in any tracker |
 | Register entry | [8](../known-defects.md): "Total price displays 0,00". Written up here with its own reproduction, as requested. |
 | Test cases | TC-CART-2 (line total after a quantity change) and TC-CART-7 (cart total versus line totals) in [test cases](../test-cases.md) |
-| Automation | TC-CART-2 and TC-CART-7 in `tests/CartTests.spec.ts`; they fail while this defect is open (test plan §4.1). |
+| Automation | TC-CART-2 and TC-CART-7 in `tests/ui/checkout/CartTests.spec.ts`; they fail while this defect is open (test plan §4.1). |
 | Area | Checkout — cart review |
 | Environment | Local Docker (`sprint5-with-bugs`), Chromium 1920×1080 |
 | Observed | 2026-11-03 |

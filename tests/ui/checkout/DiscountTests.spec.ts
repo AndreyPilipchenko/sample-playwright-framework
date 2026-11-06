@@ -1,19 +1,19 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { CartPage } from '../src/pages/CartPage';
-import { CheckoutAddressPage } from '../src/pages/CheckoutAddressPage';
-import { CheckoutPaymentPage } from '../src/pages/CheckoutPaymentPage';
-import { CheckoutSignInPage } from '../src/pages/CheckoutSignInPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { HomePage } from '../src/pages/HomePage';
-import { InvoiceDetailPage } from '../src/pages/InvoiceDetailPage';
-import { InvoicesPage } from '../src/pages/InvoicesPage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { useBrowserLocation } from '../src/utils/BrowserGeolocation';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { CartPage } from '../../../src/pages/CartPage';
+import { CheckoutAddressPage } from '../../../src/pages/CheckoutAddressPage';
+import { CheckoutPaymentPage } from '../../../src/pages/CheckoutPaymentPage';
+import { CheckoutSignInPage } from '../../../src/pages/CheckoutSignInPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { InvoiceDetailPage } from '../../../src/pages/InvoiceDetailPage';
+import { InvoicesPage } from '../../../src/pages/InvoicesPage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
@@ -27,7 +27,7 @@ let invoiceDetailPage: InvoiceDetailPage;
 let invoicesPage: InvoicesPage;
 let productDetailPage: ProductDetailPage;
 
-let testData: typeof import('../resources/testData/DiscountTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/DiscountTestJsonFile.json');
 
 /**
  * Location discounts come from the position the browser reports, so every case runs in a context that may use

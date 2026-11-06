@@ -58,7 +58,7 @@ on:
         type: string
         default: ''
       path:
-        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/LoginTests.spec.ts:38)
+        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/ui/accounts/LoginTests.spec.ts:38)
         type: string
         default: ''
 
