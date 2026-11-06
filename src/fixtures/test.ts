@@ -25,7 +25,7 @@ export const test = base.extend<{ role: Role | undefined; waitForToasts: boolean
 
   context: async ({ context, role, waitForToasts }, use, testInfo) => {
     if (role) await restoreSession(context, authStateFile(role));
-    const browserEvents = recordBrowserEvents(context, waitForToasts);
+    const browserEvents = await recordBrowserEvents(context, waitForToasts);
     await use(context);
     await attachBrowserEventsOnFailure(testInfo, browserEvents);
   },
