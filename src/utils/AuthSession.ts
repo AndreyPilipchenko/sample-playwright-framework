@@ -6,8 +6,8 @@ import type { BrowserContext, Page } from '@playwright/test';
  * Saves and restores a signed-in session that lives in sessionStorage.
  *
  * Playwright's `storageState` captures cookies, localStorage and IndexedDB, but not
- * sessionStorage (https://playwright.dev/docs/auth#session-storage), which is where the
- * app under test keeps its `auth-token`. These helpers fill that gap: the setup project
+ * sessionStorage (https://playwright.dev/docs/auth#session-storage), where an app may keep
+ * its token. These helpers fill that gap: the setup project
  * saves the page's sessionStorage once per run, and every test that opts into a role
  * restores it through an init script before the app's own code runs.
  *

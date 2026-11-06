@@ -12,7 +12,7 @@
 # then puts the results on GitHub Pages.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers),
-# static-checks (conventions, type-check, lint) and run-specs (run Playwright, publish the
+# static-checks (conventions, core boundary, type-check, lint) and run-specs (run Playwright, publish the
 # reports, reflect the outcome).
 #
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
