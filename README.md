@@ -20,7 +20,7 @@ framework reports them. Latest full local run (6 November 2026, chromium and API
 |---|---|
 | **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 9 are `@smoke` and also run on Firefox and WebKit |
 | **Automated cases** | [116 test cases](docs/test-cases.md) from the test design |
-| **Defects** | 41 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
+| **Defects** | 40 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
 | **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
 | **Stack** | Playwright 1.63, TypeScript 7, Node 24, Allure 3, Docker, GitHub Actions, oxlint |
 
@@ -50,7 +50,7 @@ the two `.env` values, the admin and disabled-account specs fail ([details](#run
 | **Some behaviour can't be reached through the UI or API** | Disabling an account goes through the database, a discount depends on the browser's position, and a contact message is checked in the local mail inbox | [`DbsUserAccount.ts`](src/dbs/DbsUserAccount.ts), [`BrowserGeolocation.ts`](src/utils/BrowserGeolocation.ts), [`ApisMailInbox.ts`](src/apis/ApisMailInbox.ts) |
 | **Security needs testing too** | API specs try another customer's record, forged invoice prices, deletes without a token and guarded GraphQL fields | [`tests/api/security/`](tests/api/security/) |
 | **Reports in a public repository can leak logins** | Allure masks typed passwords, the two places that type the admin password record no trace, and the HTML report is published only on request | [Report masking](docs/harness-change-requests/report-credential-masking.md) |
-| **Conventions drift when they only live in a review** | Every pull request runs a mechanical conventions check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
+| **Code style slips when only a reviewer checks it** | Every pull request runs a mechanical conventions check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
 
 ## How it's built
 
@@ -107,6 +107,7 @@ job's failure doesn't stop the others.
 |---|---|---|
 | **Allure** | `reports/allure-report/index.html`; CI artifact `allure-report-<job>` | Main report, with business-titled steps. Opens after a local run (`AUTO_ALLURE_OPEN=false` turns that off) |
 | **Traces** | `test-results/`; CI artifact `traces-<job>`, kept for 7 days | One per failed test. Open with `npx playwright show-trace trace.zip` |
+| **Results dashboard** | `reports/quality-dashboard/index.html`: run `node scripts/quality-dashboard.mjs local=reports/json-report/test-results.json` after a run | Pass and fail counts by area, and the recorded reason for each failure |
 | **CI summary** | The run's Summary page | Counts, failures with their assertion, and what changed since the last run |
 | **Playwright HTML** | `reports/playwright-report/`; CI only when `PUBLISH_REPORTS` is `true` | Open with `npx playwright show-report reports/playwright-report` |
 | **JSON, JUnit, CTRF** | `reports/json-report/`, `reports/junit/`, `ctrf/` | For other tools |

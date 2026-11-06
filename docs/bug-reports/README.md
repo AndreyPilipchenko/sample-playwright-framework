@@ -12,7 +12,7 @@ separate, explicitly approved preview. Reports are written even when the defect 
 | [Cart delete button does nothing](cart-delete-button-no-effect.md) | 7 | TC-CART-4, TC-CART-5 | Open, not filed |
 | [Checkout order is not placed with the prefilled billing address (`POST /invoices` 500)](checkout-order-not-placed-prefilled-address.md) | new (related to 10) | TC-CPAY-12, TC-CPAY-13 | Open, not filed |
 | [Contact form confirms the message, but the email is never delivered](contact-mail-not-delivered.md) | new | TC-CONT-8 | Open, not filed |
-| [Chat checkout offers only "Sign in"; a guest cannot continue](chat-no-guest-checkout.md) | new | TC-CHAT-6 (guest) | Open, not filed |
+| [Chat checkout offers only "Sign in"; a guest cannot continue](chat-no-guest-checkout.md) | new | TC-CHAT-6b | Open, not filed |
 | [Chat sign-in shows the typed password in plain text](chat-echoes-password.md) | new | seen in TC-CHAT-6 | Open, not filed |
 | [Contact form and `POST /messages` accept an invalid email address](contact-api-accepts-invalid-email.md) | new | `contact-api-5` | Open, not filed |
 | [`POST /messages` returns 500 for a guest without both a name and an email](contact-api-500-without-identity.md) | new | none | Open, not filed |

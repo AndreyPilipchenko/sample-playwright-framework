@@ -614,6 +614,26 @@ is used.
 
 ---
 
+## Reasons recorded per test
+
+These automated tests fail for a reason described in the notes above that the Defect column doesn't give: it is empty,
+lists a related defect that isn't why the test fails today, or belongs to one of a case's tests.
+`scripts/quality-dashboard.mjs` reads this table, and an entry here replaces the Defect column for that test.
+
+| Case | Recorded reason |
+|---|---|
+| TC-CART-10 | The local build shows no combination discount line |
+| TC-CART-11 | The local build shows no combination discount line |
+| TC-CBA-4b | Defect 11: the Submit / Next button has no text |
+| TC-DISC-6 | The local build applies no combination discount |
+| TC-INV-7 | For an invoice that does not exist, the local build shows no message |
+| TC-LOGIN-8 | The local build never locks an account, so the lock message never appears |
+| TC-CPAY-7 | Blocked by defect 12: choosing Credit Card shows the Bank Transfer fields |
+| TC-DISC-1 | The New York badge does not appear on the local build; the cause is not confirmed |
+| TC-DISC-5 | The local build applies no combination discount |
+| TC-DISC-8 | The local build applies no combination discount, and its invoice page has no Subtotal or Discount amount field |
+| customer-account-api-5 | The local build never locks an account: the login after three failures answers 200, not 423 |
+
 ## Coverage summary
 
 | Area | Cases | Automated |
