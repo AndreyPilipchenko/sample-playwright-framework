@@ -26,7 +26,7 @@ test.describe('Product Overview', () => {
 
   test('Clicking a product card found by search navigates to its detail page', { tag: ['@smoke'] }, async () => {
     await allure.feature('Product Overview');
-    await allure.testCaseId('TC-PO-2');
+    await allure.testCaseId('TC-PO-2a');
 
     const uuid = newUuid();
     const catalog = await apisProductCatalog.seedCatalog(uuid, testData.tcPO2Search);
@@ -38,7 +38,7 @@ test.describe('Product Overview', () => {
 
   test('Clicking a product card found by its category filter navigates to its detail page', { tag: ['@smoke'] }, async () => {
     await allure.feature('Product Overview');
-    await allure.testCaseId('TC-PO-2');
+    await allure.testCaseId('TC-PO-2b');
 
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPO2Category);
     await homePage.navigate();

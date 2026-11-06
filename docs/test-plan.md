@@ -157,7 +157,8 @@ composite actions under `.github/actions/`. A red run therefore reports the prod
 including the known defects until they are fixed.
 
 Record the case ID with `allure.testCaseId(...)`; add `allure.issue(...)` only for a defect
-a test is linked to. The [known-defects register](known-defects.md) and the
+a test is linked to. Each test has its own ID. When one case needs two tests, each gets a letter (TC-CBA-4a,
+TC-CBA-4b), because Allure treats tests with the same ID as retries of one test. The [known-defects register](known-defects.md) and the
 [bug reports](bug-reports/README.md) are documentation. Tests do not read them at run time.
 
 ### 4.2 Avoid asserting on defective surfaces incidentally

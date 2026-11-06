@@ -28,7 +28,7 @@ test.describe('Chat widget', () => {
 
   test('Chat checkout walks a customer who signs in through cart, address, payment and confirmation', { tag: ['@regression'] }, async () => {
     await allure.feature('Chat widget');
-    await allure.testCaseId('TC-CHAT-6');
+    await allure.testCaseId('TC-CHAT-6a');
     const data = testData.tcCHAT6SignIn;
     const { prompts, address } = data;
     const uuid = newUuid();
@@ -71,7 +71,7 @@ test.describe('Chat widget', () => {
 
   test('Chat checkout asks a guest for email, first name and last name before the address', { tag: ['@regression'] }, async () => {
     await allure.feature('Chat widget');
-    await allure.testCaseId('TC-CHAT-6');
+    await allure.testCaseId('TC-CHAT-6b');
     const data = testData.tcCHAT6Guest;
     const uuid = newUuid();
 

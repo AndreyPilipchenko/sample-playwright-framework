@@ -7,18 +7,20 @@ A Playwright + TypeScript demo framework, built for training and interview pract
 [Toolshop "with-bugs"](https://with-bugs.practicesoftwaretesting.com), a public demo store that
 ships with 90+ intentional defects.
 
-**The Nightly badge is red on purpose.** Tests assert what the product is documented to do, so
-a test of broken functionality fails until the product is fixed. A full local run on 6 November
-2026 (chromium and API) gave 78 passed and 71 failed out of 149. Nothing is skipped or marked as
-expected to fail to make that look better.
+**The tests run against a local copy of the shop in Docker.** The public site is too unstable to test
+against: many people use it at once, and it sometimes breaks completely.
+
+**Expect a red Nightly badge.** The shop's bugs are built in, and the tests catch them. A test fails when
+the product doesn't do what its documentation says, and those failures stay visible to show how the
+framework reports them. Latest full local run (6 November 2026, chromium and API): 78 passed, 71 failed.
 
 ## At a glance
 
 | | |
 |---|---|
 | **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 9 are `@smoke` and also run on Firefox and WebKit |
-| **Test design** | [234 cases](docs/test-cases.md) across 24 feature areas, 116 of them automated |
-| **Defects** | A [register of 94](docs/known-defects.md) from the upstream project, and [20 written bug reports](docs/bug-reports/) |
+| **Automated cases** | [116 test cases](docs/test-cases.md) from the test design |
+| **Defects** | 41 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
 | **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
 | **Stack** | Playwright 1.63, TypeScript 7, Node 24, Allure 3, Docker, GitHub Actions, oxlint |
 
@@ -40,9 +42,8 @@ the two `.env` values, the admin and disabled-account specs fail ([details](#run
 
 | Problem | What the framework does | Where |
 |---|---|---|
-| **How do you keep a suite honest when the product is broken?** | No `test.fail` or `fixme`, no skipping a test because of a defect, and no weakened assertions. Each failing test stays red, and its reason is recorded against its test case | [Test plan §4.1](docs/test-plan.md) |
 | **One new failure among 70 is easy to miss** | The CI summary compares with the previous run and separates newly failing, fixed and still failing tests | [`scripts/ci-summary.mjs`](scripts/ci-summary.mjs) |
-| **The app keeps its login in sessionStorage**, which Playwright's `storageState` can't save | One sign-in per role per run, restored through an init script before the app's own code runs | [`AuthSession.ts`](src/utils/AuthSession.ts), [`fixtures/test.ts`](src/fixtures/test.ts) |
+| **Logging in before every test is slow, and repeated logins put a shared account at risk** | Each role signs in once per run. The session is saved to a gitignored file, and tests that opt into a role reuse it, restored through an init script because the app keeps it in sessionStorage, which Playwright's `storageState` can't save. Passwords stay in `.env` or GitHub secrets | [`AuthSession.ts`](src/utils/AuthSession.ts), [`fixtures/test.ts`](src/fixtures/test.ts) |
 | **One failed login locks an account** (defect #21), so a retry can do damage | Customers are throwaway accounts registered through the API, and the sign-in specs never retry | [`auth.setup.ts`](setup/auth.setup.ts) |
 | **"Why did it fail?" often isn't in the assertion** | A failed test gets a report of what the browser did: console errors, failed requests, 5xx responses, dialogs, new tabs and toasts | [`BrowserDiagnostics.ts`](src/utils/BrowserDiagnostics.ts) |
 | **Toast messages cover the controls under them** | A fixture holds the test until the toast fades, and specs that read toasts turn this off | [`fixtures/test.ts`](src/fixtures/test.ts) |
@@ -184,10 +185,10 @@ private). The run's Summary page always shows the results. See
 
 ## Running the app locally
 
-By default the suite runs against the shared public instance. You can instead run the
-application under test on your own machine in Docker — useful for a clean, freshly
-seeded dataset, for offline work, and for avoiding interference from other users of
-the public instance.
+This is how the suite is meant to run, and what CI does. The public instance is too unstable to
+test against: many people use it at once, and it sometimes breaks completely. A local copy in
+Docker gives every run a clean, freshly seeded dataset that nobody else touches, and works offline.
+A plain `npm test`, without `TEST_ENV=local`, still targets the public instance.
 
 Requires Docker and free ports `4200`, `8091`, `3306`, `1080`.
 
