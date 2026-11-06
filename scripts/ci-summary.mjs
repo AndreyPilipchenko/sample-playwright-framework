@@ -10,10 +10,17 @@
  * reports/json-report/test-results.json). Appends to $GITHUB_STEP_SUMMARY when it is set and
  * prints to stdout otherwise, so it can be tried locally after any run.
  *
+ * With CI_BASELINE_FILE set, the failures are compared with that earlier run's results, so a new
+ * failure stands out among those that fail every time: newly failing, fixed since the last run,
+ * still failing. The comparison knows nothing about defects, only about the two runs. With
+ * CI_BASELINE_UPDATE=true the file is then replaced by this run's results for the next comparison
+ * (test names and outcomes only, never error text), and `baseline-updated=true` goes to
+ * $GITHUB_OUTPUT. The run-specs action keeps the file between runs in the Actions cache.
+ *
  * It reports, never judges: it always exits 0, and the run-specs action's last step is what
  * fails the job. Ops tooling like scripts/app.mjs, outside the POM layer map.
  */
-import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import * as path from 'node:path';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
@@ -55,6 +62,8 @@ function collectTests(report) {
       for (const test of spec.tests ?? []) {
         tests.push({
           name: [`[${test.projectName}]`, `${file}:${spec.line}`, ...titles, spec.title].join(' › '),
+          // The name without the line number, which moves with any edit above the test.
+          key: [`[${test.projectName}]`, file, ...titles, spec.title].join(' › '),
           status: test.status,
           results: test.results ?? [],
           annotations: test.annotations ?? [],
@@ -95,6 +104,65 @@ function skipReason(test) {
   return test.results.length === 0 ? 'Did not run (a dependency such as the setup project failed, or the run stopped early)' : '';
 }
 
+/** The earlier run's results, or undefined when there are none or they cannot be read. */
+function readBaseline(file) {
+  if (!file || !existsSync(file)) return undefined;
+  try {
+    const baseline = JSON.parse(readFileSync(file, 'utf8'));
+    return baseline.outcomes ? baseline : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Saves this run's outcomes for the next comparison. A test that did not run here keeps its earlier
+ * outcome, so a stopped run does not make its failures look new next time. A run without any result
+ * saves nothing.
+ */
+function updateBaseline(file, tests, previous) {
+  const outcomes = {};
+  for (const test of tests) {
+    if (test.status === 'unexpected') outcomes[test.key] = 'failed';
+    else if (test.status === 'expected' || test.status === 'flaky') outcomes[test.key] = 'passed';
+    else if (previous?.outcomes[test.key]) outcomes[test.key] = previous.outcomes[test.key];
+  }
+  if (!tests.some((test) => test.status !== 'skipped')) return;
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, JSON.stringify({ runId: process.env.GITHUB_RUN_ID, savedAt: new Date().toISOString(), outcomes }));
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, 'baseline-updated=true\n');
+}
+
+/** Where the compared run can be opened, when this runs on GitHub. */
+function baselineLabel(baseline) {
+  const { GITHUB_SERVER_URL: server, GITHUB_REPOSITORY: repository } = process.env;
+  if (!baseline.runId) return `the results saved on ${baseline.savedAt ?? 'an earlier date'}`;
+  // A re-run finds its own first attempt, so a failure new in that attempt reads as still failing.
+  if (baseline.runId === process.env.GITHUB_RUN_ID) return 'an earlier attempt of this run, not the previous run';
+  return server && repository ? `[run ${baseline.runId}](${server}/${repository}/actions/runs/${baseline.runId})` : `run ${baseline.runId}`;
+}
+
+/** The failed tests, split by comparison with the earlier run. */
+function failureLines(failed, tests, baseline) {
+  const table = (rows) => ['| Test | Error |', '|---|---|', ...rows.map((test) => `| ${cell(test.name)} | ${firstError(test)} |`)];
+  const failedBefore = (test) => baseline.outcomes[test.key] === 'failed';
+  const newly = failed.filter((test) => !failedBefore(test));
+  const still = failed.filter(failedBefore);
+  const fixed = tests.filter((test) => test.status === 'expected' && failedBefore(test));
+
+  const lines = [`**${newly.length} newly failing, ${fixed.length} fixed, ${still.length} still failing**, compared with ${baselineLabel(baseline)}.`, ''];
+  if (newly.length > 0) {
+    lines.push('**Newly failing** (passed last time, or not in that run)', '', ...table(newly), '');
+  }
+  if (fixed.length > 0) {
+    lines.push('**Fixed since the last run**', '', ...fixed.map((test) => `- ${cell(test.name)}`), '');
+  }
+  if (still.length > 0) {
+    lines.push(`<details><summary>Still failing (${still.length})</summary>`, '', ...table(still), '', '</details>', '');
+  }
+  return lines;
+}
+
 function summarize() {
   if (!existsSync(reportFile)) {
     return `### ⚠️ ${heading}\n\nNo JSON report at \`${path.relative(projectRoot, reportFile)}\`: the run produced no results. See the step log.\n`;
@@ -124,7 +192,14 @@ function summarize() {
     for (const error of report.errors) lines.push(`- ${truncate(cell(error.message), MAX_ERROR_LENGTH)}`);
     lines.push('');
   }
-  if (failed.length > 0) {
+  const baselineFile = process.env.CI_BASELINE_FILE && path.resolve(projectRoot, process.env.CI_BASELINE_FILE);
+  const baseline = readBaseline(baselineFile);
+  if (baseline) {
+    lines.push(...failureLines(failed, tests, baseline));
+  } else if (baselineFile) {
+    lines.push('No earlier results to compare with, so every failure is listed together.', '');
+  }
+  if (failed.length > 0 && !baseline) {
     lines.push('**Failed**', '', '| Test | Error |', '|---|---|');
     for (const test of failed) lines.push(`| ${cell(test.name)} | ${firstError(test)} |`);
     lines.push('');
@@ -139,6 +214,7 @@ function summarize() {
     for (const test of skipped) lines.push(`| ${cell(test.name)} | ${skipReason(test)} |`);
     lines.push('', '</details>', '');
   }
+  if (baselineFile && process.env.CI_BASELINE_UPDATE === 'true') updateBaseline(baselineFile, tests, baseline);
   return `${lines.join('\n')}\n`;
 }
 

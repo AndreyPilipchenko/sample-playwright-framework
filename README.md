@@ -177,7 +177,9 @@ A manual run takes optional inputs (all blank = as configured):
 The filters narrow each stage's own selection (smoke-on-commit never leaves `@smoke`); a stage
 left with nothing to run passes, and its summary says no tests matched. Every job writes its
 results (counts, failed tests with the assertion, skipped tests with the reason) to the run's
-Summary page.
+Summary page. Failures are split into newly failing, fixed and still failing by comparing with
+that step's previous unfiltered run, whose results stay in the Actions cache; a filtered run or
+one against another URL compares but does not replace them.
 
 ```sh
 gh workflow run nightly.yml -f tag=@regression -f path=tests/CartTests.spec.ts
