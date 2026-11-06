@@ -14,8 +14,8 @@ On every push to the product's `main` branch, the workflow sends a
 [`repository_dispatch`](https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event)
 event of type `product-main-push` to the test repository
 (`AndreyPilipchenko/sample-playwright-framework`). That event starts the test repository's
-**Smoke on product commit** workflow, which runs the `@smoke` tests on chromium, firefox and
-webkit against the deployed application. The full test suite runs separately, nightly.
+**Smoke on product commit** workflow, which runs the `@smoke` tests on chromium against a
+private copy of the application that it starts in Docker. The full test suite runs separately, nightly.
 
 The product's own job takes a few seconds: it only sends the event and does not wait for the
 tests. Results are in the test repository, under Actions → **Smoke on product commit**. Each

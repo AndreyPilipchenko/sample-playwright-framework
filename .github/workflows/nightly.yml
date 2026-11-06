@@ -3,17 +3,15 @@
 # functionality assert the documented behaviour, so they fail (and the run is red) until the
 # product fixes them (docs/test-plan.md §4.1).
 #
-# STAGES — each starts only when the one before it passed:
-#   1. api-tests   static checks, then the browserless API specs (tests/api)
-#   2. smoke       the @smoke subset on chromium, firefox and webkit
-#   3. regression  every other spec on chromium, in parallel shards
-# api-local, smoke-local (one job per browser) and regression-local run the same three selections,
-# each against its own private Docker instance. They start together and gate nothing. publish-site
-# then puts the results on GitHub Pages.
+# JOBS start together and gate nothing; each tests its own private Docker instance:
+#   api-local         the browserless API specs (tests/api)
+#   smoke-local       the @smoke subset, one job per browser (chromium, firefox, webkit)
+#   regression-local  every other spec on chromium
+# publish-site then puts the results on GitHub Pages.
 #
-# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers),
-# static-checks (conventions, core boundary, script tests, type-check, lint) and run-specs (run Playwright, publish the
-# reports, reflect the outcome).
+# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
+# (the Docker stack), run-specs (run Playwright, publish the reports, reflect the outcome) and
+# publish-app-logs. Static checks run on pull requests (lint.yml).
 #
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
 #
@@ -25,12 +23,12 @@
 #                     Tests that need the local mail inbox or database fail.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
-#                     They narrow each stage's own selection, so a stage can end up empty;
-#                     an empty stage passes and its summary says no tests matched.
+#                     They narrow each job's own selection, so a job can end up empty;
+#                     an empty job passes and its summary says no tests matched.
 #   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
 #
-# RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
-# fine since it's a public site — no self-hosted runner needed.
+# RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
+# the shop's images need.
 #
 # SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
 # §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
@@ -44,8 +42,7 @@
 # publish-site puts the Allure reports on a public page, so it checks them for secrets first.
 #
 # WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack. A manual
-# run against another deployment uses 2 (run-specs), because that site may be shared. The
-# commented-out hosted jobs would need fewer as well.
+# run against another deployment uses 2 (run-specs), because that site may be shared.
 
 name: Nightly tests
 
@@ -84,105 +81,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # TEMPORARY: the three jobs below (api-tests, smoke, regression) test the DEPLOYED target and
-  # are commented out; the whole suite runs against private local instances (api-local, smoke-local,
-  # regression-local). To go back to the deployment: uncomment them and remove those three.
-  ## Stage 1. Static checks run once, here only (the local jobs exercise the same code).
-  ## They are fast and fail before any spec runs.
-  #api-tests:
-  #  runs-on: ubuntu-latest
-  #  timeout-minutes: 15
-  #  steps:
-  #    - uses: actions/checkout@v7
-#
-  #    - name: Set up Node and dependencies (no browsers)
-  #      uses: ./.github/actions/setup
-  #      with:
-  #        browsers: none
-#
-  #    - name: Static checks
-  #      uses: ./.github/actions/static-checks
-#
-  #    - name: Run API specs
-  #      uses: ./.github/actions/run-specs
-  #      with:
-  #        args: --project=api
-  #        report-name: api
-  #        tag: ${{ inputs.tag }}
-  #        name: ${{ inputs.name }}
-  #        paths: ${{ inputs.path }}
-  #      env:
-  #        APP_URL: ${{ inputs.app_url }}
-  #        APP_API_URL: ${{ inputs.api_url }}
-#
-  ## Stage 2. The critical-path subset in every browser, side by side; fail-fast is off so one
-  ## browser's failure does not hide another's result.
-  #smoke:
-  #  needs: api-tests
-  #  runs-on: ubuntu-latest
-  #  timeout-minutes: 30
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      browser: [chromium, firefox, webkit]
-  #  steps:
-  #    - uses: actions/checkout@v7
-#
-  #    - name: Set up Node, dependencies and ${{ matrix.browser }}
-  #      uses: ./.github/actions/setup
-  #      with:
-  #        browsers: ${{ matrix.browser }}
-#
-  #    - name: Run the @smoke specs on ${{ matrix.browser }}
-  #      uses: ./.github/actions/run-specs
-  #      with:
-  #        args: --project=${{ matrix.browser }}
-  #        stage-tag: '@smoke'
-  #        report-name: smoke-${{ matrix.browser }}
-  #        tag: ${{ inputs.tag }}
-  #        name: ${{ inputs.name }}
-  #        paths: ${{ inputs.path }}
-  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-  #      env:
-  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-  #        APP_URL: ${{ inputs.app_url }}
-  #        APP_API_URL: ${{ inputs.api_url }}
-#
-  ## Stage 3. Everything that is not @smoke, on chromium only (the full functional suite is
-  ## chromium-only, see playwright.config.ts), in parallel shards that start together once
-  ## smoke passed in every browser. Tests of broken functionality fail here until it is fixed.
-  #regression:
-  #  needs: smoke
-  #  runs-on: ubuntu-latest
-  #  timeout-minutes: 60
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      shard: [1, 2]
-  #  steps:
-  #    - uses: actions/checkout@v7
-#
-  #    - name: Set up Node, dependencies and chromium
-  #      uses: ./.github/actions/setup
-  #      with:
-  #        browsers: chromium
-#
-  #    - name: Run the non-smoke specs, shard ${{ matrix.shard }} of 2
-  #      uses: ./.github/actions/run-specs
-  #      with:
-  #        args: --project=chromium --grep-invert @smoke --shard=${{ matrix.shard }}/2 --pass-with-no-tests
-  #        report-name: regression-${{ matrix.shard }}
-  #        tag: ${{ inputs.tag }}
-  #        name: ${{ inputs.name }}
-  #        paths: ${{ inputs.path }}
-  #        publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-  #      env:
-  #        APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-  #        APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-  #        APP_URL: ${{ inputs.app_url }}
-  #        APP_API_URL: ${{ inputs.api_url }}
-#
   # These bring the application under test up on their own runners and test that private
   # instance, not the shared public one. Each has its own stack, report and summary. They start
   # together and have no `needs`, so one job's failure hides no other job's results.

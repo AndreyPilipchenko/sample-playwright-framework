@@ -56,18 +56,17 @@ export class ProfilePage {
     this.state_input = page.getByTestId('state');
     this.country_input = page.getByTestId('country');
     this.updateProfile_button = page.getByTestId('update-profile-submit');
-    // The profile message sits beside its own submit button, inside the profile section.
-    const profileSection = this.updateProfile_button.locator('xpath=..');
-    this.profileSuccess_txt = profileSection.locator('.alert-success');
-    this.profileError_txt = profileSection.locator('.alert-danger');
+    // The page has two forms, each with its own messages, so a message is found through its form's button.
+    const profileForm = page.locator('form', { has: this.updateProfile_button });
+    this.profileSuccess_txt = profileForm.locator('.alert-success');
+    this.profileError_txt = profileForm.locator('.alert-danger');
     this.currentPassword_input = page.getByTestId('current-password');
     this.newPassword_input = page.getByTestId('new-password');
     this.confirmPassword_input = page.getByTestId('new-password-confirm');
     this.changePassword_button = page.getByTestId('change-password-submit');
-    // The message sits beside the submit button, inside the change password section.
-    const section = this.changePassword_button.locator('xpath=..');
-    this.alert_txt = section.getByRole('alert');
-    this.successAlert_txt = section.locator('.alert-success');
+    const passwordForm = page.locator('form', { has: this.changePassword_button });
+    this.alert_txt = passwordForm.getByRole('alert');
+    this.successAlert_txt = passwordForm.locator('.alert-success');
   }
 
   ///// Actions

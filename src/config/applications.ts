@@ -1,4 +1,3 @@
-// Example skeleton — adapt to your project (ships with the harness package).
 import { apiUrl, appUrl } from './targets';
 
 /**

@@ -1,4 +1,3 @@
-// Example skeleton — adapt to your project (ships with the harness package).
 import { defineConfig, devices } from '@playwright/test';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
