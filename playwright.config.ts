@@ -29,8 +29,9 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry on CI only. One retry still shows a flaky test; more would only repeat tests that fail on
+   * an open defect every time (docs/test-plan.md 4.1), at up to a minute per attempt. */
+  retries: process.env.CI ? 1 : 0,
   /* Two workers on CI: the hosted target is a shared public site, so stay modest. Raise it or
    * shard (`--shard=i/n`) once the suite grows. */
   workers: process.env.CI ? 2 : 3,
