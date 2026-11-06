@@ -31,9 +31,9 @@ export default defineConfig({
   /* Retry on CI only. One retry still shows a flaky test; more would only repeat tests that fail on
    * an open defect every time (docs/test-plan.md 4.1), at up to a minute per attempt. */
   retries: process.env.CI ? 1 : 0,
-  /* Two workers on CI: the hosted target is a shared public site, so stay modest. Raise it or
-   * shard (`--shard=i/n`) once the suite grows. */
-  workers: process.env.CI ? 2 : 3,
+  /* Every active CI job tests its own private Docker stack, so CI uses the same number as a local run.
+   * A job pointed at the shared hosted target (commented out in nightly.yml) would need fewer. */
+  workers: 3,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],

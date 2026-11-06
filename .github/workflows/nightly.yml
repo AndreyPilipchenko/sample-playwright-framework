@@ -40,9 +40,8 @@
 # sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
 # publish-site puts the Allure reports on a public page, so it checks them for secrets first.
 #
-# WORKERS: 2 on CI (playwright.config.ts). The hosted target is a shared public site, so keep
-# this low per job; the regression stage scales by adding shards (matrix `shard`, and the
-# `/2` in its args) rather than workers.
+# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack. The
+# commented-out hosted jobs would need fewer, because that target is a shared public site.
 
 name: Nightly tests
 
