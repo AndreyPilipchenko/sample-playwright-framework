@@ -28,3 +28,6 @@ export const ACTION_DEFAULT_MS = 30_000;
 export const NAVIGATION_DEFAULT_MS = 30_000;
 /** The slow-surface tier — inline on waits that measurably exceed the assertion default. */
 export const SLOW_SURFACE_MS = 60_000;
+
+/** How long a submitted password change may take to answer. */
+export const PASSWORD_CHANGE_ANSWER_MS = 5_000;

@@ -43,6 +43,14 @@ test.describe('Product Overview', () => {
     await productDetailPage.verifyProductDetailOpened(catalog.products[0].name);
   });
 
+  test('Product grid displays cards with image, name and price', { tag: ['@regression'] }, async () => {
+    await allure.feature('Product Overview');
+    await allure.testCaseId('TC-PO-1');
+
+    await homePage.navigate();
+    await homePage.verifyEveryProductCardShowsImageNameAndPrice();
+  });
+
   test('Search with a valid 3-40 character query filters the grid', { tag: ['@smoke'] }, async () => {
     await allure.feature('Product Overview');
     await allure.testCaseId('TC-PO-5');

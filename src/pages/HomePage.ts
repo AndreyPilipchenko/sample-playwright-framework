@@ -85,6 +85,14 @@ export class HomePage {
     return this.pagination_list.locator('a').filter({ hasText: new RegExp(`^\\s*page\\s*${pageNumber}\\s*$`) });
   }
 
+  private cardName_txt(card: Locator): Locator {
+    return card.getByTestId('product-name');
+  }
+
+  private cardImage_img(card: Locator): Locator {
+    return card.locator('img');
+  }
+
   ///// Actions
 
   async navigate() {
@@ -162,6 +170,19 @@ export class HomePage {
   async verifyProductCatalogVisible() {
     await step('Verify the product catalog shows a product', async () => {
       await expectToBeVisible('the first product card', this.productCards_list.first());
+    });
+  }
+
+  /** Images load lazily, so each card is scrolled into view before its image is judged. */
+  async verifyEveryProductCardShowsImageNameAndPrice() {
+    await step('Verify every product card shows an image, a name and a price', async () => {
+      await expectToBeVisible('the first product card', this.productCards_list.first());
+      await expectToHaveMatchingCount('the product names', this.productNames_list.filter({ hasText: /\S/ }), this.productCards_list, 'product');
+      await expectToHaveMatchingCount('the product prices', this.productCards_list.getByTestId('product-price').filter({ hasText: /\$\d+\.\d{2}/ }), this.productCards_list, 'product');
+      for (const card of await this.productCards_list.all()) {
+        await card.scrollIntoViewIfNeeded();
+        await expectToBeVisible(`the image of ${await this.cardName_txt(card).innerText()}`, this.cardImage_img(card));
+      }
     });
   }
 

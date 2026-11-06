@@ -188,6 +188,7 @@
     }
   },
   "tcCBA4": {
+    "expectedProceedText": "Proceed to checkout",
     "brandName": "Checkout Brand TC-CBA-4 {uuid}",
     "categoryName": "Checkout Category TC-CBA-4 {uuid}",
     "products": [

@@ -97,6 +97,12 @@ export class CheckoutAddressPage {
     });
   }
 
+  async verifyProceedText(expectedText: string) {
+    await step(`Verify the Proceed button reads: ${expectedText}`, async () => {
+      await expectToHaveText('the Proceed to checkout button', this.proceed_button, expectedText);
+    });
+  }
+
   async verifyProceedDisabled() {
     await step('Verify the Proceed button is disabled', async () => {
       await expectToBeDisabled('the Proceed to checkout button', this.proceed_button);

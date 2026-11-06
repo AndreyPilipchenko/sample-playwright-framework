@@ -36,9 +36,15 @@ test.describe('Change Password', () => {
     await allure.feature('Change Password');
     await allure.testCaseId('TC-CPW-1');
 
-    await openProfileAsNewCustomer(testData.tcCPW1.user);
-    await profilePage.verifyChangePasswordFieldsShown(testData.tcCPW1.labels);
-    await profilePage.verifyChangePasswordFieldsRequired(testData.tcCPW1.labels);
+    const { labels, newPassword } = testData.tcCPW1;
+
+    const user = await openProfileAsNewCustomer(testData.tcCPW1.user);
+    await profilePage.verifyChangePasswordFieldsShown(labels);
+    // Required means a submission without the field changes nothing, whatever way the build enforces it.
+    await profilePage.submitIncompletePasswordChange(user.password, '', newPassword);
+    await profilePage.submitIncompletePasswordChange(user.password, newPassword, '');
+    await profilePage.submitIncompletePasswordChange('', newPassword, newPassword);
+    await apisUserAccount.verifyCanLogIn(user.email, user.password);
   });
 
   test('Mismatched confirmation shows "Passwords do not match."', { tag: ['@regression'] }, async () => {
