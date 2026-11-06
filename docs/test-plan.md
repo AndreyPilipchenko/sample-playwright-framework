@@ -1,5 +1,7 @@
 # Test Plan — Toolshop (with-bugs)
 
+> Derived from Testsmith's documentation and not covered by this repository's MIT license; see [NOTICE](../NOTICE.md).
+
 Compiled from the upstream
 [Practice Software Testing documentation](https://testsmith-io.github.io/practice-software-testing/)
 ([source repo](https://github.com/testsmith-io/practice-software-testing)) and verified

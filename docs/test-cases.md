@@ -1,5 +1,7 @@
 # Test Cases — Toolshop (with-bugs)
 
+> Derived from Testsmith's documentation and not covered by this repository's MIT license; see [NOTICE](../NOTICE.md).
+
 Test conditions per feature area, compiled from the
 [upstream acceptance criteria](https://github.com/testsmith-io/practice-software-testing/blob/main/docs/user-stories/v5.md)
 and filtered to the features present in the latest deployed build.

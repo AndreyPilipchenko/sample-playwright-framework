@@ -1,5 +1,7 @@
 # Test Documentation
 
+> Derived from Testsmith's documentation and not covered by this repository's MIT license; see [NOTICE](../NOTICE.md).
+
 Test documentation for the Toolshop application under test, compiled from the upstream
 [Practice Software Testing documentation](https://testsmith-io.github.io/practice-software-testing/)
 and verified against the live target on 2026-11-02.
