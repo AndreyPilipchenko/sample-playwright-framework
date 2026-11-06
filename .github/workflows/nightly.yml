@@ -7,8 +7,8 @@
 #   1. api-tests   static checks, then the browserless API specs (tests/api)
 #   2. smoke       the @smoke subset on chromium, firefox and webkit
 #   3. regression  every other spec on chromium, in parallel shards
-# api-local, smoke-local and regression-local run the same three selections, each against its
-# own private Docker instance. They start together and gate nothing.
+# api-local, smoke-local (one job per browser) and regression-local run the same three selections,
+# each against its own private Docker instance. They start together and gate nothing.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers),
 # static-checks (conventions, type-check, lint) and run-specs (run Playwright, publish the
@@ -178,7 +178,7 @@ jobs:
   #        APP_URL: ${{ inputs.app_url }}
   #        APP_API_URL: ${{ inputs.api_url }}
 #
-  # These three bring the application under test up on their own runners and test that private
+  # These bring the application under test up on their own runners and test that private
   # instance, not the shared public one. Each has its own stack, report and summary. They start
   # together and have no `needs`, so one job's failure hides no other job's results.
   api-local:
@@ -222,25 +222,32 @@ jobs:
         if: always()
         run: node scripts/app.mjs down --volumes || true
 
+  # One job per browser; fail-fast is off so one browser's failure does not cancel the others.
   smoke-local:
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Node, dependencies and browsers
+      - name: Set up Node, dependencies and ${{ matrix.browser }}
         uses: ./.github/actions/setup
+        with:
+          browsers: ${{ matrix.browser }}
 
       - name: Start the application under test
         uses: ./.github/actions/start-local-app
 
-      - name: Run the @smoke specs against the local instance
+      - name: Run the @smoke specs on ${{ matrix.browser }} against the local instance
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
-          args: -- --project=chromium --project=firefox --project=webkit
+          args: -- --project=${{ matrix.browser }}
           stage-tag: '@smoke'
-          report-name: local-smoke
+          report-name: local-smoke-${{ matrix.browser }}
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
@@ -254,7 +261,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-local-smoke
+          artifact-name: app-logs-local-smoke-${{ matrix.browser }}
 
       - name: Stop the application under test
         if: always()
