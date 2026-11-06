@@ -1,14 +1,14 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { applications } from '../src/config/applications';
-import { LoginPage } from '../src/pages/LoginPage';
-import { AccountPage } from '../src/pages/AccountPage';
-import { AdminDashboardPage } from '../src/pages/AdminDashboardPage';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { databases } from '../src/config/databases';
-import { DbsUserAccount } from '../src/dbs/DbsUserAccount';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { applications } from '../../../src/config/applications';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { AdminDashboardPage } from '../../../src/pages/AdminDashboardPage';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { databases } from '../../../src/config/databases';
+import { DbsUserAccount } from '../../../src/dbs/DbsUserAccount';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let loginPage: LoginPage;
 let accountPage: AccountPage;
@@ -16,7 +16,7 @@ let adminDashboardPage: AdminDashboardPage;
 let apisUserAccount: ApisUserAccount;
 let dbsUserAccount: DbsUserAccount;
 
-let testData: typeof import('../resources/testData/LoginTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/LoginTestJsonFile.json');
 
 // No trace for this file: TC-LOGIN-3's would record the admin password, Allure publishes traces, and this option
 // (worker-scoped) cannot be set per test or describe. Failures keep their screenshot and video.

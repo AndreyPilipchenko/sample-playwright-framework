@@ -5,7 +5,7 @@
 | Status | Open, not yet filed in any tracker |
 | Register entry | [7](../known-defects.md): "Delete button is disabled". Written up here with its own reproduction, as requested. |
 | Test cases | TC-CART-4 (delete removes the item) and TC-CART-5 (cart total recalculates after deletion) in [test cases](../test-cases.md) |
-| Automation | TC-CART-4 and TC-CART-5 in `tests/CartTests.spec.ts`; they fail while this defect is open (test plan §4.1). |
+| Automation | TC-CART-4 and TC-CART-5 in `tests/ui/checkout/CartTests.spec.ts`; they fail while this defect is open (test plan §4.1). |
 | Area | Checkout — cart review |
 | Environment | Local Docker (`sprint5-with-bugs`), Chromium 1920×1080 |
 | Observed | 2026-11-03 |

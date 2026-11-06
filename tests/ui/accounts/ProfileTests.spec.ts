@@ -1,18 +1,18 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
-import { AccountPage } from '../src/pages/AccountPage';
-import { LoginPage } from '../src/pages/LoginPage';
-import { ProfilePage } from '../src/pages/ProfilePage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { ProfilePage } from '../../../src/pages/ProfilePage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let apisUserAccount: ApisUserAccount;
 let accountPage: AccountPage;
 let loginPage: LoginPage;
 let profilePage: ProfilePage;
 
-let testData: typeof import('../resources/testData/ProfileTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ProfileTestJsonFile.json');
 
 /**
  * Each case registers its own customer through the API (unique email per run, left behind on purpose), signs in

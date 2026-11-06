@@ -1,16 +1,16 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { CartPage } from '../src/pages/CartPage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { AccountPage } from '../src/pages/AccountPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { HomePage } from '../src/pages/HomePage';
-import { LoginPage } from '../src/pages/LoginPage';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { useBrowserLocation } from '../src/utils/BrowserGeolocation';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { CartPage } from '../../../src/pages/CartPage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let cartPage: CartPage;
 let productDetailPage: ProductDetailPage;
@@ -21,7 +21,7 @@ let homePage: HomePage;
 let loginPage: LoginPage;
 let apisUserAccount: ApisUserAccount;
 
-let testData: typeof import('../resources/testData/ProductDetailTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ProductDetailTestJsonFile.json');
 
 // These tests read toasts, so the toast must not be waited away before the check.
 test.use({ waitForToasts: false });

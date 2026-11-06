@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). Closely related to entry [10](../known-defects.md) (postcode shows "Missing value"), which may be its cause. |
 | Test cases | TC-CPAY-12 (valid payment places the order and shows the invoice number) and TC-CPAY-13 (cart is cleared after a successful order) in [test cases](../test-cases.md). Automated with an explicitly typed address, see Automation. |
-| Automation | The checkout tests in `tests/CheckoutTests.spec.ts` type the full billing address themselves, so they do not exercise the prefilled path. That follows the case wording ("valid payment") and is not a workaround for this defect: the prefilled path has no test of its own yet. |
+| Automation | The checkout tests in `tests/ui/checkout/CheckoutTests.spec.ts` type the full billing address themselves, so they do not exercise the prefilled path. That follows the case wording ("valid payment") and is not a workaround for this defect: the prefilled path has no test of its own yet. |
 | Area | Checkout — billing address and payment |
 | Environment | Public instance `https://with-bugs.practicesoftwaretesting.com`, Chromium (Playwright) |
 | Observed | 2026-11-05 |

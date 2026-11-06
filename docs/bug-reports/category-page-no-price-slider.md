@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-CAT-3 (same filter set as the product overview) in [test cases](../test-cases.md). |
-| Automation | `tests/CategoryTests.spec.ts` finds the other four filters, then fails on the slider. |
+| Automation | `tests/ui/catalog/CategoryTests.spec.ts` finds the other four filters, then fails on the slider. |
 | Area | Category page |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

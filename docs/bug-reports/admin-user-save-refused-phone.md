@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-ADM-7, TC-ADM-8 and TC-ADM-9 in [test cases](../test-cases.md). |
-| Automation | `tests/AdminUserTests.spec.ts` fails after the refused save. |
+| Automation | `tests/ui/admin/AdminUserTests.spec.ts` fails after the refused save. |
 | Area | Admin, users |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright) and direct API calls. |
 | Observed | 2026-11-06 |

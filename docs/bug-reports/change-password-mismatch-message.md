@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-CPW-3 in [test cases](../test-cases.md). |
-| Automation | `tests/ChangePasswordTests.spec.ts` fails on the message text. |
+| Automation | `tests/ui/accounts/ChangePasswordTests.spec.ts` fails on the message text. |
 | Area | Profile page, change password |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

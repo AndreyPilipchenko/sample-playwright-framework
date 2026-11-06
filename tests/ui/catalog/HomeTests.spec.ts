@@ -1,13 +1,13 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { HomePage } from '../src/pages/HomePage';
-import { HeaderPage } from '../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
 
 let homePage: HomePage;
 let headerPage: HeaderPage;
 
-let testData: typeof import('../resources/testData/HomeTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/HomeTestJsonFile.json');
 
 test.describe('Home', () => {
 

@@ -1,19 +1,19 @@
 import * as allure from 'allure-js-commons';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { databases } from '../src/config/databases';
-import { DbsUserAccount } from '../src/dbs/DbsUserAccount';
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
-import { AdminUserFormPage } from '../src/pages/AdminUserFormPage';
-import { AdminUsersPage } from '../src/pages/AdminUsersPage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, searchTokenOf, withUniqueEmail } from '../src/utils/UniqueData';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { databases } from '../../../src/config/databases';
+import { DbsUserAccount } from '../../../src/dbs/DbsUserAccount';
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { AdminUserFormPage } from '../../../src/pages/AdminUserFormPage';
+import { AdminUsersPage } from '../../../src/pages/AdminUsersPage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, searchTokenOf, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let adminUsersPage: AdminUsersPage;
 let adminUserFormPage: AdminUserFormPage;
 let apisUserAccount: ApisUserAccount;
 let dbsUserAccount: DbsUserAccount;
 
-let testData: typeof import('../resources/testData/AdminUserTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/AdminUserTestJsonFile.json');
 
 /**
  * Admin user management on the local stack. Each case registers its own customer through the API (email

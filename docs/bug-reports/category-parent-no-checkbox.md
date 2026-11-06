@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-PO-9 (checking a parent checks its children) in [test cases](../test-cases.md). |
-| Automation | `tests/ProductOverviewTests.spec.ts` fails trying to check the parent. |
+| Automation | `tests/ui/catalog/ProductOverviewTests.spec.ts` fails trying to check the parent. |
 | Area | Product overview, category filter |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

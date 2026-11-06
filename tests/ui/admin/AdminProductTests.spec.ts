@@ -1,16 +1,16 @@
 import * as allure from 'allure-js-commons';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
-import { AdminProductFormPage } from '../src/pages/AdminProductFormPage';
-import { AdminProductsPage } from '../src/pages/AdminProductsPage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, searchTokenOf, withUuid } from '../src/utils/UniqueData';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { AdminProductFormPage } from '../../../src/pages/AdminProductFormPage';
+import { AdminProductsPage } from '../../../src/pages/AdminProductsPage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, searchTokenOf, withUuid } from '../../../src/utils/UniqueData';
 
 let adminProductsPage: AdminProductsPage;
 let adminProductFormPage: AdminProductFormPage;
 let apisProductCatalog: ApisProductCatalog;
 
-let testData: typeof import('../resources/testData/AdminProductTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/AdminProductTestJsonFile.json');
 
 /**
  * Admin product management on the local stack (the case creates and deletes records). The case seeds its own

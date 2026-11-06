@@ -1,17 +1,21 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { HomePage } from '../src/pages/HomePage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { useBrowserLocation } from '../src/utils/BrowserGeolocation';
-import { newUuid, searchTokenOf, withUuid } from '../src/utils/UniqueData';
+import { HomePage } from '../../../src/pages/HomePage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { ApisCategories } from '../../../src/apis/ApisCategories';
+import { ApisProducts } from '../../../src/apis/ApisProducts';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
+import { newUuid, searchTokenOf, withUuid } from '../../../src/utils/UniqueData';
 
 let homePage: HomePage;
 let productDetailPage: ProductDetailPage;
+let apisCategories: ApisCategories;
+let apisProducts: ApisProducts;
 let apisProductCatalog: ApisProductCatalog;
 
-let testData: typeof import('../resources/testData/ProductOverviewTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ProductOverviewTestJsonFile.json');
 
 /**
  * Every case seeds its own brand, category and products through the API, named with a
@@ -69,9 +73,9 @@ test.describe('Product Overview', () => {
 
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPO8);
     const seededNames = catalog.products.map((product) => product.name);
-    const categoryListing = await apisProductCatalog.getCategoryListing(catalog.categorySlug);
-    await apisProductCatalog.verifyAllProductsInCategory(categoryListing, catalog.categorySlug);
-    await apisProductCatalog.verifyProductNamesInclude(categoryListing, seededNames);
+    const categoryListing = await apisProducts.getCategoryListing(catalog.categorySlug);
+    await apisProducts.verifyAllProductsInCategory(categoryListing, catalog.categorySlug);
+    await apisProducts.verifyProductNamesInclude(categoryListing, seededNames);
     await homePage.navigate();
     await homePage.verifyProductCatalogVisible();
     await homePage.filterByCategory(catalog.categoryName);
@@ -182,9 +186,9 @@ test.describe('Product Overview', () => {
     const firstChild = withUuid(firstChildCategoryName, uuid);
     const secondChild = withUuid(secondChildCategoryName, uuid);
     const parent = withUuid(parentCategoryName, uuid);
-    const parentId = await apisProductCatalog.createCategory(parent);
-    await apisProductCatalog.createCategory(firstChild, parentId);
-    await apisProductCatalog.createCategory(secondChild, parentId);
+    const parentId = await apisCategories.createCategory(parent);
+    await apisCategories.createCategory(firstChild, parentId);
+    await apisCategories.createCategory(secondChild, parentId);
     await homePage.navigate();
     await homePage.verifyProductCatalogVisible();
     await homePage.filterByCategory(parent);
@@ -199,7 +203,7 @@ test.describe('Product Overview', () => {
     const uuid = newUuid();
     const first = await apisProductCatalog.seedCatalog(uuid, testData.tcPO11First);
     const second = await apisProductCatalog.seedCatalog(uuid, testData.tcPO11Second);
-    const crossed = await apisProductCatalog.addProduct(uuid, testData.tcPO11Crossed, second.categoryId, first.brandId);
+    const crossed = await apisProducts.addProduct(uuid, testData.tcPO11Crossed, second.categoryId, first.brandId);
     await homePage.navigate();
     await homePage.verifyProductCatalogVisible();
     await homePage.filterByBrand(first.brandName);
@@ -213,8 +217,8 @@ test.describe('Product Overview', () => {
     const uuid = newUuid();
     const first = await apisProductCatalog.seedCatalog(uuid, testData.tcPO12First);
     const second = await apisProductCatalog.seedCatalog(uuid, testData.tcPO12Second);
-    const categoryOnly = await apisProductCatalog.addProduct(uuid, testData.tcPO12CategoryOnly, first.categoryId, second.brandId);
-    await apisProductCatalog.addProduct(uuid, testData.tcPO12BrandOnly, second.categoryId, first.brandId);
+    const categoryOnly = await apisProducts.addProduct(uuid, testData.tcPO12CategoryOnly, first.categoryId, second.brandId);
+    await apisProducts.addProduct(uuid, testData.tcPO12BrandOnly, second.categoryId, first.brandId);
     await homePage.navigate();
     await homePage.filterByCategory(first.categoryName);
     await homePage.verifyProductNamesShown([first.products[0].name, categoryOnly.name]);
@@ -267,6 +271,8 @@ test.describe('Product Overview', () => {
   test.beforeEach(({ page, request }) => {
     homePage = new HomePage(page);
     productDetailPage = new ProductDetailPage(page);
+    apisCategories = new ApisCategories(request);
+    apisProducts = new ApisProducts(request);
     apisProductCatalog = new ApisProductCatalog(request);
   });
 

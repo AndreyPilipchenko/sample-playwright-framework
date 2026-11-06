@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-RENT-5 (location-based discount applies to rentals) in [test cases](../test-cases.md). |
-| Automation | `tests/RentalTests.spec.ts` passes on the discounted price, then fails on the total. |
+| Automation | `tests/ui/catalog/RentalTests.spec.ts` passes on the discounted price, then fails on the total. |
 | Area | Product detail, rental products |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

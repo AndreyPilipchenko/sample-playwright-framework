@@ -1,8 +1,10 @@
 import { test } from '@playwright/test';
 import * as allure from 'allure-js-commons';
-import { registerInvoiceOwner, createOwnInvoice } from '../../../src/apis/OwnInvoices';
+import { ApisOwnInvoices } from '../../../src/apis/ApisOwnInvoices';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { loadTestData } from '../../../src/utils/TestData';
+
+let apisOwnInvoices: ApisOwnInvoices;
 
 let testData: typeof import('../../../resources/testData/InvoiceSecurityApiTestJsonFile.json');
 
@@ -13,13 +15,13 @@ let testData: typeof import('../../../resources/testData/InvoiceSecurityApiTestJ
 test.describe('Invoice API security', () => {
   test.describe.configure({ retries: 0 });
 
-  test('An invoice list shows only the signed-in customer\'s invoices', { tag: ['@regression'] }, async ({ request }) => {
+  test('An invoice list shows only the signed-in customer\'s invoices', { tag: ['@regression'] }, async () => {
     await allure.feature('Invoice API security');
     await allure.testCaseId('TC-API-8');
 
-    const owner = await createOwnInvoice(request, testData.tcApi8.owner);
+    const owner = await apisOwnInvoices.createOwnInvoice(testData.tcApi8.owner);
     await owner.apisInvoices.verifyOwnInvoicesListed(await owner.apisInvoices.getInvoiceCount());
-    const { apisInvoices } = await registerInvoiceOwner(request, testData.tcApi8.other);
+    const { apisInvoices } = await apisOwnInvoices.registerInvoiceOwner(testData.tcApi8.other);
     const count = await apisInvoices.getInvoiceCount();
     await apisInvoices.verifyNoInvoicesListed(count);
   });
@@ -29,7 +31,7 @@ test.describe('Invoice API security', () => {
     await allure.testCaseId('TC-API-11');
     const { invoice, catalog, quantity, forgedUnitPrice, forgedTotal } = testData.tcApi11;
 
-    const { apisInvoices, userId, uuid } = await registerInvoiceOwner(request, testData.tcApi11.user);
+    const { apisInvoices, userId, uuid } = await apisOwnInvoices.registerInvoiceOwner(testData.tcApi11.user);
     const seeded = await new ApisProductCatalog(request).seedCatalog(uuid, catalog);
     const status = await apisInvoices.createInvoiceWithForgedAmounts(
       userId, invoice, { productId: seeded.products[0].id, unitPrice: forgedUnitPrice, quantity }, forgedTotal);
@@ -38,5 +40,9 @@ test.describe('Invoice API security', () => {
 
   test.beforeAll(async () => {
     testData = loadTestData('InvoiceSecurityApiTestJsonFile.json');
+  });
+
+  test.beforeEach(({ request }) => {
+    apisOwnInvoices = new ApisOwnInvoices(request);
   });
 });

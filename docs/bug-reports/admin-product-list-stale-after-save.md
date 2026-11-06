@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-ADM-2 in [test cases](../test-cases.md). |
-| Automation | `tests/AdminProductTests.spec.ts` fails on the listed price after the edit. |
+| Automation | `tests/ui/admin/AdminProductTests.spec.ts` fails on the listed price after the edit. |
 | Area | Admin, products |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |

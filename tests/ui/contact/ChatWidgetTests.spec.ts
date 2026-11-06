@@ -1,12 +1,12 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { ChatWidgetPage } from '../src/pages/ChatWidgetPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, withUniqueEmail, withUuid } from '../src/utils/UniqueData';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { ChatWidgetPage } from '../../../src/pages/ChatWidgetPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, withUniqueEmail, withUuid } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
@@ -14,7 +14,7 @@ let chatWidgetPage: ChatWidgetPage;
 let headerPage: HeaderPage;
 let productDetailPage: ProductDetailPage;
 
-let testData: typeof import('../resources/testData/ChatWidgetTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ChatWidgetTestJsonFile.json');
 
 /**
  * Chat checkout (story AC4). A visitor who is not signed in either signs in from the chat or continues as a guest,

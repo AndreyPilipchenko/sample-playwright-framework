@@ -49,14 +49,14 @@ Route: `#/`
 | TC-PO-21 | Search icon image loads | P3 | 30 | — |
 | TC-PO-22 | Product names wrap correctly (Firefox) | P3 | 35 | — |
 
-Smoke coverage: `tests/HomeTests.spec.ts` (`home1`) checks that the home page loads with a product; TC-PO-2, TC-PO-5 and
-TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests
+Smoke coverage: `tests/ui/catalog/HomeTests.spec.ts` (`home1`) checks that the home page loads with a product; TC-PO-2, TC-PO-5 and
+TC-PO-8 in `tests/ui/catalog/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests
 that differ only in how the product card is reached: through the search box and through the
 product's own category filter. Each smoke case seeds its own brand, category and products
 through the API with a per-run UUID in their names, and leaves them behind (deleting needs
 an admin token).
 
-Automated in `tests/ProductOverviewTests.spec.ts` (`@regression`): TC-PO-13 and 15. Both seed three products in one
+Automated in `tests/ui/catalog/ProductOverviewTests.spec.ts` (`@regression`): TC-PO-13 and 15. Both seed three products in one
 category (prices 15, 55 and 95; CO₂ ratings A, C and E) and look at that category only. TC-PO-13 cycles the sort options
 in alternating directions, so a grid that has not re-sorted can never match by chance; it fails on the local build at the
 first sort (the grid stays in ascending name order after Name Z-A). TC-PO-15 moves both slider handles with the
@@ -79,7 +79,7 @@ TC-PO-9 fails on the local build, where a parent category has no checkbox
 | TC-NAV-4 | Signed-in user's name is displayed in the header | P2 | 32 | — |
 | TC-NAV-5 | Guarded routes redirect to login when unauthenticated | P1 | — | — |
 
-TC-NAV-1, 3 and 4 are automated in `tests/NavigationTests.spec.ts` (`@regression`) and fail on defects 29, 3 and 32. TC-NAV-3
+TC-NAV-1, 3 and 4 are automated in `tests/ui/catalog/NavigationTests.spec.ts` (`@regression`) and fail on defects 29, 3 and 32. TC-NAV-3
 opens Hand Tools, Power Tools and Chainsaws, and fails on Chainsaws. It leaves out the entry labelled "UNDEFINED", which no
 source describes ([report](bug-reports/nav-undefined-category-entry.md)).
 
@@ -97,7 +97,7 @@ TC-NAV-5 is verified behaviour: `#/account`, `#/account/invoices`,
 | TC-CAT-5 | Product names are left-aligned | P3 | 4 | — |
 | TC-CAT-6 | Page title alignment is consistent (Edge) | P3 | 5 | — |
 
-Automated in `tests/CategoryTests.spec.ts` (`@regression`): TC-CAT-1, 3 and 4. TC-CAT-1 seeds two categories and passes.
+Automated in `tests/ui/catalog/CategoryTests.spec.ts` (`@regression`): TC-CAT-1, 3 and 4. TC-CAT-1 seeds two categories and passes.
 TC-CAT-3 finds the category and brand checkboxes, the sort dropdown and the pagination, then fails: the page has no price
 slider ([report](bug-reports/category-page-no-price-slider.md)). TC-CAT-4 fails on defect 3. The page title comes from the
 URL slug ([report](bug-reports/category-title-from-slug.md)), which matters for TC-CAT-2, not automated yet.
@@ -125,7 +125,7 @@ URL slug ([report](bug-reports/category-title-from-slug.md)), which matters for 
 | TC-PD-17 | Product images have alt text | P2 | 92 | — |
 | TC-PD-18 | Title alignment and button layout render correctly per browser | P3 | 44, 45 | — |
 
-Automated in `tests/ProductDetailTests.spec.ts` (`@regression`): TC-PD-1, 4, 5 and 8. TC-PD-4 and 5 fail on the local
+Automated in `tests/ui/catalog/ProductDetailTests.spec.ts` (`@regression`): TC-PD-1, 4, 5 and 8. TC-PD-4 and 5 fail on the local
 build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 passes: it does not
 read alt text, which TC-PD-17 checks for defect 92. TC-PD-8 fails
 on defect 43: it expects AC8's success message, and the local build shows a red error, though the items are still added.
@@ -150,7 +150,7 @@ TC-PD-6 passes, but proves nothing while defect 40 is open: the minus button doe
 | TC-RENT-6 | Rental product images load across browsers | P3 | 48 | — |
 | TC-RENT-7 | Rentals page title alignment is consistent | P3 | 49 | — |
 
-Automated in `tests/RentalTests.spec.ts` (`@regression`): TC-RENT-1 to 5. TC-RENT-1 seeds 10 rentals, more than one page
+Automated in `tests/ui/catalog/RentalTests.spec.ts` (`@regression`): TC-RENT-1 to 5. TC-RENT-1 seeds 10 rentals, more than one page
 holds, and fails: the page shows 9 and has no pagination ([report](bug-reports/rentals-page-no-pagination.md)). TC-RENT-4
 expects the local build's wording, "Item for rent, price per hour", by decision of 2026-11-06; the story's AC4 says "This is a
 rental item". TC-RENT-5 passes on the discounted price and fails on the total, which stays at the full rate
@@ -173,7 +173,7 @@ rental item". TC-RENT-5 passes on the discounted price and fails on the total, w
 | TC-CART-11 | Cart shows subtotal, discount amount and final total | P1 | 8 | AC7 |
 | TC-CART-12 | Removing all rental items removes the 15% discount | P2 | — | AC8 |
 
-Automated in `tests/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5, 7, 8, 10 and 11. They assert the documented
+Automated in `tests/ui/checkout/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5, 7, 8, 10 and 11. They assert the documented
 behaviour and fail while defects L1, 7 and 8 are open; see [bug reports](bug-reports/README.md). Each case seeds its own products through the API.
 TC-CART-2 fails first on the line total, which shows `$00.00` (defect 8), so it cannot yet show whether the quantity change
 itself works (defect 1).
@@ -209,7 +209,7 @@ TOTP during checkout (upstream AC3) is **out of scope** — absent from this bui
 | TC-CBA-9 | Address form inputs have accessible labels | P2 | 88 | — |
 | TC-CBA-10 | Checkout wizard labels meet contrast requirements | P2 | 86 | — |
 
-Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
+Automated in `tests/ui/checkout/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
 are shown and that the postcode shows the saved postcode; it fails while defect 10 is open (it reads "missing value").
 TC-CBA-4 runs as two tests: one reaches the payment step and passes, the other checks the button's text, "Proceed to
 checkout" in the upstream source, and fails while defect 11 is open.
@@ -233,7 +233,7 @@ checkout" in the upstream source, and fails while defect 11 is open.
 | TC-CPAY-13 | Cart is cleared after a successful order | P1 | — | AC9 |
 | TC-CPAY-14 | Payment form inputs have accessible labels | P2 | 89 | — |
 
-Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CPAY-1, 4, 7, 12 and 13. TC-CPAY-1 and 4 fail while defect 12
+Automated in `tests/ui/checkout/CheckoutTests.spec.ts` (`@regression`): TC-CPAY-1, 4, 7, 12 and 13. TC-CPAY-1 and 4 fail while defect 12
 is open (the dropdown carries an extra "Error 304" option, and Credit Card shows the Bank Transfer fields). TC-CPAY-7
 has no linked defect but is blocked by the same Credit Card behaviour.
 
@@ -267,7 +267,7 @@ Route: `#/auth/register`
 | TC-REG-13 | Phone placeholder text is spelled correctly | P3 | 54 | — |
 | TC-REG-14 | Field labels, padding and button width render correctly per browser | P3 | 55–59 | — |
 
-Automated in `tests/RegistrationTests.spec.ts` (`@regression`): TC-REG-1, 7, 8 and 9. TC-REG-1 fails while defect 52
+Automated in `tests/ui/accounts/RegistrationTests.spec.ts` (`@regression`): TC-REG-1, 7, 8 and 9. TC-REG-1 fails while defect 52
 is open (the State and Country labels are swapped). TC-REG-7 and 8 fail while defect 50 is open (the error reads "User
 already registered - Your password hint is: …").
 
@@ -295,7 +295,7 @@ Route: `#/auth/login`
 > account first (test plan §4.3). Social login (upstream AC1, AC10) and TOTP
 > (AC7–AC9) are **out of scope** — absent from this build.
 
-Automated in `tests/LoginTests.spec.ts`: TC-LOGIN-1 to 5, 7, 8 and 10. Expected texts and status codes for TC-LOGIN-5,
+Automated in `tests/ui/accounts/LoginTests.spec.ts`: TC-LOGIN-1 to 5, 7, 8 and 10. Expected texts and status codes for TC-LOGIN-5,
 8 and 10 come from the defect-free upstream source (`sprint5` in testsmith-io/practice-software-testing), not from a
 live instance:
 
@@ -339,7 +339,7 @@ Route: `#/account/profile`
 | TC-PROF-6 | City field shows the stored city, not "City not found" | P2 | 37 | AC1 |
 | TC-PROF-7 | Updating address fields does not error or 404 | P1 | 38 | AC4 |
 
-Automated in `tests/ProfileTests.spec.ts` (`@regression`): TC-PROF-1, 4, 5 and 7. All four fail on the local build: it
+Automated in `tests/ui/accounts/ProfileTests.spec.ts` (`@regression`): TC-PROF-1, 4, 5 and 7. All four fail on the local build: it
 shows the first name in the Last Name field and the other way round (defect 36), shows "City not found" instead of the
 stored city (defect 37), and refuses a profile update (defect 38; the build answers "Resource not found", wording seen locally only). Each case registers its
 own customer. The expected confirmation, "Your profile is successfully updated!", comes from the defect-free upstream
@@ -359,13 +359,13 @@ carry the ids `address` and `postcode`, where upstream uses `street` and `postal
 | TC-CPW-6 | Successful change confirms and logs out after 5s | P1 | — | AC6 |
 | TC-CPW-7 | Changed password works on the next login | P1 | 39 | AC6 |
 
-Automated in `tests/ChangePasswordTests.spec.ts`. TC-CPW-1 matches the story's field names in any case, because the story
+Automated in `tests/ui/accounts/ChangePasswordTests.spec.ts`. TC-CPW-1 matches the story's field names in any case, because the story
 gives no exact label text and the page and the defect-free upstream source both read "Current Password". The local inputs have no
 `required` attribute, and the form marks them required only in its code, so it checks "required" by behaviour: leaving out each field in turn changes nothing,
 and the old password still signs in. TC-CPW-3 fails on a local finding: the page shows the server's "The new password field confirmation does not match."
 instead of "Passwords do not match." ([report](bug-reports/change-password-mismatch-message.md)).
 
-TC-CPW-7 (in `tests/ChangePasswordTests.spec.ts`) changes the password, waits for the automatic logout and signs in
+TC-CPW-7 (in `tests/ui/accounts/ChangePasswordTests.spec.ts`) changes the password, waits for the automatic logout and signs in
 with the new one. It fails on the local build at that sign-in (defect 39).
 
 > TC-CPW-7 is the functional check for defect #39 (password stored unhashed, so the
@@ -396,7 +396,7 @@ with the new one. It fails on the local build at that sign-in (defect 39).
 | TC-INV-10 | City and Country appear in their correct fields | P1 | 15 | AC2 |
 | TC-INV-11 | Address fields never render "undefined" | P1 | 16 | AC2 |
 
-Automated in `tests/InvoiceTests.spec.ts` (`@regression`): TC-INV-3, 4, 5, 6, 7, 10 and 11. TC-INV-4, 5, 7, 10 and 11
+Automated in `tests/ui/invoices/InvoiceTests.spec.ts` (`@regression`): TC-INV-3, 4, 5, 6, 7, 10 and 11. TC-INV-4, 5, 7, 10 and 11
 fail on the local build: the detail shows "undefined" for address, postcode and state and swaps City and Country
 (defects 15 and 16) and shows "Method not found" for the payment method (defect 14). For an invoice that does not
 exist it shows no message; that is a local observation, not in the upstream register. A foreign invoice is also shown in
@@ -439,7 +439,7 @@ Route: `#/contact`
 > TC-CONT-5 / 6 / 7 depend on resolving open question 2 in the test plan — the
 > upstream attachment rule and defect #70 contradict each other.
 
-Automated in `tests/ContactTests.spec.ts` (`@regression`): TC-CONT-3, 8 and 9. TC-CONT-3 and 9 fail while defect 60
+Automated in `tests/ui/contact/ContactTests.spec.ts` (`@regression`): TC-CONT-3, 8 and 9. TC-CONT-3 and 9 fail while defect 60
 is open. TC-CONT-3 asserts the story's text "Status of order", while the local build and the upstream source both show
 "Status of my order", so it stays red after defect 60 is fixed unless the story or the product changes. TC-CONT-8 shows its confirmation and then fails on a local
 finding, with two causes: the API queues this mail but the local stack runs no queue worker, and the with-bugs build
@@ -469,7 +469,7 @@ Route: `#/admin/dashboard` (admin role required)
 > Admin CRUD on a shared public instance is destructive and visible to other users.
 > Prefer creating and then removing your own records; avoid editing seeded data.
 
-Automated (`@regression`, local stack, admin credentials in `APP_ADMIN_*`): TC-ADM-2 (`tests/AdminProductTests.spec.ts`),
+Automated (`@regression`, local stack, admin credentials in `APP_ADMIN_*`): TC-ADM-2 (`tests/ui/admin/AdminProductTests.spec.ts`),
 TC-ADM-5 and 6 (`AdminOrderTests.spec.ts`), TC-ADM-7, 8 and 9 (`AdminUserTests.spec.ts`) and TC-ADM-12
 (`AdminAccessTests.spec.ts`). Each case seeds its own customer, catalog and invoice through the API. TC-ADM-2 and 7 delete the
 records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 passed twice in a row on a local run (2026-11-05); the other five were red there. Causes, as checked on 2026-11-06:
@@ -504,7 +504,7 @@ Expected behaviour comes from the defect-free upstream source: statuses only mov
 | TC-CHAT-7 | Checkout with an empty cart shows "Your cart is empty" | P3 | — | AC5 |
 | TC-CHAT-8 | Support collects subject, 50-char message and optional `.txt` | P2 | — | AC6 |
 
-Automated in `tests/ChatWidgetTests.spec.ts` (`@regression`): TC-CHAT-6, one test per route. A customer who signs in
+Automated in `tests/ui/contact/ChatWidgetTests.spec.ts` (`@regression`): TC-CHAT-6, one test per route. A customer who signs in
 from the chat passes through cart total, address, payment and the order number. A guest fails on a local finding
 ([bug report](bug-reports/chat-no-guest-checkout.md)): the
 local build only offers "Sign in", while the story and the upstream source also offer "Continue as guest", which asks
@@ -526,7 +526,7 @@ also echoes the typed password as a visible message ([bug report](bug-reports/ch
 | TC-DISC-7 | Removing one product type removes the 15% | P2 | — | Comb AC3 |
 | TC-DISC-8 | Invoice reflects subtotal, discount and final total | P1 | — | Comb AC4 |
 
-Automated in `tests/DiscountTests.spec.ts` (`@regression`): TC-DISC-1, 4, 5, 6 and 8. The location cases use the
+Automated in `tests/ui/checkout/DiscountTests.spec.ts` (`@regression`): TC-DISC-1, 4, 5, 6 and 8. The location cases use the
 browser's own geolocation (the context grants the permission and reports a chosen position; the app is then told to
 read it). TC-DISC-1 checks the product page badge for Mumbai (-10%), Tokyo (-15%), Amsterdam (-20%), London (-25%) and
 New York (-5%), New York last. TC-DISC-4 puts a 100.00 location offer in the cart from Amsterdam and expects "$80.00";

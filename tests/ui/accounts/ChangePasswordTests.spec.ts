@@ -1,18 +1,18 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
-import { ApisUserAccount, type UserSeed } from '../src/apis/ApisUserAccount';
-import { AccountPage } from '../src/pages/AccountPage';
-import { LoginPage } from '../src/pages/LoginPage';
-import { ProfilePage } from '../src/pages/ProfilePage';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { ProfilePage } from '../../../src/pages/ProfilePage';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let apisUserAccount: ApisUserAccount;
 let accountPage: AccountPage;
 let loginPage: LoginPage;
 let profilePage: ProfilePage;
 
-let testData: typeof import('../resources/testData/ChangePasswordTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/ChangePasswordTestJsonFile.json');
 
 /**
  * Each test registers its own customer through the API (unique email per run, left behind on

@@ -1,15 +1,17 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { ApisProductCatalog } from '../src/apis/ApisProductCatalog';
-import { CartPage } from '../src/pages/CartPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { HomePage } from '../src/pages/HomePage';
-import { ProductDetailPage } from '../src/pages/ProductDetailPage';
-import { RentalsPage } from '../src/pages/RentalsPage';
-import { useBrowserLocation } from '../src/utils/BrowserGeolocation';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid } from '../src/utils/UniqueData';
+import { ApisProducts } from '../../../src/apis/ApisProducts';
+import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { CartPage } from '../../../src/pages/CartPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
+import { RentalsPage } from '../../../src/pages/RentalsPage';
+import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid } from '../../../src/utils/UniqueData';
 
+let apisProducts: ApisProducts;
 let apisProductCatalog: ApisProductCatalog;
 let cartPage: CartPage;
 let headerPage: HeaderPage;
@@ -17,7 +19,7 @@ let homePage: HomePage;
 let productDetailPage: ProductDetailPage;
 let rentalsPage: RentalsPage;
 
-let testData: typeof import('../resources/testData/RentalTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/RentalTestJsonFile.json');
 
 /**
  * TC-RENT-1 seeds more rentals than one API page holds, so it depends only on its own data. TC-RENT-2 and 3 go through
@@ -49,7 +51,7 @@ test.describe('Rentals', () => {
     await allure.testCaseId('TC-RENT-3');
     const { minimumHours, maximumHours, startHours, chosenHours } = testData.tcRENT3;
 
-    const [rental] = await apisProductCatalog.getRentalListing();
+    const [rental] = await apisProducts.getRentalListing();
     await rentalsPage.navigate();
     await rentalsPage.clickRental(rental.name);
     await productDetailPage.verifyProductDetailOpened(rental.name);
@@ -96,6 +98,7 @@ test.describe('Rentals', () => {
   });
 
   test.beforeEach(({ page, request }) => {
+    apisProducts = new ApisProducts(request);
     apisProductCatalog = new ApisProductCatalog(request);
     cartPage = new CartPage(page);
     headerPage = new HeaderPage(page);

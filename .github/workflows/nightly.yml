@@ -22,7 +22,7 @@
 #                     They narrow each stage's own selection, so a stage can end up empty;
 #                     an empty stage passes and its summary says no tests matched.
 #   regression-local takes the filters but never the URL overrides (it tests its own stack).
-#   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/CartTests.spec.ts
+#   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
 #
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
@@ -66,7 +66,7 @@ on:
         type: string
         default: ''
       path:
-        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/LoginTests.spec.ts:38)
+        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/ui/accounts/LoginTests.spec.ts:38)
         type: string
         default: ''
 

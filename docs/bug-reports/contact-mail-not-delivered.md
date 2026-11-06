@@ -4,7 +4,7 @@
 |---|---|
 | Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
 | Test cases | TC-CONT-8 (valid submission confirms and sends the email) in [test cases](../test-cases.md). |
-| Automation | `tests/ContactTests.spec.ts` shows the confirmation, then fails waiting for the mail in the local inbox. |
+| Automation | `tests/ui/contact/ContactTests.spec.ts` shows the confirmation, then fails waiting for the mail in the local inbox. |
 | Area | Contact form, API mail queue |
 | Environment | Local Docker stack (`sprint5-with-bugs`, `node scripts/app.mjs up`), with mailcatcher as the mail sink. Chromium (Playwright). |
 | Observed | 2026-11-06 |

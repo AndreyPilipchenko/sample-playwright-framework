@@ -1,17 +1,17 @@
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import { AccountPage } from '../src/pages/AccountPage';
-import { InvoicesPage } from '../src/pages/InvoicesPage';
-import { FavoritesPage } from '../src/pages/FavoritesPage';
-import { AdminDashboardPage } from '../src/pages/AdminDashboardPage';
-import { LoginPage } from '../src/pages/LoginPage';
-import { HeaderPage } from '../src/pages/HeaderPage';
-import { HomePage } from '../src/pages/HomePage';
-import { CategoryPage } from '../src/pages/CategoryPage';
-import { RentalsPage } from '../src/pages/RentalsPage';
-import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { loadTestData } from '../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { AccountPage } from '../../../src/pages/AccountPage';
+import { InvoicesPage } from '../../../src/pages/InvoicesPage';
+import { FavoritesPage } from '../../../src/pages/FavoritesPage';
+import { AdminDashboardPage } from '../../../src/pages/AdminDashboardPage';
+import { LoginPage } from '../../../src/pages/LoginPage';
+import { HeaderPage } from '../../../src/pages/HeaderPage';
+import { HomePage } from '../../../src/pages/HomePage';
+import { CategoryPage } from '../../../src/pages/CategoryPage';
+import { RentalsPage } from '../../../src/pages/RentalsPage';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { loadTestData } from '../../../src/utils/TestData';
+import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let accountPage: AccountPage;
 let invoicesPage: InvoicesPage;
@@ -24,7 +24,7 @@ let categoryPage: CategoryPage;
 let rentalsPage: RentalsPage;
 let apisUserAccount: ApisUserAccount;
 
-let testData: typeof import('../resources/testData/NavigationTestJsonFile.json');
+let testData: typeof import('../../../resources/testData/NavigationTestJsonFile.json');
 
 test.describe('Navigation & Header', () => {
 

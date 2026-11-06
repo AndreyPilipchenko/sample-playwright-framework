@@ -30,7 +30,7 @@ inputs:
       contain them. The Allure report is always published.
     default: 'true'
   paths:
-    description: Manual-run filter. Spec files or folders, separated by spaces, optionally with :line (e.g. "tests/LoginTests.spec.ts:38").
+    description: Manual-run filter. Spec files or folders, separated by spaces, optionally with :line (e.g. "tests/ui/accounts/LoginTests.spec.ts:38").
     default: ''
 
 outputs:
