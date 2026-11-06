@@ -25,6 +25,12 @@
       "rules": {
         "playwright/no-wait-for-timeout": "off"
       }
+    },
+    {
+      "files": ["scripts/tests/**"],
+      "rules": {
+        "typescript/no-floating-promises": "off"
+      }
     }
   ],
   "ignorePatterns": ["node_modules", "reports", "test-results", ".harness", ".app", "tools", ".claude", ".agents"]
