@@ -3,6 +3,7 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
 import { expectToBe, expectToBeAtLeast, expectToBeAtMost, expectToContain, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** One line item of an invoice (Swagger: InvoiceItem). */
 export interface InvoiceLineSeed {
@@ -115,9 +116,7 @@ export class ApisInvoices {
   /** Creating an invoice without its required fields is refused; resolves to the field names the API complained about. */
   async createInvoiceWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create an invoice without its required fields', async () => {
-      const response = await this.apiActions.post(this.invoices_serviceName, { data: {} });
-      expectToBe('the create invoice without fields response status', response.status(), 422);
-      return Object.keys((await response.json()) as Record<string, string[]>);
+      return await postEmptyAndGetReportedFields(this.apiActions, this.invoices_serviceName, 'the create invoice without fields response status');
     });
   }
 

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -30,6 +30,11 @@ export async function saveSession(page: Page, file: string): Promise<void> {
   }));
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, JSON.stringify(session), 'utf8');
+}
+
+/** Removes a saved session, so a role that cannot sign in this run does not reuse one from an earlier run. */
+export async function discardSession(file: string): Promise<void> {
+  await rm(file, { force: true });
 }
 
 /** Seeds every page of `context` with the saved sessionStorage, once per tab, on the saved origin only. */

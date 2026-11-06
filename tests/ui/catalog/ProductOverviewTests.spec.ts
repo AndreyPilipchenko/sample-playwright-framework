@@ -1,6 +1,5 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { HomePage } from '../../../src/pages/HomePage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
 import { ApisCategories } from '../../../src/apis/ApisCategories';
@@ -8,6 +7,7 @@ import { ApisProducts } from '../../../src/apis/ApisProducts';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
 import { newUuid, searchTokenOf, withUuid } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let homePage: HomePage;
 let productDetailPage: ProductDetailPage;
@@ -265,7 +265,7 @@ test.describe('Product Overview', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/ProductOverviewTestJsonFile.json', 'utf8'));
+    testData = loadTestData('ProductOverviewTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {

@@ -1,25 +1,21 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { CartPage } from '../../../src/pages/CartPage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
-import { AccountPage } from '../../../src/pages/AccountPage';
 import { HeaderPage } from '../../../src/pages/HeaderPage';
 import { HomePage } from '../../../src/pages/HomePage';
-import { LoginPage } from '../../../src/pages/LoginPage';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
-import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
 import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { newUuid } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
+import { CustomerFlows } from '../../../src/helpers/CustomerFlows';
 
 let cartPage: CartPage;
 let productDetailPage: ProductDetailPage;
 let apisProductCatalog: ApisProductCatalog;
-let accountPage: AccountPage;
 let headerPage: HeaderPage;
 let homePage: HomePage;
-let loginPage: LoginPage;
-let apisUserAccount: ApisUserAccount;
+let customerFlows: CustomerFlows;
 
 let testData: typeof import('../../../resources/testData/ProductDetailTestJsonFile.json');
 
@@ -204,11 +200,7 @@ test.describe('Product Detail', () => {
       await allure.testCaseId('TC-PD-12');
 
       const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPD12);
-      const user = withUniqueEmail(testData.tcPD12.user, newUuid());
-      await apisUserAccount.registerUser(user);
-      await loginPage.navigate();
-      await loginPage.login(user.email, user.password);
-      await accountPage.verifyPageOpened();
+      await customerFlows.signInAsNewCustomer(testData.tcPD12.user);
       await productDetailPage.navigate(catalog.products[0].id);
       await productDetailPage.verifyProductInStock();
       await productDetailPage.addToFavorites();
@@ -217,18 +209,16 @@ test.describe('Product Detail', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/ProductDetailTestJsonFile.json', 'utf8'));
+    testData = loadTestData('ProductDetailTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {
+    customerFlows = new CustomerFlows(page, request);
     cartPage = new CartPage(page);
     productDetailPage = new ProductDetailPage(page);
     apisProductCatalog = new ApisProductCatalog(request);
-    accountPage = new AccountPage(page);
     headerPage = new HeaderPage(page);
     homePage = new HomePage(page);
-    loginPage = new LoginPage(page);
-    apisUserAccount = new ApisUserAccount(request);
   });
 
 });

@@ -1,12 +1,12 @@
 import { test as setup } from '@playwright/test';
-import * as fs from 'fs';
 import { applications } from '../src/config/applications';
 import { authStateFile } from '../src/config/auth';
 import { LoginPage } from '../src/pages/LoginPage';
 import { HeaderPage } from '../src/pages/HeaderPage';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
-import { saveSession } from '../src/utils/AuthSession';
-import { newUuid, withUuid } from '../src/utils/UniqueData';
+import { discardSession, saveSession } from '../src/utils/AuthSession';
+import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
+import { loadTestData } from '../src/utils/TestData';
 
 let setupData: typeof import('../resources/testData/AuthSetupJsonFile.json');
 
@@ -24,11 +24,11 @@ let setupData: typeof import('../resources/testData/AuthSetupJsonFile.json');
  * lock a shared demo account.
  */
 setup.beforeAll(() => {
-  setupData = JSON.parse(fs.readFileSync('./resources/testData/AuthSetupJsonFile.json', 'utf8'));
+  setupData = loadTestData('AuthSetupJsonFile.json');
 });
 
 setup('authenticate as customer', async ({ page, request }) => {
-  const user = { ...setupData.customer.user, email: withUuid(setupData.customer.user.email, newUuid()) };
+  const user = withUniqueEmail(setupData.customer.user, newUuid());
   const apisUserAccount = new ApisUserAccount(request);
   const loginPage = new LoginPage(page);
   const headerPage = new HeaderPage(page);
@@ -42,6 +42,7 @@ setup('authenticate as customer', async ({ page, request }) => {
 
 setup('authenticate as admin', async ({ page }) => {
   const { username, password } = applications.app.accounts.admin;
+  await discardSession(authStateFile('admin'));
   setup.skip(!username || !password, 'Set the admin account credentials in .env to enable admin specs');
   const loginPage = new LoginPage(page);
   const headerPage = new HeaderPage(page);

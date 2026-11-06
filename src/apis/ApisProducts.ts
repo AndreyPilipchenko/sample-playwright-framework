@@ -3,7 +3,8 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { withUuid } from '../utils/UniqueData';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeGreaterThan, expectToBeOneOf, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToBeGreaterThan, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectRefusedWithoutToken, postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** One page of `GET /products` (Swagger: ProductResponse list, paginated). */
 interface ProductPage {
@@ -165,9 +166,7 @@ export class ApisProducts {
   /** Creating a product without its required fields is refused; resolves to the field names the API complained about. */
   async createProductWithoutRequiredFields(): Promise<string[]> {
     return await allure.step('Create a product without its required fields', async () => {
-      const response = await this.apiActions.post(this.products_serviceName, { data: {} });
-      expectToBe('the create product without fields response status', response.status(), 422);
-      return Object.keys((await response.json()) as Record<string, string[]>);
+      return await postEmptyAndGetReportedFields(this.apiActions, this.products_serviceName, 'the create product without fields response status');
     });
   }
 
@@ -204,7 +203,7 @@ export class ApisProducts {
   /** Deleting without an admin token is refused: 401 or 403. */
   async verifyDeleteRefused(productId: string, status: number) {
     await allure.step(`Verify deleting the product ${productId} without a token is refused`, async () => {
-      expectToBeOneOf(`the status of deleting the product ${productId} without a token`, status, [401, 403]);
+      expectRefusedWithoutToken(`the status of deleting the product ${productId} without a token`, status);
     });
   }
 

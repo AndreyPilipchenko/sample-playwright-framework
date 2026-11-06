@@ -9,9 +9,8 @@ import { HeaderPage } from '../../../src/pages/HeaderPage';
 import { HomePage } from '../../../src/pages/HomePage';
 import { CategoryPage } from '../../../src/pages/CategoryPage';
 import { RentalsPage } from '../../../src/pages/RentalsPage';
-import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { CustomerFlows } from '../../../src/helpers/CustomerFlows';
 
 let accountPage: AccountPage;
 let invoicesPage: InvoicesPage;
@@ -22,7 +21,7 @@ let headerPage: HeaderPage;
 let homePage: HomePage;
 let categoryPage: CategoryPage;
 let rentalsPage: RentalsPage;
-let apisUserAccount: ApisUserAccount;
+let customerFlows: CustomerFlows;
 
 let testData: typeof import('../../../resources/testData/NavigationTestJsonFile.json');
 
@@ -73,11 +72,7 @@ test.describe('Navigation & Header', () => {
       await allure.feature('Navigation & Header');
       await allure.testCaseId('TC-NAV-4');
 
-      const user = withUniqueEmail(testData.tcNAV4.user, newUuid());
-      await apisUserAccount.registerUser(user);
-      await loginPage.navigate();
-      await loginPage.login(user.email, user.password);
-      await accountPage.verifyPageOpened();
+      const user = await customerFlows.signInAsNewCustomer(testData.tcNAV4.user);
       await headerPage.verifySignedInUserName(`${user.firstName} ${user.lastName}`);
     });
   });
@@ -87,6 +82,7 @@ test.describe('Navigation & Header', () => {
   });
 
   test.beforeEach(({ page, request }) => {
+    customerFlows = new CustomerFlows(page, request);
     accountPage = new AccountPage(page);
     invoicesPage = new InvoicesPage(page);
     favoritesPage = new FavoritesPage(page);
@@ -96,7 +92,6 @@ test.describe('Navigation & Header', () => {
     homePage = new HomePage(page);
     categoryPage = new CategoryPage(page);
     rentalsPage = new RentalsPage(page);
-    apisUserAccount = new ApisUserAccount(request);
   });
 
 });

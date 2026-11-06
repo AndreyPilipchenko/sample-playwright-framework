@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
+import { rowWithCell } from '../utils/TableRows';
 
 /** Admin user list (`#/admin/users`). Requires a signed-in admin session. */
 export class AdminUsersPage {
@@ -20,7 +21,7 @@ export class AdminUsersPage {
 
   /** The list row whose Email cell is exactly `email`. */
   private row(email: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name: email, exact: true }) });
+    return rowWithCell(this.page, email);
   }
 
   ///// Actions

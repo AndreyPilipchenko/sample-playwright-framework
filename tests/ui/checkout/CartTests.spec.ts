@@ -1,12 +1,12 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
 import { HeaderPage } from '../../../src/pages/HeaderPage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
 import { CartPage } from '../../../src/pages/CartPage';
 import { CheckoutSignInPage } from '../../../src/pages/CheckoutSignInPage';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { newUuid } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let headerPage: HeaderPage;
 let productDetailPage: ProductDetailPage;
@@ -143,7 +143,7 @@ test.describe('Checkout Cart', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/CartTestJsonFile.json', 'utf8'));
+    testData = loadTestData('CartTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {

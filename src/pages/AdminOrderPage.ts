@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectToHaveText, expectToHaveValue } from '../utils/Expects';
+import { rowWithCell } from '../utils/TableRows';
 
 /** What the order view shows about the invoice, in the form's own formats. */
 export interface AdminOrderDetails {
@@ -89,7 +90,7 @@ export class AdminOrderPage {
 
   async verifyLineItem(productName: string, quantity: string, price: string, total: string) {
     await step(`Verify the order line of ${productName}`, async () => {
-      const line = this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name: productName, exact: true }) });
+      const line = rowWithCell(this.page, productName);
       await expectToHaveText(`the quantity of ${productName}`, line.getByRole('cell').nth(0), quantity);
       await expectToHaveText(`the price of ${productName}`, line.getByRole('cell').nth(2), price);
       await expectToHaveText(`the line total of ${productName}`, line.getByRole('cell').nth(3), total);

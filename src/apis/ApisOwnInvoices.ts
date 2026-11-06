@@ -35,18 +35,18 @@ export class ApisOwnInvoices {
       const owner = withUniqueEmail(user, uuid);
       const userId = await apisUserAccount.registerUser(owner);
       const apisInvoices = new ApisInvoices(this.request, () => apisUserAccount.getAccessToken(owner.email, owner.password));
-      return { apisInvoices, userId, uuid };
+      return { apisInvoices, owner, userId, uuid };
     });
   }
 
   /** Registers a customer, seeds one product and creates an invoice for it as that customer. */
   async createOwnInvoice(seed: OwnInvoiceSeed) {
     return await allure.step('Create an invoice for a new customer', async () => {
-      const { apisInvoices, userId, uuid } = await this.registerInvoiceOwner(seed.user);
+      const { apisInvoices, owner, userId, uuid } = await this.registerInvoiceOwner(seed.user);
       const catalog = await new ApisProductCatalog(this.request).seedCatalog(uuid, seed.catalog);
       const lines: InvoiceLineSeed[] = [{ productId: catalog.products[0].id, unitPrice: seed.catalog.products[0].price, quantity: seed.quantity }];
       const created: CreatedInvoice = await apisInvoices.createInvoice(userId, seed.invoice, lines);
-      return { apisInvoices, userId, created, lines, productName: catalog.products[0].name };
+      return { apisInvoices, owner, userId, created, lines, productName: catalog.products[0].name };
     });
   }
 }

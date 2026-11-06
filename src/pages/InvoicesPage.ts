@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { rowWithCell } from '../utils/TableRows';
 
 /** Customer invoice list (`#/account/invoices`). Requires a signed-in session; without one the app redirects to the login page. */
 export class InvoicesPage {
@@ -13,7 +14,7 @@ export class InvoicesPage {
 
   /** The Details link of the list row showing exactly `invoiceNumber`. */
   private details_link(invoiceNumber: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name: invoiceNumber, exact: true }) }).getByRole('link', { name: 'Details' });
+    return rowWithCell(this.page, invoiceNumber).getByRole('link', { name: 'Details' });
   }
 
   ///// Actions

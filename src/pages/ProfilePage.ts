@@ -6,18 +6,10 @@ import {
   expectToBeAtLeast, expectToBeAtMost, expectToBeHidden, expectToBeVisible, expectToHaveText, expectToHaveURL,
   expectToHaveValue,
 } from '../utils/Expects';
-
-/** The address part of the profile. */
-export interface ProfileAddress {
-  address: string;
-  postcode: string;
-  city: string;
-  state: string;
-  country: string;
-}
+import { expectAddressFieldsToShow, type AddressValues } from './AddressFields';
 
 /** The profile fields a customer can change. */
-export interface ProfileEdit extends ProfileAddress {
+export interface ProfileEdit extends AddressValues {
   firstName: string;
   lastName: string;
   phone: string;
@@ -99,7 +91,7 @@ export class ProfilePage {
   }
 
   /** Replaces only the address fields and submits the profile form. */
-  async updateAddress(address: ProfileAddress) {
+  async updateAddress(address: AddressValues) {
     await step('Update the address in the profile', async () => {
       await this.fillAddress(address);
       this.profileSubmittedAt = Date.now();
@@ -107,7 +99,7 @@ export class ProfilePage {
     });
   }
 
-  private async fillAddress(address: ProfileAddress) {
+  private async fillAddress(address: AddressValues) {
     await this.address_input.fill(address.address);
     await this.postcode_input.fill(address.postcode);
     await this.city_input.fill(address.city);
@@ -178,13 +170,12 @@ export class ProfilePage {
     });
   }
 
-  async verifyAddress(expected: ProfileAddress) {
+  async verifyAddress(expected: AddressValues) {
     await step('Verify the address fields show the stored values', async () => {
-      await expectToHaveValue('the Address field', this.address_input, expected.address);
-      await expectToHaveValue('the Postcode field', this.postcode_input, expected.postcode);
-      await expectToHaveValue('the City field', this.city_input, expected.city);
-      await expectToHaveValue('the State field', this.state_input, expected.state);
-      await expectToHaveValue('the Country field', this.country_input, expected.country);
+      await expectAddressFieldsToShow(
+        { address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_input },
+        expected,
+      );
     });
   }
 

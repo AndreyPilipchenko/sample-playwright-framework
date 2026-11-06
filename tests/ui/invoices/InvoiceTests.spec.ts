@@ -1,24 +1,18 @@
-import type { APIRequestContext } from '@playwright/test';
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
-import * as fs from 'fs';
-import { ApisInvoices, type CreatedInvoice } from '../../../src/apis/ApisInvoices';
-import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
+import { type CreatedInvoice } from '../../../src/apis/ApisInvoices';
 import { ApisOwnInvoices, type OwnInvoiceSeed } from '../../../src/apis/ApisOwnInvoices';
-import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
+import { type UserSeed } from '../../../src/apis/ApisUserAccount';
 import { AccountPage } from '../../../src/pages/AccountPage';
 import { InvoiceDetailPage } from '../../../src/pages/InvoiceDetailPage';
 import { InvoicesPage } from '../../../src/pages/InvoicesPage';
 import { LoginPage } from '../../../src/pages/LoginPage';
-import { newUuid, withUuid } from '../../../src/utils/UniqueData';
+import { loadTestData } from '../../../src/utils/TestData';
 
 let accountPage: AccountPage;
 let invoiceDetailPage: InvoiceDetailPage;
 let invoicesPage: InvoicesPage;
 let loginPage: LoginPage;
-let apisProductCatalog: ApisProductCatalog;
-let apisUserAccount: ApisUserAccount;
-let apiRequest: APIRequestContext;
 let apisOwnInvoices: ApisOwnInvoices;
 
 let testData: typeof import('../../../resources/testData/InvoiceTestJsonFile.json');
@@ -31,22 +25,14 @@ let testData: typeof import('../../../resources/testData/InvoiceTestJsonFile.jso
  * Never retried: this target locks an account after ONE failed login (known defect #21).
  */
 async function openOwnInvoiceDetail(seed: OwnInvoiceSeed): Promise<{ user: UserSeed; invoice: CreatedInvoice; productName: string }> {
-  const uuid = newUuid();
-  const user = { ...seed.user, email: withUuid(seed.user.email, uuid) };
-  const userId = await apisUserAccount.registerUser(user);
-  const catalog = await apisProductCatalog.seedCatalog(uuid, seed.catalog);
-  const [product] = catalog.products;
-  const apisInvoices = new ApisInvoices(apiRequest, () => apisUserAccount.getAccessToken(user.email, user.password));
-  const invoice = await apisInvoices.createInvoice(userId, seed.invoice, [
-    { productId: product.id, unitPrice: seed.catalog.products[0].price, quantity: seed.quantity },
-  ]);
+  const { owner: user, created: invoice, productName } = await apisOwnInvoices.createOwnInvoice(seed);
 
   await loginPage.navigate();
   await loginPage.login(user.email, user.password);
   await accountPage.verifyPageOpened(); // the sign-in must finish before navigating away from it
   await invoicesPage.navigate();
   await invoicesPage.openInvoiceDetails(invoice.invoiceNumber);
-  return { user, invoice, productName: product.name };
+  return { user, invoice, productName };
 }
 
 test.describe('Invoices', () => {
@@ -120,14 +106,11 @@ test.describe('Invoices', () => {
   });
 
   test.beforeAll(async () => {
-    testData = JSON.parse(fs.readFileSync('./resources/testData/InvoiceTestJsonFile.json', 'utf8'));
+    testData = loadTestData('InvoiceTestJsonFile.json');
   });
 
   test.beforeEach(({ page, request }) => {
-    apiRequest = request;
     apisOwnInvoices = new ApisOwnInvoices(request);
-    apisProductCatalog = new ApisProductCatalog(request);
-    apisUserAccount = new ApisUserAccount(request);
     accountPage = new AccountPage(page);
     invoiceDetailPage = new InvoiceDetailPage(page);
     invoicesPage = new InvoicesPage(page);
