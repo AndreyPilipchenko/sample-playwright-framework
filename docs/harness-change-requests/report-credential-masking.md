@@ -34,9 +34,10 @@ access and retention and to prefer disposable credentials, which is what this pr
   The Allure report is always uploaded. `src/utils/AllureReport.ts` masks the value typed
   into a field whose locator looks secret (`REDACTED_FIELD_LOCATOR`), so its step titles show
   `Fill "***"` for passwords; emails stay visible, and a failure's page snapshot attachment can
-  still show a filled password field. A failed test's trace is embedded in it too, so the two places
-  that type the admin password record no trace: the `setup` project and `tests/ui/accounts/LoginTests.spec.ts`. Traces of
-  tests signed in as the admin can still show that session's token. The run's Summary page
+  still show a filled password field. It leaves traces out, so they stay in the HTML report. The two
+  places that type the admin password record no trace at all: the `setup` project and
+  `tests/ui/accounts/LoginTests.spec.ts`. Traces of tests signed in as the admin can still show
+  that session's token. The run's Summary page
   (`scripts/ci-summary.mjs`) shows the results as well.
 
 ## Requested

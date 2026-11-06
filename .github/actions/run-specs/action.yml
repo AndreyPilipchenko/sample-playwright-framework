@@ -64,8 +64,9 @@ runs:
       run: |
         set +e
         # Several stages can share a job. Without this, a stage that writes no report would be
-        # summarized, and saved for the next comparison, with the previous stage's results.
-        rm -f reports/json-report/test-results.json reports/ci-baseline/results.json
+        # summarized, and saved for the next comparison, with the previous stage's results, and
+        # a stage whose Allure report fails would publish the previous stage's report as its own.
+        rm -f reports/json-report/test-results.json reports/ci-baseline/results.json reports/allure-report/index.html
         # Regex-escapes literal text.
         escape() { printf '%s' "$1" | sed 's/[][\\.*^$+?(){}|/]/\\&/g'; }
         # One lookahead requiring any of the given tags as a whole word of the title.
@@ -170,7 +171,8 @@ runs:
         name: allure-report-${{ inputs.report-name }}
         path: reports/allure-report/index.html
         retention-days: 30
-        if-no-files-found: ignore
+        # A missing report is either a selection with no specs or a failed generation (see the run's log).
+        if-no-files-found: warn
 
     - name: Reflect test outcome
       if: always()

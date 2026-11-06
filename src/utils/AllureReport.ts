@@ -20,10 +20,15 @@ export default class AllureReport extends AllureReporter {
       ? allureConfig.attachVideo : process.env.ALLURE_ATTACH_VIDEO === 'true');
   }
 
-  /** Keep every non-video attachment and preserve the original attachment array. */
+  /**
+   * Keep everything except traces and, unless enabled, videos; the original array is not changed.
+   * Traces stay out because a full run's exceed the harness limit on Allure results (128 MiB, 16 MiB a
+   * file), which leaves no report, and because they can show credentials, while this report is
+   * always published. They remain in `test-results/` and the Playwright HTML report.
+   */
   private reportAttachments(attachments: TestResult['attachments']): TestResult['attachments'] {
-    return this.attachVideo || !attachments.some(attachment => attachment.contentType.startsWith('video/'))
-      ? attachments : attachments.filter(attachment => !attachment.contentType.startsWith('video/'));
+    return attachments.filter(attachment => attachment.name !== 'trace'
+      && (this.attachVideo || !attachment.contentType.startsWith('video/')));
   }
 
   /** Forward a separate result view so other reporters still receive videos. */
@@ -88,7 +93,7 @@ export default class AllureReport extends AllureReporter {
       const run = helper.reserveAllureReport(roots, {historyRoot: process.env.HARNESS_ALLURE_HISTORY ?? allureConfig.historyDir});
       helper.captureAllureResults(roots, run.directory, this.options.resultsDir ?? allureConfig.resultsDir);
       const receipt = await helper.generateAllure(roots, run.directory, {configuration: allureConfig.generatorConfig});
-      if (receipt.status !== 'GENERATED') throw new Error('Allure report generation failed.');
+      if (receipt.status !== 'GENERATED') throw new Error(`${receipt.phase}: ${receipt.reason}`);
       if (receipt.latest?.status === 'FAILED') console.warn(receipt.latest.reason);
       if (process.env.AUTO_ALLURE_OPEN !== 'false' && !process.env.CI) {
         const command = process.platform === 'win32' ? 'rundll32.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
@@ -96,8 +101,8 @@ export default class AllureReport extends AllureReporter {
         const args = process.platform === 'win32' ? ['url.dll,FileProtocolHandler', pathToFileURL(reportFile).href] : [reportFile];
         execFileSync(command, args, { stdio: 'ignore', windowsHide: true, timeout: 15000 });
       }
-    } catch {
-      console.warn('Allure report generation or opening failed; test outcomes are unchanged.');
+    } catch (error) {
+      console.warn(`Allure report generation or opening failed; test outcomes are unchanged. ${String(error)}`);
     }
   }
 }
