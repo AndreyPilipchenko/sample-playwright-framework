@@ -23,6 +23,9 @@ let apisUserAccount: ApisUserAccount;
 
 let testData: typeof import('../resources/testData/ProductDetailTestJsonFile.json');
 
+// These tests read toasts, so the toast must not be waited away before the check.
+test.use({ waitForToasts: false });
+
 test.describe('Product Detail', () => {
 
   test('Quantity selector is displayed defaulting to 1', { tag: ['@smoke'] }, async () => {
