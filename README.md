@@ -53,7 +53,8 @@ the two `.env` values, the admin and disabled-account specs fail ([details](#run
 | **Some behaviour can't be reached through the UI or API** | Disabling an account goes through the database, a discount depends on the browser's position, and a contact message is checked in the local mail inbox | [`DbsUserAccount.ts`](src/dbs/DbsUserAccount.ts), [`BrowserGeolocation.ts`](src/utils/BrowserGeolocation.ts), [`ApisMailInbox.ts`](src/apis/ApisMailInbox.ts) |
 | **Security needs testing too** | API specs try another customer's record, forged invoice prices, deletes without a token and guarded GraphQL fields | [`tests/api/security/`](tests/api/security/) |
 | **Reports in a public repository can leak logins** | Allure masks typed passwords, the two places that type the admin password record no trace, and the HTML report is published only on request | [Report masking](docs/harness-change-requests/report-credential-masking.md) |
-| **Code style slips when only a reviewer checks it** | Every pull request runs a mechanical conventions check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
+| **A wrong report misleads as much as a wrong test** | The scripts behind the run summary, dashboard, secret check and boundary check have their own tests, run on every pull request | [`scripts/tests`](scripts/tests) |
+| **Code style slips when only a reviewer checks it** | Every pull request runs a mechanical conventions check, a core boundary check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
 
 ## How it's built
 
@@ -86,7 +87,7 @@ commit to the product repository triggers the smoke tests, and the full suite ru
 
 ```mermaid
 flowchart LR
-    pr["Pull request here"] --> lint["lint.yml<br/>conventions, typecheck, lint"]
+    pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, script tests, typecheck, lint"]
     push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
     nightly["02:00 UTC or by hand"] --> api["api-local"]
     nightly --> smoke["smoke-local<br/>one job per browser"]
@@ -247,7 +248,7 @@ CI job's QEMU step does.
 ## CI
 
 Two workflows run the tests. This repository is the test project, not the product, so
-**commits and pull requests here run no tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, type-check, lint).
+**commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, script tests, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|

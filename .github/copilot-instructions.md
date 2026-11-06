@@ -2,7 +2,7 @@
 
 This is a Playwright + TypeScript test framework (page object model) for the Practice
 Software Testing "Toolshop" app. It is the test project, not the product: its own pull
-requests run no tests. When reviewing, flag these in particular:
+requests run no Playwright tests. When reviewing, flag these in particular:
 
 ## Test policy (docs/test-plan.md §4.1)
 - Every test asserts the documented behaviour. A test of broken functionality fails and stays

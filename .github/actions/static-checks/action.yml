@@ -1,5 +1,5 @@
 name: Static checks
-description: The POM conventions check, the core boundary check, the TypeScript type-check and the linter. Run after the setup action.
+description: The POM conventions check, the core boundary check, the tests of the scripts, the TypeScript type-check and the linter. Run after the setup action.
 
 runs:
   using: composite
@@ -11,6 +11,10 @@ runs:
     - name: Check the core boundary and case IDs
       shell: bash
       run: node scripts/check-core-boundary.mjs
+
+    - name: Test the scripts
+      shell: bash
+      run: npm run test:scripts
 
     - name: Type-check
       shell: bash

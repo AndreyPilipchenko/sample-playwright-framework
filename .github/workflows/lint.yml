@@ -1,5 +1,6 @@
-# Static checks on every pull request: the POM conventions check, the core boundary check, the TypeScript type-check and
-# the linter. No test runs here (docs/test-plan.md §4.1: the suite never runs on pull requests);
+# Static checks on every pull request: the POM conventions check, the core boundary check, the tests
+# of the scripts, the TypeScript type-check and the linter. No Playwright test runs here
+# (docs/test-plan.md §4.1: the suite never runs on pull requests);
 # the checks are the composite action .github/actions/static-checks.
 #
 # Run it by hand: Actions → Lint → Run workflow, or `gh workflow run lint.yml`.
