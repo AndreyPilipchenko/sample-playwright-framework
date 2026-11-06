@@ -5,15 +5,14 @@ export function newUuid(): string {
   return randomUUID();
 }
 
-/** Fills the `{uuid}` placeholder of a paired-JSON template, e.g. "Claw Hammer TC-PO-8 {uuid}". */
+/** Fills the `{uuid}` placeholder of a paired-JSON template, e.g. "Sample item {uuid}". */
 export function withUuid(template: string, uuid: string): string {
   return template.replace('{uuid}', uuid);
 }
 
 /**
- * The part of a UUID to search for. The product search finds nothing for a full hyphenated
- * UUID, while the first segment (8 hex characters, within the 3-40 character query rule)
- * still identifies exactly one run's records.
+ * The part of a UUID to search for, where a search finds nothing for a full hyphenated UUID.
+ * The first segment (8 hex characters) still identifies exactly one run's records.
  */
 export function searchTokenOf(uuid: string): string {
   return uuid.split('-')[0];
@@ -24,7 +23,7 @@ export function withUniqueEmail<T extends { email: string }>(user: T, uuid: stri
   return { ...user, email: withUuid(user.email, uuid) };
 }
 
-/** URL part of a name: lowercase words separated by hyphens (Swagger: slug). */
+/** URL part of a name: lowercase words separated by hyphens. */
 export function slugOf(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }

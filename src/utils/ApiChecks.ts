@@ -8,7 +8,7 @@ export async function postEmptyAndGetReportedFields(apiActions: ApiActions, url:
   return Object.keys((await response.json()) as Record<string, string[]>);
 }
 
-/** A call that needs an admin token is refused without one: 401 or 403. */
+/** A call that needs a token is refused without one: 401 or 403. */
 export function expectRefusedWithoutToken(subject: string, status: number): void {
   expectToBeOneOf(subject, status, [401, 403]);
 }

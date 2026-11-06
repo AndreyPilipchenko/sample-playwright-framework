@@ -122,9 +122,9 @@ src/pages/    GUI business layer — page classes (locators + actions + validati
 src/apis/     API business layer — service classes per domain (accounts, catalog, invoices, users, logs, GraphQL)
 src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
 src/helpers/  Flows across the API and several pages, shared by specs (CustomerFlows)
-src/utils/    Technical layer — ApiActions/DBActions facades, Allure/report plumbing
-src/config/   Environment & target coordinates (reads .harness/targets.json / .env)
-src/fixtures/ The suite's `test` with the `role` option (signed-in sessions)
+src/utils/    Reusable core: technical layer — ApiActions/DBActions facades, Allure/report plumbing
+src/config/   App settings: environment & target coordinates (reads .harness/targets.json / .env)
+src/fixtures/ Reusable core: the suite's `test` with the `role` option (signed-in sessions)
 tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only
 setup/        Setup project — signs each role in once per run
 resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (team libraries)
@@ -247,7 +247,7 @@ CI job's QEMU step does.
 ## CI
 
 Two workflows run the tests. This repository is the test project, not the product, so
-**commits and pull requests here run no tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, type-check, lint).
+**commits and pull requests here run no tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|
@@ -384,6 +384,13 @@ Run only these with `npx playwright test --project=api`. UI specs sign in throug
 `docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
 (TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
 address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
+
+## Using it on another app
+
+`src/utils` and `src/fixtures` are the reusable core, and `src/config` holds the settings. Everything else is specific
+to Toolshop. [`scripts/check-core-boundary.mjs`](scripts/check-core-boundary.mjs) runs on every pull request and fails
+when core names the app or imports a Toolshop layer, or when two tests share a case ID. The
+[adapting guide](docs/adapting-to-your-app.md) lists what to change; it hasn't been tried on another app yet.
 
 ## License
 

@@ -16,7 +16,7 @@ import { attachBrowserEventsOnFailure, recordBrowserEvents } from '../utils/Brow
  *   holds a test until a toast covering a control fades (`waitForToasts`).
  *
  *   import { test } from '../src/fixtures/test'; // conventions-ok: <reason>
- *   test.use({ role: 'customer' });
+ *   test.use({ role: '<role>' }); // a role from src/config/auth.ts
  */
 export const test = base.extend<{ role: Role | undefined; waitForToasts: boolean }>({
   role: [undefined, { option: true }],
