@@ -71,7 +71,7 @@ sessionStorage, which Playwright's `storageState` does not capture, so specs opt
 the `role` fixture instead:
 
 ```ts
-import { test } from '../src/fixtures/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 
 test.use({ role: 'customer' }); // or 'admin'
 ```

@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
 import { ApisUsers } from '../src/apis/ApisUsers';
-import { test } from '../src/fixtures/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import { AdminDashboardPage } from '../src/pages/AdminDashboardPage';
 import { AdminOrdersPage } from '../src/pages/AdminOrdersPage';
 import { AdminProductsPage } from '../src/pages/AdminProductsPage';

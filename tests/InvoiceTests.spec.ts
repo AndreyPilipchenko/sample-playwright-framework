@@ -1,4 +1,5 @@
-import { test, type APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import * as fs from 'fs';
 import { ApisInvoices, type CreatedInvoice } from '../src/apis/ApisInvoices';

@@ -1,6 +1,6 @@
 import * as allure from 'allure-js-commons';
 import { createOwnInvoice } from '../src/apis/OwnInvoices';
-import { test } from '../src/fixtures/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import { AdminOrderPage } from '../src/pages/AdminOrderPage';
 import { AdminOrdersPage } from '../src/pages/AdminOrdersPage';
 import { loadTestData } from '../src/utils/TestData';

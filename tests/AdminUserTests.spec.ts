@@ -2,7 +2,7 @@ import * as allure from 'allure-js-commons';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
 import { databases } from '../src/config/databases';
 import { DbsUserAccount } from '../src/dbs/DbsUserAccount';
-import { test } from '../src/fixtures/test';
+import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import { AdminUserFormPage } from '../src/pages/AdminUserFormPage';
 import { AdminUsersPage } from '../src/pages/AdminUsersPage';
 import { loadTestData } from '../src/utils/TestData';
