@@ -105,6 +105,20 @@ test.describe('Checkout', () => {
     await checkoutAddressPage.verifyRequiredAddressFieldsShown(user.postcode);
   });
 
+  /** Apart from the test below, so the missing text cannot stop it from reaching the payment step. */
+  test('The billing address step names its Proceed button', { tag: ['@regression'] }, async () => {
+    await allure.feature('Checkout');
+    await allure.testCaseId('TC-CBA-4');
+    const user = await registerCustomer(testData.tcCBA4.user);
+
+    await addSeededProductToCartAndOpenIt(testData.tcCBA4);
+    await cartPage.proceed();
+    await checkoutSignInPage.login(user.email, user.password);
+    await checkoutSignInPage.proceed();
+    await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
+    await checkoutAddressPage.verifyProceedText(testData.tcCBA4.expectedProceedText);
+  });
+
   test('Completing all fields allows proceeding to payment', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CBA-4');

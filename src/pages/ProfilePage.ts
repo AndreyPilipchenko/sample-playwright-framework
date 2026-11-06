@@ -1,8 +1,9 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { PASSWORD_CHANGE_ANSWER_MS } from '../config/timeouts';
 import {
-  expectToBeAtLeast, expectToBeAtMost, expectToBeHidden, expectToBeVisible, expectToHaveAttribute, expectToHaveText, expectToHaveURL,
+  expectToBeAtLeast, expectToBeAtMost, expectToBeHidden, expectToBeVisible, expectToHaveText, expectToHaveURL,
   expectToHaveValue,
 } from '../utils/Expects';
 
@@ -131,6 +132,16 @@ export class ProfilePage {
     });
   }
 
+  /**
+   * Waits for the server's answer, so what is checked next cannot run ahead of it. A build that blocks
+   * the incomplete form in the browser sends nothing, so the wait gives up without failing.
+   */
+  async submitIncompletePasswordChange(currentPassword: string, newPassword: string, confirmation: string) {
+    const answered = this.page.waitForResponse('**/users/change-password', { timeout: PASSWORD_CHANGE_ANSWER_MS }).catch(() => undefined);
+    await this.changePassword(currentPassword, newPassword, confirmation);
+    await answered;
+  }
+
   ///// Validations
 
   /** The saved profile has loaded once the read-only email shows; edit cases wait for it so a late load cannot overwrite what they type. */
@@ -200,19 +211,11 @@ export class ProfilePage {
     });
   }
 
-  /** Each field is found by its documented label (exact, case-sensitive). */
+  /** The story names the fields without giving exact label text, so the whole label is matched in any case. */
   async verifyChangePasswordFieldsShown(labels: { current: string; new: string; confirm: string }) {
     await step('Verify the change password section shows the three fields', async () => {
       for (const label of [labels.current, labels.new, labels.confirm]) {
-        await expectToBeVisible(`the "${label}" field`, this.page.getByLabel(label, { exact: true }));
-      }
-    });
-  }
-
-  async verifyChangePasswordFieldsRequired(labels: { current: string; new: string; confirm: string }) {
-    await step('Verify the three change password fields are required', async () => {
-      for (const label of [labels.current, labels.new, labels.confirm]) {
-        await expectToHaveAttribute(`the "${label}" field`, this.page.getByLabel(label, { exact: true }), 'required', '');
+        await expectToBeVisible(`the "${label}" field`, this.page.getByLabel(new RegExp(`^${label}$`, 'i')));
       }
     });
   }

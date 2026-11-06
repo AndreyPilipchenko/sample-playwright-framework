@@ -26,7 +26,7 @@ Route: `#/`
 
 | ID | Title | Pri | Defect | AC |
 |---|---|---|---|---|
-| TC-PO-1 | Product grid displays cards with image, name and price | P1 | 26, 92 | AC1 |
+| TC-PO-1 | Product grid displays cards with image, name and price | P1 | 26 | AC1 |
 | TC-PO-2 | Clicking a product card navigates to its detail page | P1 | — | AC2 |
 | TC-PO-3 | Pagination controls appear when products exceed one page | P2 | — | AC3 |
 | TC-PO-4 | Clicking a page number updates the grid | P2 | — | AC3 |
@@ -49,13 +49,12 @@ Route: `#/`
 | TC-PO-21 | Search icon image loads | P3 | 30 | — |
 | TC-PO-22 | Product names wrap correctly (Firefox) | P3 | 35 | — |
 
-Smoke coverage: TC-PO-1 is automated in `tests/HomeTests.spec.ts`; TC-PO-2, TC-PO-5 and
+Smoke coverage: `tests/HomeTests.spec.ts` (`home1`) checks that the home page loads with a product; TC-PO-2, TC-PO-5 and
 TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as two tests
 that differ only in how the product card is reached: through the search box and through the
 product's own category filter. Each smoke case seeds its own brand, category and products
 through the API with a per-run UUID in their names, and leaves them behind (deleting needs
-an admin token). The TC-PO-1 test (test ID `home1`) checks the navigation, the page title and that a first product card shows. It does
-not read the image, name or price, so defects 26 and 92 are not covered by it.
+an admin token).
 
 Automated in `tests/ProductOverviewTests.spec.ts` (`@regression`): TC-PO-13 and 15. Both seed three products in one
 category (prices 15, 55 and 95; CO₂ ratings A, C and E) and look at that category only. TC-PO-13 cycles the sort options
@@ -63,7 +62,8 @@ in alternating directions, so a grid that has not re-sorted can never match by c
 first sort (the grid stays in ascending name order after Name Z-A). TC-PO-15 moves both slider handles with the
 keyboard (range 40 to 70) and expects only the 55 product; it fails on the local build, which keeps all three.
 
-Also automated there (`@regression`): TC-PO-3, 4, 6, 7, 9, 11, 12, 14, 16 and 17. TC-PO-6 activates the category, brand,
+Also automated there (`@regression`): TC-PO-1, 3, 4, 6, 7, 9, 11, 12, 14, 16 and 17. TC-PO-1 checks the image, name and price of
+every card on the first page, and fails on defect 26: the image of Slip Joint Pliers (product 5) is hidden in Chrome. Defect 92 (alt text) is a product detail defect, checked by TC-PD-17. TC-PO-6 activates the category, brand,
 price and sort filters; the first three reset, and it fails on the sort dropdown, which keeps its option
 ([report](bug-reports/search-leaves-sort-selected.md)). It counts sorting as a filter because the category story's AC2 does.
 TC-PO-9 fails on the local build, where a parent category has no checkbox
@@ -211,7 +211,8 @@ TOTP during checkout (upstream AC3) is **out of scope** — absent from this bui
 
 Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
 are shown and that the postcode shows the saved postcode; it fails while defect 10 is open (it reads "missing value").
-TC-CBA-4 passes: it reaches the payment step without reading the button's text, so defect 11 is not covered by it.
+TC-CBA-4 runs as two tests: one reaches the payment step and passes, the other checks the button's text, "Proceed to
+checkout" in the upstream source, and fails while defect 11 is open.
 
 ## 9. Checkout — Payment
 
@@ -358,10 +359,10 @@ carry the ids `address` and `postcode`, where upstream uses `street` and `postal
 | TC-CPW-6 | Successful change confirms and logs out after 5s | P1 | — | AC6 |
 | TC-CPW-7 | Changed password works on the next login | P1 | 39 | AC6 |
 
-TC-CPW-1 and 3 fail on the local build (both are in `tests/ChangePasswordTests.spec.ts`). TC-CPW-1 looks for the story's
-wording with exact case, and the page's labels read "Current Password", "New Password" and "Confirm New Password". Its next
-check would also fail: the three inputs have no `required` attribute, because the form only marks them required in its code.
-TC-CPW-3 fails on a local finding: the page shows the server's "The new password field confirmation does not match."
+Automated in `tests/ChangePasswordTests.spec.ts`. TC-CPW-1 matches the story's field names in any case, because the story
+gives no exact label text and the page and the defect-free upstream source both read "Current Password". The local inputs have no
+`required` attribute, and the form marks them required only in its code, so it checks "required" by behaviour: leaving out each field in turn changes nothing,
+and the old password still signs in. TC-CPW-3 fails on a local finding: the page shows the server's "The new password field confirmation does not match."
 instead of "Passwords do not match." ([report](bug-reports/change-password-mismatch-message.md)).
 
 TC-CPW-7 (in `tests/ChangePasswordTests.spec.ts`) changes the password, waits for the automatic logout and signs in
@@ -615,20 +616,20 @@ is used.
 
 | Area | Cases | Automated |
 |---|---|---|
-| Product Overview | 22 | 16 (TC-PO-1, 2, 5, 8 — smoke; TC-PO-3, 4, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-6, 9 failing on local findings) |
+| Product Overview | 22 | 16 (TC-PO-2, 5, 8 — smoke; TC-PO-1 failing on defect 26; TC-PO-3, 4, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-6, 9 failing on local findings) |
 | Navigation & Header | 5 | 4 (TC-NAV-5, smoke; TC-NAV-1, 3, 4 failing on defects 29, 3, 32) |
 | Product Category | 6 | 3 (TC-CAT-1 passes; TC-CAT-3 failing on a local finding, TC-CAT-4 on defect 3) |
 | Product Detail | 18 | 15 (TC-PD-3 — smoke; TC-PD-1, 2, 6, 9, 10, 11, 14 pass; TC-PD-4, 5, 8, 12, 16, 17 failing on defects 40, 43, 41, 91, 92; TC-PD-7 on a local finding) |
 | Rentals | 7 | 5 (TC-RENT-2, 3, 4 pass; TC-RENT-1, 5 failing on local findings) |
 | Checkout — Cart | 12 | 8 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8; TC-CART-8 passes; TC-CART-10, 11 failing, no combination discount locally) |
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
-| Checkout — Address | 10 | 3 (TC-CBA-1, 3, 4 — TC-CBA-1 failing on open defect 10) |
+| Checkout — Address | 10 | 3 (TC-CBA-1, 3, 4 — TC-CBA-1 failing on open defect 10; TC-CBA-4's button text test on defect 11) |
 | Checkout — Payment | 14 | 5 (TC-CPAY-1, 4, 7, 12, 13 — TC-CPAY-1, 4, 7 failing on open defect 12) |
 | Registration | 14 | 4 (TC-REG-1, 7, 8, 9 — TC-REG-1, 7, 8 failing on open defects 52, 50) |
 | Login | 13 | 8 (TC-LOGIN-1, 4, 5, 7, 8, 10; TC-LOGIN-2, 3 — smoke; TC-LOGIN-5, 8 failing) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 4 (TC-PROF-1, 4, 5, 7 — all failing on defects 36, 37, 38) |
-| Change Password | 7 | 5 (TC-CPW-1, 3, 4, 6, 7 — TC-CPW-1 failing on the exact label wording, TC-CPW-3 on a local finding; TC-CPW-7 failing on defect 39) |
+| Change Password | 7 | 5 (TC-CPW-1, 3, 4, 6, 7 — TC-CPW-1 passes; TC-CPW-3 failing on a local finding; TC-CPW-7 failing on defect 39) |
 | Favorites | 3 | 0 |
 | Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |
