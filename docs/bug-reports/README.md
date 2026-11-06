@@ -22,5 +22,8 @@ separate, explicitly approved preview. Reports are written even when the defect 
 | [The category page title comes from the URL slug, not the category name](category-title-from-slug.md) | new | TC-CAT-2 (not automated) | Open, not filed |
 | [The Categories menu has an entry labelled "UNDEFINED" that opens an empty page](nav-undefined-category-entry.md) | new | none | Open, not filed |
 | [The product quantity is capped at 99, while the story allows 999,999,999](product-quantity-capped-at-99.md) | new | TC-PD-7 | Open, not filed |
+| [The change password form shows the server's message for a mismatched confirmation](change-password-mismatch-message.md) | new | TC-CPW-3 | Open, not filed |
+| [The admin product list shows the old price after an edit](admin-product-list-stale-after-save.md) | new | TC-ADM-2 | Open, not filed |
+| [Admin cannot save an edited user: the phone comes back as a number](admin-user-save-refused-phone.md) | new | TC-ADM-7, TC-ADM-8, TC-ADM-9 | Open, not filed |
 | [The rentals page shows only the first 9 rentals, with no way to reach the rest](rentals-page-no-pagination.md) | new | TC-RENT-1 | Open, not filed |
 | [A discounted rental shows a total at the full hourly rate](rental-total-ignores-location-discount.md) | new | TC-RENT-5 | Open, not filed |

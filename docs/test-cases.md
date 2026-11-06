@@ -54,7 +54,8 @@ TC-PO-8 in `tests/ProductOverviewTests.spec.ts` (all `@smoke`). TC-PO-2 runs as 
 that differ only in how the product card is reached: through the search box and through the
 product's own category filter. Each smoke case seeds its own brand, category and products
 through the API with a per-run UUID in their names, and leaves them behind (deleting needs
-an admin token).
+an admin token). The TC-PO-1 test (test ID `home1`) checks the navigation, the page title and that a first product card shows. It does
+not read the image, name or price, so defects 26 and 92 are not covered by it.
 
 Automated in `tests/ProductOverviewTests.spec.ts` (`@regression`): TC-PO-13 and 15. Both seed three products in one
 category (prices 15, 55 and 95; CO₂ ratings A, C and E) and look at that category only. TC-PO-13 cycles the sort options
@@ -125,13 +126,15 @@ URL slug ([report](bug-reports/category-title-from-slug.md)), which matters for 
 | TC-PD-18 | Title alignment and button layout render correctly per browser | P3 | 44, 45 | — |
 
 Automated in `tests/ProductDetailTests.spec.ts` (`@regression`): TC-PD-1, 4, 5 and 8. TC-PD-4 and 5 fail on the local
-build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 passes. TC-PD-8 fails
+build (the plus button does not raise the quantity; the minus button leaves it unchanged). TC-PD-1 passes: it does not
+read alt text, which TC-PD-17 checks for defect 92. TC-PD-8 fails
 on defect 43: it expects AC8's success message, and the local build shows a red error, though the items are still added.
 An earlier form of this case passed by mistake: it looked for the error only after the message had gone, about 3 seconds
 after appearing.
 
 Also automated there (`@regression`): TC-PD-2, 6, 7, 9, 10, 11, 12, 14, 16 and 17. TC-PD-12, 16 and 17 fail on defects 41, 91
-and 92. TC-PD-7 passes typed entry and the lower limit, then fails on the story's upper limit, because the page stops at 99
+and 92. On TC-PD-8 and 12 the red toast reads "Oeps, something went wrong."; the register's wording for defect 41 is
+"Upsss... something wrong". TC-PD-7 passes typed entry and the lower limit, then fails on the story's upper limit, because the page stops at 99
 ([report](bug-reports/product-quantity-capped-at-99.md)). TC-PD-9 passes on the local build, with 12 units reaching the cart.
 TC-PD-6 passes, but proves nothing while defect 40 is open: the minus button does nothing at any quantity.
 
@@ -158,7 +161,7 @@ rental item". TC-RENT-5 passes on the discounted price and fails on the total, w
 | ID | Title | Pri | Defect | AC |
 |---|---|---|---|---|
 | TC-CART-1 | Cart table shows Item, Quantity, Price, Total, Actions | P1 | L1 | AC1 |
-| TC-CART-2 | Changing quantity recalculates line and cart totals | P1 | 1 | AC2 |
+| TC-CART-2 | Changing quantity recalculates line and cart totals | P1 | 1, 8 | AC2 |
 | TC-CART-3 | Quantity update shows "Product quantity updated." | P2 | 1 | AC2 |
 | TC-CART-4 | Delete button removes the item | P1 | 7 | AC3 |
 | TC-CART-5 | Cart total recalculates after deletion | P1 | 7, 8 | AC3 |
@@ -172,6 +175,8 @@ rental item". TC-RENT-5 passes on the discounted price and fails on the total, w
 
 Automated in `tests/CartTests.spec.ts` (`@regression`): TC-CART-1, 2, 4, 5, 7, 8, 10 and 11. They assert the documented
 behaviour and fail while defects L1, 7 and 8 are open; see [bug reports](bug-reports/README.md). Each case seeds its own products through the API.
+TC-CART-2 fails first on the line total, which shows `$00.00` (defect 8), so it cannot yet show whether the quantity change
+itself works (defect 1).
 
 TC-CART-8, 10 and 11 are in the same spec. TC-CART-8 is the same observable as TC-CSI-1 (Proceed from the cart
 leads to the sign-in step) and passes. TC-CART-10 and 11 seed a 50.00 rental product and a 20.00 non-rental product and
@@ -206,6 +211,7 @@ TOTP during checkout (upstream AC3) is **out of scope** — absent from this bui
 
 Automated in `tests/CheckoutTests.spec.ts` (`@regression`): TC-CBA-1, 3 and 4. TC-CBA-1 checks that all five fields
 are shown and that the postcode shows the saved postcode; it fails while defect 10 is open (it reads "missing value").
+TC-CBA-4 passes: it reaches the payment step without reading the button's text, so defect 11 is not covered by it.
 
 ## 9. Checkout — Payment
 
@@ -299,7 +305,9 @@ live instance:
   That differs from defect 21 ("locked after 1 attempt"), which matches the current upstream with-bugs source and the
   hosted instance. TC-LOGIN-7 (two failures, then a valid login succeeds) therefore passes locally and fails where
   defect 21 applies; TC-LOGIN-8 (lock message "Account locked, too many failed attempts. Please contact the
-  administrator." and HTTP 423, threshold 3 per the upstream source) fails locally because nothing locks.
+  administrator." and HTTP 423, threshold 3 per the upstream source) fails locally because nothing locks. The API
+  test `customer-account-api-5` (`tests/api/accounts/CustomerAccountApiTests.spec.ts`) fails for the same reason: the
+  login after three failures answers 200, not 423.
 - **TC-LOGIN-10** passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
   test disables its account with `UPDATE users SET enabled = 0` (`src/dbs/DbsUserAccount.ts`). It runs only where
   `APP_DB_LOCAL` is set (local stack; the nightly `regression-local` job reads the secret of that name) and fails with
@@ -349,6 +357,12 @@ carry the ids `address` and `postcode`, where upstream uses `street` and `postal
 | TC-CPW-5 | New password identical to current is rejected | P2 | — | AC5 |
 | TC-CPW-6 | Successful change confirms and logs out after 5s | P1 | — | AC6 |
 | TC-CPW-7 | Changed password works on the next login | P1 | 39 | AC6 |
+
+TC-CPW-1 and 3 fail on the local build (both are in `tests/ChangePasswordTests.spec.ts`). TC-CPW-1 looks for the story's
+wording with exact case, and the page's labels read "Current Password", "New Password" and "Confirm New Password". Its next
+check would also fail: the three inputs have no `required` attribute, because the form only marks them required in its code.
+TC-CPW-3 fails on a local finding: the page shows the server's "The new password field confirmation does not match."
+instead of "Passwords do not match." ([report](bug-reports/change-password-mismatch-message.md)).
 
 TC-CPW-7 (in `tests/ChangePasswordTests.spec.ts`) changes the password, waits for the automatic logout and signs in
 with the new one. It fails on the local build at that sign-in (defect 39).
@@ -457,18 +471,19 @@ Route: `#/admin/dashboard` (admin role required)
 Automated (`@regression`, local stack, admin credentials in `APP_ADMIN_*`): TC-ADM-2 (`tests/AdminProductTests.spec.ts`),
 TC-ADM-5 and 6 (`AdminOrderTests.spec.ts`), TC-ADM-7, 8 and 9 (`AdminUserTests.spec.ts`) and TC-ADM-12
 (`AdminAccessTests.spec.ts`). Each case seeds its own customer, catalog and invoice through the API. TC-ADM-2 and 7 delete the
-records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 passed twice in a row on a local run (2026-11-05); the other five were red there. The causes below are suspected, not confirmed:
-- TC-ADM-2: the product edit shows "Product saved!" but the list still shows the old price.
-- TC-ADM-7: saving an edited user is refused (seen in the network response) with 422 "The phone field must be a string". Users created after the seed
-  data (by registration or by the admin form) appear to have their phone stored as a number (`0987654321` becomes `987654321`),
-  and the edit form sends it back as a number. Seeded users are not affected.
-- TC-ADM-8 and 9: the same refused save blocks them. TC-ADM-8 also cannot show whether the admin API drops `enabled`
+records they create when they get that far; the others leave disposable records behind. TC-ADM-5 and 6 passed twice in a row on a local run (2026-11-05); the other five were red there. Causes, as checked on 2026-11-06:
+- TC-ADM-2: the edit is saved, but the list keeps showing the old price. The API returns the new price; the page's second search for the product is
+  answered from the browser cache, because product responses allow caching for 120 seconds ([report](bug-reports/admin-product-list-stale-after-save.md)).
+- TC-ADM-7: saving an edited user is refused with 422 "The phone field must be a string". `GET /users/{id}` returns a registered user's phone as a
+  number (`987654321`), though `GET /users/me` returns `"0987654321"`, and a `PUT` with the number gives this 422 ([report](bug-reports/admin-user-save-refused-phone.md)). The
+  edit form sends back what it loaded (read in the source, not traced). Seeded users are not affected, because their phone is empty.
+- TC-ADM-8 and 9: the same 422 shows in their browser diagnostics, so the same refused save blocks them. TC-ADM-8 also cannot show whether the admin API drops `enabled`
   (it did in the earlier TC-LOGIN-10 work). TC-ADM-9 starts from an account disabled in the database (`APP_DB_LOCAL`),
   because the UI cannot disable one here.
 - TC-ADM-12: a customer calling an admin-only API endpoint gets 401, not 403 (defect 83). The UI half passes: every
   admin route sends a signed-in customer to the login page.
 
-These local findings (product price, phone as a number, and duplicate invoice numbers, below) are not in the upstream
+These local findings (stale product list, phone as a number, and duplicate invoice numbers, below) are not in the upstream
 register and could not be checked on the hosted site, which is broken; treat them as candidate findings.
 Duplicate invoice numbers: two invoices created at the same moment can get the same number (seen as two
 `INV-2026000027` rows with different totals), so the admin order specs find an order by its id, not its number.
@@ -613,7 +628,7 @@ is used.
 | Login | 13 | 8 (TC-LOGIN-1, 4, 5, 7, 8, 10; TC-LOGIN-2, 3 — smoke; TC-LOGIN-5, 8 failing) |
 | Forgot Password | 6 | 0 |
 | Profile | 7 | 4 (TC-PROF-1, 4, 5, 7 — all failing on defects 36, 37, 38) |
-| Change Password | 7 | 5 (TC-CPW-1, 3, 4, 6, 7 — TC-CPW-1, 3 failing; TC-CPW-7 failing on defect 39) |
+| Change Password | 7 | 5 (TC-CPW-1, 3, 4, 6, 7 — TC-CPW-1 failing on the exact label wording, TC-CPW-3 on a local finding; TC-CPW-7 failing on defect 39) |
 | Favorites | 3 | 0 |
 | Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |

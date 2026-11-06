@@ -18,7 +18,7 @@ test.describe('Home', () => {
     await homePage.navigate();
     await headerPage.verifyNavigationVisible();
     await homePage.verifyPageTitle(new RegExp(testData.home1.expectedTitleContains));
-    await homePage.verifyProductCatalogVisible(testData.home1.minimumProductCount);
+    await homePage.verifyProductCatalogVisible();
   });
 
   test.beforeAll(async () => {

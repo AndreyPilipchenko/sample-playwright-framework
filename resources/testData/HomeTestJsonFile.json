@@ -1,6 +1,5 @@
 {
   "home1": {
-    "expectedTitleContains": "Practice Software Testing",
-    "minimumProductCount": 1
+    "expectedTitleContains": "Practice Software Testing"
   }
 }
