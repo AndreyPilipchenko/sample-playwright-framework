@@ -10,12 +10,16 @@ ships with 90+ intentional defects.
 **[See the latest results](https://andreypilipchenko.github.io/sample-playwright-framework/)**: the pass and fail counts, why each test failed, and the full Allure
 reports, updated every night.
 
+[![The results dashboard: 149 tests, 78 passed, 71 failed, then results by job and why the tests failed](docs/images/dashboard.png)](https://andreypilipchenko.github.io/sample-playwright-framework/)
+
+*The dashboard after the run of 6 November 2026. The link above shows the latest run.*
+
 **The tests run against a local copy of the shop in Docker.** The public site is too unstable to test
 against: many people use it at once, and it sometimes breaks completely.
 
 **Expect a red Nightly badge.** The shop's bugs are built in, and the tests catch them. A test fails when
 the product doesn't do what its documentation says, and those failures stay visible to show how the
-framework reports them. Latest full local run (6 November 2026, chromium and API): 78 passed, 71 failed.
+framework reports them.
 
 ## At a glance
 
@@ -26,6 +30,17 @@ framework reports them. Latest full local run (6 November 2026, chromium and API
 | **Defects** | 40 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
 | **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
 | **Stack** | Playwright 1.63, TypeScript 7, Node 24, Allure 3, Docker, GitHub Actions, oxlint |
+
+## 5-minute tour
+
+1. [The live results](https://andreypilipchenko.github.io/sample-playwright-framework/): open an Allure report from "Results by job", then a failed test, to see its
+   business-titled steps and its "Browser diagnostics" attachment.
+2. [`tests/ui/checkout/CheckoutTests.spec.ts`](tests/ui/checkout/CheckoutTests.spec.ts): what a spec looks like when it only orchestrates.
+3. [`src/pages/ProductDetailPage.ts`](src/pages/ProductDetailPage.ts): a page object with its locators, actions and validations.
+4. [`tests/api/security/`](tests/api/security/): the API-level attacks.
+5. [`docs/bug-reports/cart-line-total-zero.md`](docs/bug-reports/cart-line-total-zero.md): how a failing test connects to a written bug report.
+
+With more time, [`.github/actions/run-specs/action.yml`](.github/actions/run-specs/action.yml) shows how CI selects tests, publishes reports and compares runs.
 
 ## Quick start
 
@@ -97,14 +112,6 @@ flowchart LR
 Each test job brings up its own Docker copy of the shop, so jobs can't disturb each other, and one
 job's failure doesn't stop the others.
 
-### Where to start reading
-
-1. [`tests/ui/checkout/CheckoutTests.spec.ts`](tests/ui/checkout/CheckoutTests.spec.ts): what a spec looks like when it only orchestrates.
-2. [`src/pages/ProductDetailPage.ts`](src/pages/ProductDetailPage.ts): a page object with its locators, actions and validations.
-3. [`tests/api/security/`](tests/api/security/): the API-level attacks.
-4. [`docs/bug-reports/cart-line-total-zero.md`](docs/bug-reports/cart-line-total-zero.md): how a failing test connects to a written bug report.
-5. [`.github/actions/run-specs/action.yml`](.github/actions/run-specs/action.yml): how CI selects tests, publishes reports and compares runs.
-
 ## Reports
 
 | Report | Where | Notes |
@@ -155,6 +162,14 @@ compiled from the upstream Practice Software Testing docs:
   acceptance criteria
 - [Known defects](docs/known-defects.md): the defect register, and how test cases map to it
 - [Bug reports](docs/bug-reports/): written reports with their reproductions
+- [Automated tests](docs/automated-tests.md): every spec, the cases it covers and which are red
+
+### Not automated yet
+
+116 of the 234 designed cases are automated; the per-area count is the Coverage summary in
+`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
+(TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
+address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
 
 ## Signed-in tests
 
@@ -255,58 +270,10 @@ Two workflows run the tests. This repository is the test project, not the produc
 | `smoke-on-commit.yml` | `@smoke` tests on chromium | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
 | `nightly.yml` | all tests, in separate jobs, then publishes the results to GitHub Pages | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
 
-Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke-on-commit.yml`
-/ `gh workflow run nightly.yml`). Smoke runs queue behind each other, and a burst of product
-commits tests only the newest one; nightly runs have their own queue, so a product commit never
-cancels a waiting nightly run.
-
-A manual run takes optional inputs (all blank = the local stack and every test):
-
-| Input | Effect |
-|---|---|
-| `app_url`, `api_url` | Test another deployment instead of the local stack: give both. The deployment needs the same demo accounts, and the repository's admin login is sent to it. The run starts no stack, uses 2 workers and uploads no traces, which could hold a live token. Tests that need the local mail inbox or database fail, and the results aren't published to the live site. |
-| `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
-| `name` | Only tests whose title contains this text, case-insensitive |
-| `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
-
-The filters narrow each stage's own selection (smoke-on-commit never leaves `@smoke`); a stage
-left with nothing to run passes, and its summary says no tests matched. Every job writes its
-results (counts, failed tests with the assertion, skipped tests with the reason) to the run's
-Summary page. Failures are split into newly failing, fixed and still failing by comparing with
-that step's previous unfiltered run, whose results stay in the Actions cache; a filtered run or
-one against another URL compares but does not replace them.
-
-```sh
-gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
-gh workflow run smoke-on-commit.yml -f name="admin credentials" --ref <branch>
-```
-
-The nightly jobs start together, and each tests its own private Docker instance on its runner:
-
-| Job | What it does |
-|---|---|
-| `api-local` | The browserless API specs (`tests/api`) |
-| `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
-| `regression-local` | Every other spec on chromium |
-| `publish-site` | Runs after them: publishes the dashboard and Allure reports to GitHub Pages, unless the run was filtered or the secret check fails |
-
-`nightly.yml` also keeps three jobs for the deployed site (`api-tests`, `smoke`, `regression`),
-which run as stages. They are commented out for now.
-
-The steps both workflows share are composite actions in `.github/actions/`:
-
-| Action | What it does |
-|---|---|
-| `setup` | Node, `npm ci`, the requested Playwright browsers and their Ubuntu system packages (both cached, so a slow package mirror can't stall a job; chromium is always added, because the auth setup runs on it) |
-| `static-checks` | Conventions check, typecheck and lint |
-| `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
-| `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
-| `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed |
-
-Tests of broken functionality assert the documented behaviour, so they fail, and the run
-is red, until the product fixes them (see [test plan §4.1](docs/test-plan.md)). All jobs run
-headless and publish HTML and Allure reports as artifacts (named per job and browser;
-the local jobs also upload container logs when they do not pass).
+Both can also be started by hand, narrowed by tag, test title or path, or pointed at another deployment.
+Every job writes its results to the run's Summary page, with failures split into newly failing, fixed
+and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs, the nightly jobs and the
+shared composite actions.
 
 ### Connecting the product repository
 
@@ -315,76 +282,6 @@ The trigger that the product repository needs, and its instructions, are in
 ([`product-repo-trigger.yml`](docs/ci/product-repo-trigger.yml)) and a README for that
 repository covering the token, the secret, how to check it works and troubleshooting. Both
 live under `docs/` so they never run here.
-
-## Tests
-
-Every test asserts the documented behaviour (see `docs/test-plan.md` §4.1). A test of broken functionality
-fails and stays red until the product is fixed; the cases are in `docs/test-cases.md`, the defects in
-`docs/known-defects.md` and the written bug reports in `docs/bug-reports/`.
-
-<details>
-<summary><strong>UI specs</strong>: 20 spec files, with the cases each covers and which are red</summary>
-
-| Spec | Cases | Covers | Tag |
-|---|---|---|---|
-| `HomeTests.spec.ts` | 1 | Home page loads with the product catalog | `@smoke` |
-| `NavigationTests.spec.ts` | TC-NAV-1, 3, 4, 5 | Home link, category menu entries, signed-in name in the header, guarded routes. **TC-NAV-1, 3 and 4 are red** (defects 29, 3, 32) | `@smoke`, `@regression` |
-| `ProductOverviewTests.spec.ts` | TC-PO-1 to 9, 11 to 17 | Search and its limits, category and brand filters, opening a product card, pagination, sort options, price range, discount and out-of-stock on the cards. **TC-PO-13 and 15 are red** (known defects); **TC-PO-6 and 9 are red** (local findings) | `@smoke`, `@regression` |
-| `ProductDetailTests.spec.ts` | TC-PD-1 to 12, 14, 16, 17 | Details shown, discount, quantity selector and limits, plus and minus buttons, add to cart, out of stock, rental slider, favorites, accessible label and alt text. **TC-PD-4, 5, 8, 12, 16 and 17 are red** (defects 40, 43, 41, 91, 92); **TC-PD-7 is red** (local finding) | `@smoke`, `@regression` |
-| `CategoryTests.spec.ts` | TC-CAT-1, 3, 4 | Only the category's products, the filter set, the Chainsaws entry. **TC-CAT-3 is red** (local finding); **TC-CAT-4 is red** (defect 3) | `@regression` |
-| `RentalTests.spec.ts` | TC-RENT-1 to 5 | Rentals page and its cards, duration slider and total, rental label in the cart, location discount. **TC-RENT-1 and 5 are red** (local findings) | `@regression` |
-| `LoginTests.spec.ts` | TC-LOGIN-1..5, 7, 8, 10 | Form fields, invalid credentials message, customer and admin sign-in redirects, empty-form validation, locking after 3 failures, disabled account. **TC-LOGIN-5 and 8 are red** (known defects; the local build never locks) | `@regression`, sign-ins `@smoke` |
-| `ChangePasswordTests.spec.ts` | TC-CPW-1, 3, 4, 6, 7 | Form fields, mismatched confirmation, wrong current password, successful change and logout, the new password on the next login. **TC-CPW-1, 3 and 7 are red** (TC-CPW-7: defect 39) | `@regression` |
-| `ProfileTests.spec.ts` | TC-PROF-1, 4, 5, 7 | Account details, valid update with its fading confirmation, first and last name fields, address update. **All four are red** (defects 36, 37, 38) | `@regression` |
-| `CartTests.spec.ts` | TC-CART-1, 2, 4, 5, 7, 8, 10, 11 | Cart table, quantity change, delete, totals, proceed to checkout, the 15% combination discount. **All but TC-CART-8 are red** (known defects; no combination discount locally) | `@regression` |
-| `ContactTests.spec.ts` | TC-CONT-3, 8, 9 | Subject options, no error entries among them, a valid guest message with its confirmation and mail in the local inbox. **All three are red** (defect 60, TC-CONT-3 also on the story's "Status of order" wording; the mail is never delivered locally) | `@regression` |
-| `ChatWidgetTests.spec.ts` | TC-CHAT-6 | Chat checkout: a customer signing in from the chat reaches the order number; the guest route is **red** (the local build does not offer it) | `@regression` |
-| `DiscountTests.spec.ts` | TC-DISC-1, 4, 5, 6, 8 | Location discount per city through the browser's geolocation, discounted cart line, combination discount in the cart and on the invoice. **All but TC-DISC-4 are red** on the local build | `@regression` |
-| `CheckoutTests.spec.ts` | TC-CSI-1..3, TC-CBA-1, 3, 4, TC-CPAY-1, 4, 7, 12, 13 | Guest sign-in step, billing address fields and validation, proceeding to payment, payment methods, credit card form and expiry check, placing an order, cart cleared afterwards. **TC-CBA-1 and TC-CPAY-1, 4, 7 are red** (known defects) | `@regression` |
-| `RegistrationTests.spec.ts` | TC-REG-1, 7, 8, 9 | Field labels, duplicate-email message without a password hint, a valid registration that lands on login and can sign in. **TC-REG-1, 7, 8 are red** (known defects) | `@regression` |
-| `InvoiceTests.spec.ts` | TC-INV-3, 4, 5, 6, 7, 10, 11 | Invoice detail shows number, date, total, line items, billing address, payment details, and "not found" for a missing or foreign invoice. **TC-INV-4, 5, 7, 10 and 11 are red** (defects 14, 15, 16; TC-INV-7 a local finding) | `@regression` |
-| `AdminProductTests.spec.ts` | TC-ADM-2 | Admin creates, edits and deletes a product. **Red locally** (suspected: the edited price is not stored) | `@regression` |
-| `AdminOrderTests.spec.ts` | TC-ADM-5, 6 | Orders are listed and viewed; the initial status, then each of the other four | `@regression` |
-| `AdminUserTests.spec.ts` | TC-ADM-7, 8, 9 | Admin lists, edits and deletes a user; disabling and re-enabling decide whether the user can sign in. **All three red locally** (suspected: the user edit is refused with 422) | `@regression` |
-| `AdminAccessTests.spec.ts` | TC-ADM-12 | A customer is sent to login from every admin route; an admin-only API call must answer 403. **Red** (defect 83) | `@regression` |
-
-The admin specs need `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD`; the setup project skips the admin sign-in without them, and the admin specs then fail with "No saved session".
-
-</details>
-
-<details>
-<summary><strong>API specs</strong>: 10 spec files in <code>tests/api</code>, the browserless <code>api</code> project</summary>
-
-| Spec | Tests | Covers |
-|---|---|---|
-| `catalog/BrandApiTests.spec.ts` | 2 | Brand creation and read-back, brand required-field rejection |
-| `catalog/CategoryApiTests.spec.ts` | 3 | Category creation and read-back, listing and search, category required-field rejection |
-| `catalog/ProductApiTests.spec.ts` | 5 | Product creation and read-back, required-field rejection, restocking, a search matching nothing, an unknown product id (404) |
-| `accounts/CustomerAccountApiTests.spec.ts` | 6 | Registration and login, duplicate email (409), wrong password (401), two failures do not lock, three failures lock (423), disabled account (403, needs `APP_DB_LOCAL`). **The lock test is red** on the local build, which never locks; where defect 21 applies (locks after one failure) the two-failures test is red instead |
-| `security/UserSecurityApiTests.spec.ts` | 4 | TC-API-1, 2, 3, 9: another customer's record, token lifetimes, admin-only fields hidden, injected email. **All four are red** (known defects) |
-| `security/CatalogSecurityApiTests.spec.ts` | 2 | TC-API-4, 6: brand and product delete without a token. **Both red** |
-| `security/InvoiceSecurityApiTests.spec.ts` | 2 | TC-API-8, 11: invoice list scoped to its owner, forged unit price and total. **Both red** |
-| `security/ServerExposureApiTests.spec.ts` | 2 | TC-API-10, 16: public log file (**red**), guarded GraphQL fields refuse unauthenticated queries |
-| `contact/ContactApiTests.spec.ts` | 6 | `POST /messages` as a guest and as a customer, read-back and listing, missing fields, over-long text, invalid email (**red**: the local build accepts it), the list requires sign-in |
-| `invoices/InvoiceApiTests.spec.ts` | 5 | `POST /invoices` issues a number and date; `GET /invoices/{id}` returns the stored billing address, payment and total, and the line items; `GET /invoices` lists the owner's invoice; a create without required fields is rejected |
-
-Every request the service classes in `src/apis/` send has at least one API test, except the local mail inbox read,
-which TC-CONT-8 covers. The `accounts`, `catalog`, `contact`
-and `invoices` specs are not part of the `docs/test-cases.md` inventory: they check the calls the UI specs seed
-their data through, the login status codes and the call behind the contact form. The `security` specs automate ten of the §22 cases (TC-API-1, 2, 3,
-4, 6, 8, 9, 10, 11, 16) and only run meaningfully against the local stack, since they attack the target.
-
-Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
-(see Signed-in tests), seed their own data through the API and leave disposable records behind.
-
-</details>
-
-### Not automated yet
-
-116 of the 234 designed cases are automated; the per-area count is the Coverage summary in
-`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
-(TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
-address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
 
 ## Using it on another app
 

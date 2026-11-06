@@ -13,6 +13,7 @@ application, and only the features actually present in that build are documented
 |---|---|
 | [Test plan](test-plan.md) | Scope, environment, accounts, approach, risks, how tests of broken functionality are treated, open questions |
 | [Test cases](test-cases.md) | 234 test conditions across 24 feature areas, traceable to upstream acceptance criteria |
+| [Automated tests](automated-tests.md) | Every spec, the cases it covers and which are red |
 | [Known defects](known-defects.md) | The 90+ intentional defect register, with notes and exploratory tour mapping |
 
 ## Start here
@@ -30,4 +31,5 @@ single fact drives most of the decisions in these documents:
 ## Related
 
 - Framework conventions, structure and commands: [project README](../README.md)
+- Workflows, manual runs and CI jobs: [CI guide](ci-guide.md)
 - Agent skill routing: `AGENTS.md` / `CLAUDE.md` at the repository root
