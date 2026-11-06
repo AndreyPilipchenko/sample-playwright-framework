@@ -18,12 +18,15 @@
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   app_url, api_url  test another deployment (APP_URL / APP_API_URL, src/config/targets.ts)
+#   app_url, api_url  test another deployment instead of the local stack; give both (APP_URL /
+#                     APP_API_URL, src/config/targets.ts). The deployment needs the same demo
+#                     accounts, and the repository's admin login is sent to it. The run starts no
+#                     stack, uses 2 workers and uploads no traces, which could hold a live token.
+#                     Tests that need the local mail inbox or database fail.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow each stage's own selection, so a stage can end up empty;
 #                     an empty stage passes and its summary says no tests matched.
-#   The local jobs take the filters but never the URL overrides (they test their own stacks).
 #   e.g. gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTests.spec.ts
 #
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
@@ -40,8 +43,9 @@
 # sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
 # publish-site puts the Allure reports on a public page, so it checks them for secrets first.
 #
-# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack. The
-# commented-out hosted jobs would need fewer, because that target is a shared public site.
+# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack. A manual
+# run against another deployment uses 2 (run-specs), because that site may be shared. The
+# commented-out hosted jobs would need fewer as well.
 
 name: Nightly tests
 
@@ -52,11 +56,11 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       app_url:
-        description: App base URL to test instead of the configured target (blank = configured)
+        description: App base URL to test instead of the local stack; needs api_url too (blank = local stack)
         type: string
         default: ''
       api_url:
-        description: API base URL to use instead of the configured target (blank = configured)
+        description: API base URL to use instead of the local stack; needs app_url too (blank = local stack)
         type: string
         default: ''
       tag:
@@ -194,9 +198,10 @@ jobs:
           browsers: none
 
       - name: Start the application under test
+        if: inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/start-local-app
 
-      - name: Run API specs against the local instance
+      - name: Run the API specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -209,12 +214,14 @@ jobs:
         # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL: the
         # disabled-account case (customer-account-api-6) disables its account in the database.
         env:
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure()
+        if: failure() && inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-api
@@ -240,9 +247,10 @@ jobs:
           browsers: ${{ matrix.browser }}
 
       - name: Start the application under test
+        if: inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/start-local-app
 
-      - name: Run the @smoke specs on ${{ matrix.browser }} against the local instance
+      - name: Run the @smoke specs on ${{ matrix.browser }}
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -255,11 +263,13 @@ jobs:
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
         # The local stack seeds the same demo accounts as the hosted target.
         env:
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure()
+        if: failure() && inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-smoke-${{ matrix.browser }}
@@ -280,9 +290,10 @@ jobs:
           browsers: chromium
 
       - name: Start the application under test
+        if: inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/start-local-app
 
-      - name: Run the non-smoke specs against the local instance
+      - name: Run the non-smoke specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -296,12 +307,14 @@ jobs:
         # local MariaDB credentials as JSON ({"user":…,"password":…}); TC-LOGIN-10 disables its
         # account in the database, the only route this build offers.
         env:
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure()
+        if: failure() && inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-regression

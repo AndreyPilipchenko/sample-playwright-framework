@@ -32,7 +32,7 @@ export default defineConfig({
    * an open defect every time (docs/test-plan.md 4.1), at up to a minute per attempt. */
   retries: process.env.CI ? 1 : 0,
   /* Every active CI job tests its own private Docker stack, so CI uses the same number as a local run.
-   * A job pointed at the shared hosted target (commented out in nightly.yml) would need fewer. */
+   * A manual run against another deployment uses 2 (.github/actions/run-specs). */
   workers: 3,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
