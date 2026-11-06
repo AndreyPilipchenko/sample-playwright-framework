@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Writes one self-contained HTML page that combines the Playwright JSON reports of a run: how many
- * tests passed and failed, by area, and the recorded reason for each failure.
+ * tests passed and failed, by job and by area, and the recorded reason for each failure.
  *
  *   node scripts/quality-dashboard.mjs [--out <file>] <report-name>=<test-results.json> ...
  *
@@ -17,7 +17,8 @@
  * So a reason says what the docs record for that test. It does not prove why this run's attempt
  * failed, and the page says so. A failure with no entry is listed as having no recorded reason.
  *
- * A test that runs in several jobs or browsers counts once, and as failed if it failed in any.
+ * A test that runs in several jobs or browsers counts once in the totals, and as failed if it failed
+ * in any. The table of jobs counts each job separately, so it matches that job's GitHub Summary.
  * The page holds titles and counts only, never error text, attachments or environment values, and
  * has no scripts. Links to a report appear when `<out folder>/<report-name>/index.html` exists.
  * Ops tooling like scripts/ci-summary.mjs, outside the POM layer map.
@@ -90,8 +91,8 @@ function caseIdsOf(spec) {
 /** One entry per test, with its worst outcome across the given reports. */
 function collectTests(reports) {
   const tests = new Map();
-  const add = (spec) => {
-    const key = `${spec.file}\u0000${spec.title}`;
+  const add = (spec, titles) => {
+    const key = [spec.file, ...titles, spec.title].join('\u0000');
     const test = tests.get(key) ?? { spec, statuses: new Set(), failedIn: new Set() };
     for (const run of spec.tests) {
       test.statuses.add(run.status);
@@ -99,12 +100,42 @@ function collectTests(reports) {
     }
     tests.set(key, test);
   };
+  const walk = (suite, titles) => {
+    for (const spec of suite.specs ?? []) add(spec, titles);
+    for (const child of suite.suites ?? []) walk(child, [...titles, child.title]);
+  };
+  for (const report of reports) for (const suite of report.suites ?? []) walk(suite, []);
+  return [...tests.values()];
+}
+
+/** One job's own counts, by Playwright status, the way its GitHub Summary counts them. */
+function jobCounts(report) {
+  const counts = { total: 0, expected: 0, unexpected: 0, flaky: 0, skipped: 0 };
   const walk = (suite) => {
-    (suite.specs ?? []).forEach(add);
+    for (const spec of suite.specs ?? []) {
+      for (const { status } of spec.tests) {
+        counts.total += 1;
+        counts[status] += 1;
+      }
+    }
     (suite.suites ?? []).forEach(walk);
   };
-  for (const report of reports) (report.suites ?? []).forEach(walk);
-  return [...tests.values()];
+  (report.suites ?? []).forEach(walk);
+  return counts;
+}
+
+function jobTable(jobs, testCount, outFolder) {
+  const rows = jobs.map(({ name, counts }) => {
+    const hasReport = existsSync(path.join(outFolder, name, 'index.html'));
+    return `<tr><td>${escapeHtml(name)}</td><td class="num">${counts.total}</td><td class="num">${counts.expected}</td><td class="num">${counts.unexpected}</td>`
+      + `<td class="num">${counts.flaky}</td><td class="num">${counts.skipped}</td>`
+      + `<td>${hasReport ? `<a href="${encodeURI(name)}/index.html">Allure report</a>` : '-'}</td></tr>`;
+  });
+  const entries = jobs.reduce((sum, job) => sum + job.counts.total, 0);
+  const why = entries === testCount ? '' : ` The jobs add up to ${entries}, not ${testCount}, because some tests, such as smoke tests and sign-in setup, run in more than one job; the totals above count each test once.`;
+  return `<div class="scroll"><table><thead><tr><th>Job</th><th class="num">Tests</th><th class="num">Passed</th><th class="num">Failed</th><th class="num">Flaky</th><th class="num">Skipped</th><th>Details</th></tr></thead>`
+    + `<tbody>${rows.join('')}</tbody></table></div>`
+    + `<p class="muted">Each row matches that job's Summary on GitHub and its Allure report.${why} The Allure reports hold each test's steps and screenshots. They are large, so they can take a moment to open.</p>`;
 }
 
 function outcomeOf(test) {
@@ -118,6 +149,23 @@ function areaOf(file) {
   const [layer, category] = file.split('/');
   if (layer === 'ui' || layer === 'api') return `${layer === 'ui' ? 'UI' : 'API'}: ${category}`;
   return 'Sign-in setup';
+}
+
+/** The part of an area's name before the colon: `API: security` belongs to `API`. */
+const layerOf = (areaName) => areaName.split(':')[0];
+
+/** The areas under their layer, each layer with its totals, the most failures first. */
+function groupByLayer(areas) {
+  const layers = new Map();
+  for (const area of areas) {
+    const name = layerOf(area.name);
+    const layer = layers.get(name) ?? { name, passed: 0, failed: 0, areas: [] };
+    layer.passed += area.passed;
+    layer.failed += area.failed;
+    layer.areas.push(area);
+    layers.set(name, layer);
+  }
+  return [...layers.values()].sort((a, b) => b.failed - a.failed || a.name.localeCompare(b.name));
 }
 
 /** What the docs record for one failing test. */
@@ -152,14 +200,21 @@ function failureTable(tests) {
   return `<table><thead><tr><th>Test</th><th>Case</th><th>Recorded reason</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
 }
 
-function areaChart(areas) {
+function areaChart(layers) {
+  const areas = layers.flatMap((layer) => layer.areas);
   const widest = Math.max(...areas.map((area) => area.passed + area.failed));
-  const rows = areas.map((area) => {
+  const areaRow = (area) => {
     const label = `${area.passed} passed, ${area.failed} failed`;
     const segment = (kind, count) => (count ? `<span class="bar ${kind}" style="width:${(count / widest) * 100}%" title="${escapeHtml(area.name)}: ${count} ${kind}"></span>` : '');
-    return `<div class="row" role="row"><span class="name" role="cell">${escapeHtml(area.name)}</span>`
+    const shortName = area.name.split(': ').pop();
+    return `<div class="row" role="row"><span class="name" role="cell">${escapeHtml(shortName)}</span>`
       + `<span class="track" role="img" aria-label="${escapeHtml(label)}">${segment('passed', area.passed)}${segment('failed', area.failed)}</span>`
       + `<span class="counts" role="cell">${label}</span></div>`;
+  };
+  const rows = layers.flatMap((layer) => {
+    const heading = `<div class="layer" role="row"><span role="cell">${escapeHtml(layer.name)}</span><span role="cell">${layer.passed} passed, ${layer.failed} failed</span></div>`;
+    const isOwnArea = layer.areas.length === 1 && layer.areas[0].name === layer.name;
+    return isOwnArea ? [heading] : [heading, ...layer.areas.map(areaRow)];
   });
   return `<div class="legend"><span><i class="key passed"></i>Passed</span><span><i class="key failed"></i>Failed</span></div><div role="table" aria-label="Tests by area">${rows.join('')}</div>`;
 }
@@ -186,20 +241,24 @@ function page({ tests, inputs, outFolder }) {
   const security = failures.filter((failure) => failure.name === 'API: security');
   const unexplained = byKind(NO_REASON);
   const sortedAreas = [...areas.values()].sort((a, b) => b.failed - a.failed || a.name.localeCompare(b.name));
+  const layers = groupByLayer(sortedAreas);
+  const apiFailures = failures.filter((failure) => layerOf(failure.name) === 'API').length;
+  const jobs = inputs.filter((input) => input.report).map((input) => ({ name: input.name, counts: jobCounts(input.report) }));
 
   const started = inputs.map((input) => input.report?.stats?.startTime).filter(Boolean).sort()[0];
   const missing = inputs.filter((input) => !input.report).map((input) => input.name);
-  const reportLinks = inputs.filter((input) => existsSync(path.join(outFolder, input.name, 'index.html')))
-    .map((input) => `<li><a href="${encodeURI(input.name)}/index.html">${escapeHtml(input.name)}</a></li>`);
   const source = [
     started ? `Run started ${escapeHtml(started.slice(0, 16).replace('T', ' '))} UTC` : '',
     runId ? `<a href="${repositoryUrl}/actions/runs/${escapeHtml(runId)}">workflow run</a>` : '',
     commit ? `commit <a href="${repositoryUrl}/commit/${escapeHtml(commit)}">${escapeHtml(commit.slice(0, 7))}</a>` : '',
   ].filter(Boolean).join(' · ');
 
-  const areaSections = sortedAreas.filter((area) => area.failed).map((area) => {
-    const inArea = failures.filter((failure) => failure.name === area.name);
-    return `<details><summary>${escapeHtml(area.name)}: ${plural(inArea.length, 'failure')}</summary>${failureTable(inArea)}</details>`;
+  const areaSections = layers.filter((layer) => layer.failed).map((layer) => {
+    const sections = layer.areas.filter((area) => area.failed).map((area) => {
+      const inArea = failures.filter((failure) => failure.name === area.name);
+      return `<details><summary>${escapeHtml(area.name.split(': ').pop())}: ${plural(inArea.length, 'failure')}</summary>${failureTable(inArea)}</details>`;
+    });
+    return `<h3>${escapeHtml(layer.name)}: ${plural(layer.failed, 'failure')}</h3>${sections.join('\n')}`;
   });
 
   return `<!DOCTYPE html>
@@ -240,6 +299,9 @@ function page({ tests, inputs, outFolder }) {
   th, td { text-align: left; vertical-align: top; padding: .45rem .75rem .45rem 0; border-bottom: 1px solid var(--rule); }
   th { color: var(--secondary); font-weight: 600; }
   td.id { white-space: nowrap; color: var(--secondary); }
+  .scroll { overflow-x: auto; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .layer { display: flex; justify-content: space-between; gap: .75rem; font-weight: 600; font-size: .95rem; margin-top: 1rem; padding-bottom: .25rem; border-bottom: 1px solid var(--rule); }
   details { border-bottom: 1px solid var(--rule); padding: .5rem 0; }
   summary { cursor: pointer; }
   @media (max-width: 40rem) { .row { grid-template-columns: 1fr; gap: .1rem; padding: .5rem 0; } td.id { white-space: normal; } }
@@ -258,6 +320,9 @@ ${missing.length ? `<p><strong>No results from: ${missing.map(escapeHtml).join('
   ${counts.skipped ? `<div class="tile"><b>${counts.skipped}</b><span>skipped</span></div>` : ''}
 </div>
 
+<h2>Results by job</h2>
+${jobTable(jobs, tests.length, outFolder)}
+
 <h2>Why they failed</h2>
 <div class="tiles">
   <div class="tile"><b>${byKind(DEFECT_REASON).length}</b><span>on a defect in the shop's published list</span></div>
@@ -267,14 +332,12 @@ ${missing.length ? `<p><strong>No results from: ${missing.map(escapeHtml).join('
 <p class="muted">A reason is what the project's documents record for that test. It doesn't prove why this run failed.</p>
 ${unexplained.length ? `<h3>No recorded reason</h3>${failureTable(unexplained)}` : ''}
 
-${security.length ? `<h2>Security failures</h2><p class="muted">Failures in the API security tests.</p>${failureTable(security)}` : ''}
+${security.length ? `<h2>API security failures</h2><p class="muted">${security.length} of the ${apiFailures} API failures. All ${apiFailures} are listed under API in All failures below.</p>${failureTable(security)}` : ''}
 
 <h2>Tests by area</h2>
-${areaChart(sortedAreas)}
+${areaChart(layers)}
 
-${areaSections.length ? `<h2>All failures</h2>${areaSections.join('\n')}` : ''}
-
-${reportLinks.length ? `<h2>Full reports</h2><p class="muted">Allure reports with each test's steps and screenshots. They are large, so they can take a moment to open.</p><ul>${reportLinks.join('')}</ul>` : ''}
+${areaSections.length ? `<h2>All failures: ${failures.length}</h2>${areaSections.join('\n')}` : ''}
 </body>
 </html>
 `;
