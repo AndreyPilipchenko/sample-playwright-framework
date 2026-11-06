@@ -38,7 +38,7 @@ access and retention and to prefer disposable credentials, which is what this pr
   own `traces-*` artifact, kept for 7 days. The two places that type the admin password record no
   trace at all: the `setup` project and `tests/ui/accounts/LoginTests.spec.ts`. Traces of tests
   signed in can still show that session's token, which only works on that run's own Docker stack
-  (a job pointed at the hosted target would expose a live token). The nightly also publishes its Allure reports and
+  (a manual run against another address uploads no traces, because its token could be live). The nightly also publishes its Allure reports and
   results dashboard to GitHub Pages, after `scripts/check-site-secrets.mjs` finds no token, hash, unmasked
   secret field or admin or database password in their text. A page snapshot can still show another test
   account's password, and the check can't read screenshots. The run's Summary page

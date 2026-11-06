@@ -63,6 +63,16 @@ runs:
         PATHS: ${{ inputs.paths }}
       run: |
         set +e
+        # Another deployment needs both addresses, or the UI and API would be different systems.
+        if [ -n "${APP_URL:-}${APP_API_URL:-}" ]; then
+          address='^https?://[^[:space:]]+$'
+          if ! [[ ${APP_URL:-} =~ $address && ${APP_API_URL:-} =~ $address ]]; then
+            echo "::error::A run against another deployment needs both app_url and api_url, each starting with http:// or https://."
+            echo "exit-code=2" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          export APP_URL="${APP_URL%/}" APP_API_URL="${APP_API_URL%/}"
+        fi
         # Several stages can share a job. Without this, a stage that writes no report would be
         # summarized, and saved for the next comparison, with the previous stage's results, and
         # a stage whose Allure report fails would publish the previous stage's report as its own.
@@ -82,6 +92,8 @@ runs:
         lookaheads="$(tag_lookahead "$STAGE_TAG")$(tag_lookahead "$TAGS")"
         [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
         selection=()
+        # That deployment may be a shared site, so stay modest.
+        [ -n "${APP_URL:-}" ] && selection+=(--workers=2)
         [ -n "$lookaheads" ] && selection+=(--grep "^$lookaheads")
 
         read -ra paths <<< "$PATHS"
@@ -138,7 +150,7 @@ runs:
           note="Manual selection: tag \`${TAGS:-any}\`, name \`${NAME:-any}\`, path \`${PATHS:-any}\`. "
         fi
         [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
-        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
+        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. Traces not uploaded: they could hold a live token. "
         if [ "$PUBLISH_HTML_REPORT" != "true" ]; then
           note+="HTML report not published: its failure pages and step titles can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report and the traces of failed tests are attached."
         fi
@@ -192,7 +204,8 @@ runs:
     # Too large for the Allure report (src/utils/AllureReport.ts). `setup` and LoginTests, which
     # type the admin password, record none. Open one with `npx playwright show-trace trace.zip`.
     - name: Publish traces of failed tests
-      if: always()
+      # A trace from another deployment could hold a token that still works, and this repository is public.
+      if: always() && !github.event.inputs.app_url && !github.event.inputs.api_url
       uses: actions/upload-artifact@v7
       with:
         name: traces-${{ inputs.report-name }}

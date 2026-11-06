@@ -11,11 +11,15 @@
 # `gh workflow run smoke-on-commit.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   app_url, api_url  test another deployment (APP_URL / APP_API_URL, src/config/targets.ts)
+#   app_url, api_url  test another deployment instead of the local stack; give both (APP_URL /
+#                     APP_API_URL, src/config/targets.ts). The deployment needs the same demo
+#                     accounts, and the repository's admin login is sent to it. The run starts no
+#                     stack, uses 2 workers and uploads no traces, which could hold a live token.
+#                     Tests that need the local mail inbox or database fail.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow the @smoke selection; nothing outside @smoke runs here.
-#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f app_url=https://staging.example.com
+#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f app_url=https://staging.example.com -f api_url=https://api.staging.example.com
 #
 # RUNNER: ubuntu-latest reaches the configured target (https://with-bugs.practicesoftwaretesting.com)
 # fine since it's a public site — no self-hosted runner needed.
@@ -42,11 +46,11 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       app_url:
-        description: App base URL to test instead of the configured target (blank = configured)
+        description: App base URL to test instead of the local stack; needs api_url too (blank = local stack)
         type: string
         default: ''
       api_url:
-        description: API base URL to use instead of the configured target (blank = configured)
+        description: API base URL to use instead of the local stack; needs app_url too (blank = local stack)
         type: string
         default: ''
       tag:
@@ -84,9 +88,10 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Start the application under test
+        if: inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/start-local-app
 
-      - name: Run the @smoke specs against the local instance
+      - name: Run the @smoke specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
@@ -98,11 +103,13 @@ jobs:
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
         env:
+          APP_URL: ${{ inputs.app_url }}
+          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure()
+        if: failure() && inputs.app_url == '' && inputs.api_url == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-smoke-local
