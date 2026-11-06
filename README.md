@@ -1,16 +1,114 @@
-# sample-playwright-framework
+# Playwright test framework for a deliberately broken shop
 
-A sample Playwright + TypeScript test automation framework, built for training and
-interview practice. It follows Page Object Model conventions, with
-Allure/HTML/JSON/JUnit reporting and a CI pipeline.
+[![Static checks](https://github.com/AndreyPilipchenko/sample-playwright-framework/actions/workflows/lint.yml/badge.svg)](https://github.com/AndreyPilipchenko/sample-playwright-framework/actions/workflows/lint.yml)
+[![Nightly tests](https://github.com/AndreyPilipchenko/sample-playwright-framework/actions/workflows/nightly.yml/badge.svg)](https://github.com/AndreyPilipchenko/sample-playwright-framework/actions/workflows/nightly.yml)
 
-## Application under test
+A Playwright + TypeScript demo framework, built for training and interview practice. It tests
+[Toolshop "with-bugs"](https://with-bugs.practicesoftwaretesting.com), a public demo store that
+ships with 90+ intentional defects.
 
-[`https://with-bugs.practicesoftwaretesting.com`](https://with-bugs.practicesoftwaretesting.com)
-— the "with-bugs" variant of the public Practice Software Testing / Toolshop demo site,
-configured here as the `app` browser target in the `practice` environment (mode `test`,
-so runs may read and change data freely). It ships with intentional defects by design,
-so don't be surprised when something looks broken — that's the point.
+**The Nightly badge is red on purpose.** Tests assert what the product is documented to do, so
+a test of broken functionality fails until the product is fixed. A full local run on 6 November
+2026 (chromium and API) gave 78 passed and 71 failed out of 149. Nothing is skipped or marked as
+expected to fail to make that look better.
+
+## At a glance
+
+| | |
+|---|---|
+| **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 9 are `@smoke` and also run on Firefox and WebKit |
+| **Test design** | [234 cases](docs/test-cases.md) across 24 feature areas, 116 of them automated |
+| **Defects** | A [register of 94](docs/known-defects.md) from the upstream project, and [20 written bug reports](docs/bug-reports/) |
+| **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
+| **Stack** | Playwright 1.63, TypeScript 7, Node 24, Allure 3, Docker, GitHub Actions, oxlint |
+
+## Quick start
+
+```sh
+npm ci
+npx playwright install --with-deps chromium firefox webkit
+cp .env.example .env    # add APP_ADMIN_* (demo login: docs/test-plan.md) and APP_DB_LOCAL
+npm run app:up          # start the shop in Docker, freshly seeded
+npm run test:local      # run the suite against it; opens the Allure report after
+```
+
+Expect red tests: see above. `npm test` runs against the shared public site instead of Docker, but
+the private stack is the better first run, because some specs need its database and mail inbox. Without
+the two `.env` values, the admin and disabled-account specs fail ([details](#running-the-app-locally)).
+
+## What's worth a look
+
+| Problem | What the framework does | Where |
+|---|---|---|
+| **How do you keep a suite honest when the product is broken?** | No `test.fail` or `fixme`, no skipping a test because of a defect, and no weakened assertions. Each failing test stays red, and its reason is recorded against its test case | [Test plan §4.1](docs/test-plan.md) |
+| **One new failure among 70 is easy to miss** | The CI summary compares with the previous run and separates newly failing, fixed and still failing tests | [`scripts/ci-summary.mjs`](scripts/ci-summary.mjs) |
+| **The app keeps its login in sessionStorage**, which Playwright's `storageState` can't save | One sign-in per role per run, restored through an init script before the app's own code runs | [`AuthSession.ts`](src/utils/AuthSession.ts), [`fixtures/test.ts`](src/fixtures/test.ts) |
+| **One failed login locks an account** (defect #21), so a retry can do damage | Customers are throwaway accounts registered through the API, and the sign-in specs never retry | [`auth.setup.ts`](setup/auth.setup.ts) |
+| **"Why did it fail?" often isn't in the assertion** | A failed test gets a report of what the browser did: console errors, failed requests, 5xx responses, dialogs, new tabs and toasts | [`BrowserDiagnostics.ts`](src/utils/BrowserDiagnostics.ts) |
+| **Toast messages cover the controls under them** | A fixture holds the test until the toast fades, and specs that read toasts turn this off | [`fixtures/test.ts`](src/fixtures/test.ts) |
+| **Some behaviour can't be reached through the UI or API** | Disabling an account goes through the database, a discount depends on the browser's position, and a contact message is checked in the local mail inbox | [`DbsUserAccount.ts`](src/dbs/DbsUserAccount.ts), [`BrowserGeolocation.ts`](src/utils/BrowserGeolocation.ts), [`ApisMailInbox.ts`](src/apis/ApisMailInbox.ts) |
+| **Security needs testing too** | API specs try another customer's record, forged invoice prices, deletes without a token and guarded GraphQL fields | [`tests/api/security/`](tests/api/security/) |
+| **Reports in a public repository can leak logins** | Allure masks typed passwords, the two places that type the admin password record no trace, and the HTML report is published only on request | [Report masking](docs/harness-change-requests/report-credential-masking.md) |
+| **Conventions drift when they only live in a review** | Every pull request runs a mechanical conventions check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
+
+## How it's built
+
+Specs only orchestrate. Business meaning lives in page objects and service classes, and anything
+technical stays in `src/utils/`.
+
+```mermaid
+flowchart TD
+    specs["tests/ui, tests/api<br/>specs: orchestration only"]
+    data["resources/testData<br/>JSON per spec"]
+    flows["src/helpers<br/>flows across API and pages"]
+    pages["src/pages<br/>page objects"]
+    apis["src/apis<br/>API service classes"]
+    dbs["src/dbs<br/>database service class"]
+    utils["src/utils<br/>facades, sessions, diagnostics, reporting"]
+    specs --> data
+    specs --> flows
+    specs --> pages
+    specs --> apis
+    specs --> dbs
+    flows --> pages
+    flows --> apis
+    pages --> utils
+    apis --> utils
+    dbs --> utils
+```
+
+Tests never run on commits to this repository, because it's the test project, not the product. A
+commit to the product repository triggers the smoke tests, and the full suite runs every night.
+
+```mermaid
+flowchart LR
+    pr["Pull request here"] --> lint["lint.yml<br/>conventions, typecheck, lint"]
+    push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
+    nightly["02:00 UTC or by hand"] --> api["api-local"]
+    nightly --> smoke["smoke-local<br/>one job per browser"]
+    nightly --> regression["regression-local"]
+```
+
+Each test job brings up its own Docker copy of the shop, so jobs can't disturb each other, and one
+job's failure doesn't stop the others.
+
+### Where to start reading
+
+1. [`tests/ui/checkout/CheckoutTests.spec.ts`](tests/ui/checkout/CheckoutTests.spec.ts): what a spec looks like when it only orchestrates.
+2. [`src/pages/ProductDetailPage.ts`](src/pages/ProductDetailPage.ts): a page object with its locators, actions and validations.
+3. [`tests/api/security/`](tests/api/security/): the API-level attacks.
+4. [`docs/bug-reports/cart-line-total-zero.md`](docs/bug-reports/cart-line-total-zero.md): how a failing test connects to a written bug report.
+5. [`.github/actions/run-specs/action.yml`](.github/actions/run-specs/action.yml): how CI selects tests, publishes reports and compares runs.
+
+## Reports
+
+| Report | Where | Notes |
+|---|---|---|
+| **Allure** | `reports/allure-report/index.html`; CI artifact `allure-report-<job>` | Main report, with business-titled steps. Opens after a local run (`AUTO_ALLURE_OPEN=false` turns that off) |
+| **Traces** | `test-results/`; CI artifact `traces-<job>`, kept for 7 days | One per failed test. Open with `npx playwright show-trace trace.zip` |
+| **CI summary** | The run's Summary page | Counts, failures with their assertion, and what changed since the last run |
+| **Playwright HTML** | `reports/playwright-report/`; CI only when `PUBLISH_REPORTS` is `true` | Open with `npx playwright show-report reports/playwright-report` |
+| **JSON, JUnit, CTRF** | `reports/json-report/`, `reports/junit/`, `ctrf/` | For other tools |
 
 ## Project structure
 
@@ -28,33 +126,9 @@ resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (te
 .harness/     Harness-managed project config, targets and the vendored package
 ```
 
-See `AGENTS.md` / `CLAUDE.md` for the AI-agent skill routing, and the harness's own
+The framework was built with AI agents working from the `playwright-pom-harness` skill library, so
+its conventions are written down and checked. See `AGENTS.md` / `CLAUDE.md` for the skill routing, and
 `node_modules/playwright-pom-harness/docs/` for the full conventions reference.
-
-## Test documentation
-
-[`docs/`](docs/README.md) holds the test documentation for the application under test,
-compiled from the upstream Practice Software Testing docs:
-
-- [Test plan](docs/test-plan.md) — scope, environment, approach, risks, and the
-  treatment of tests for a deliberately broken target (a test of broken functionality fails
-  until it is fixed)
-- [Test cases](docs/test-cases.md) — test conditions per feature area, traced to
-  upstream acceptance criteria
-
-## Getting started
-
-```sh
-npm ci
-npx playwright install --with-deps chromium firefox webkit
-cp .env.example .env   # fill in any values a test needs (none required yet)
-npm test                # runs the suite headless; opens the Allure report after
-```
-
-Allure (`reports/allure-report/index.html`) is the main report and opens after a local
-run (`AUTO_ALLURE_OPEN=false` turns that off). The Playwright HTML report is still
-written to `reports/playwright-report/`; open it with
-`npx playwright show-report reports/playwright-report`.
 
 Run Playwright from the repository root. Specs load their test data from
 repo-root-relative paths (`./resources/testData/...`, the harness test-data
@@ -64,6 +138,18 @@ convention, which `check-conventions` verifies), so launching from a subfolder w
 Check harness readiness any time with `npx --no pom-harness check`, and enforce POM
 conventions with `npx --no pom-harness check-conventions`.
 
+## Test documentation
+
+[`docs/`](docs/README.md) holds the test documentation for the application under test,
+compiled from the upstream Practice Software Testing docs:
+
+- [Test plan](docs/test-plan.md): scope, environment, approach, risks, and the treatment of
+  tests for a deliberately broken target
+- [Test cases](docs/test-cases.md): test conditions per feature area, traced to upstream
+  acceptance criteria
+- [Known defects](docs/known-defects.md): the defect register, and how test cases map to it
+- [Bug reports](docs/bug-reports/): written reports with their reproductions
+
 ## Signed-in tests
 
 The `setup` project (`setup/auth.setup.ts`) signs each role in once per run and saves
@@ -72,7 +158,7 @@ sessionStorage, which Playwright's `storageState` does not capture, so specs opt
 the `role` fixture instead:
 
 ```ts
-import { test } from '../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
+import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 
 test.use({ role: 'customer' }); // or 'admin'
 ```
@@ -160,8 +246,8 @@ Two workflows run the tests. This repository is the test project, not the produc
 
 | Workflow | Runs | When |
 |---|---|---|
-| `smoke-on-commit.yml` | `@smoke` tests on chromium, firefox and webkit | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
-| `nightly.yml` | all tests, in stages | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
+| `smoke-on-commit.yml` | `@smoke` tests on chromium | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
+| `nightly.yml` | all tests, in separate jobs | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
 
 Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke-on-commit.yml`
 / `gh workflow run nightly.yml`). Smoke runs queue behind each other, and a burst of product
@@ -189,16 +275,16 @@ gh workflow run nightly.yml -f tag=@regression -f path=tests/ui/checkout/CartTes
 gh workflow run smoke-on-commit.yml -f name="admin credentials" --ref <branch>
 ```
 
-The nightly stages; each starts only when the one before it passed:
+The nightly jobs start together, and each tests its own private Docker instance on its runner:
 
-| Stage | Job | What it does |
-|---|---|---|
-| 1 | `api-tests` | Conventions check, typecheck and lint, then the browserless API specs (`tests/api`) |
-| 2 | `smoke` | The `@smoke` subset on chromium, firefox and webkit (one job per browser) |
-| 3 | `regression` | Every other spec on chromium, in 2 parallel shards |
-| - | `api-local` | The API specs against a private Docker instance on the runner, seeded fresh; gates nothing |
-| - | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser, each against its own private instance; gates nothing |
-| - | `regression-local` | Every other spec on chromium against its own private instance; gates nothing |
+| Job | What it does |
+|---|---|
+| `api-local` | The browserless API specs (`tests/api`) |
+| `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
+| `regression-local` | Every other spec on chromium |
+
+`nightly.yml` also keeps three jobs for the deployed site (`api-tests`, `smoke`, `regression`),
+which run as stages. They are commented out for now.
 
 The steps both workflows share are composite actions in `.github/actions/`:
 
@@ -212,7 +298,7 @@ The steps both workflows share are composite actions in `.github/actions/`:
 
 Tests of broken functionality assert the documented behaviour, so they fail, and the run
 is red, until the product fixes them (see [test plan §4.1](docs/test-plan.md)). All jobs run
-headless and publish HTML and Allure reports as artifacts (named per job, browser or shard;
+headless and publish HTML and Allure reports as artifacts (named per job and browser;
 the local jobs also upload container logs when they do not pass).
 
 ### Connecting the product repository
@@ -229,7 +315,8 @@ Every test asserts the documented behaviour (see `docs/test-plan.md` §4.1). A t
 fails and stays red until the product is fixed; the cases are in `docs/test-cases.md`, the defects in
 `docs/known-defects.md` and the written bug reports in `docs/bug-reports/`.
 
-### UI specs
+<details>
+<summary><strong>UI specs</strong>: 20 spec files, with the cases each covers and which are red</summary>
 
 | Spec | Cases | Covers | Tag |
 |---|---|---|---|
@@ -256,7 +343,10 @@ fails and stays red until the product is fixed; the cases are in `docs/test-case
 
 The admin specs need `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD`; the setup project skips the admin sign-in without them, and the admin specs then fail with "No saved session".
 
-### API specs (`tests/api`, the browserless `api` project)
+</details>
+
+<details>
+<summary><strong>API specs</strong>: 10 spec files in <code>tests/api</code>, the browserless <code>api</code> project</summary>
 
 | Spec | Tests | Covers |
 |---|---|---|
@@ -279,6 +369,8 @@ their data through, the login status codes and the call behind the contact form.
 
 Run only these with `npx playwright test --project=api`. UI specs sign in through the setup project
 (see Signed-in tests), seed their own data through the API and leave disposable records behind.
+
+</details>
 
 ### Not automated yet
 
