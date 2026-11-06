@@ -108,7 +108,7 @@ test.describe('Checkout', () => {
   /** Apart from the test below, so the missing text cannot stop it from reaching the payment step. */
   test('The billing address step names its Proceed button', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
-    await allure.testCaseId('TC-CBA-4');
+    await allure.testCaseId('TC-CBA-4b');
     const user = await registerCustomer(testData.tcCBA4.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA4);
@@ -121,7 +121,7 @@ test.describe('Checkout', () => {
 
   test('Completing all fields allows proceeding to payment', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
-    await allure.testCaseId('TC-CBA-4');
+    await allure.testCaseId('TC-CBA-4a');
     const user = await registerCustomer(testData.tcCBA4.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA4);
