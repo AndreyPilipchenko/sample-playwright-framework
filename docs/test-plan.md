@@ -153,7 +153,7 @@ and no workaround in the page objects.
 and pull requests here do not run the suite (a pull request runs only the static checks, `.github/workflows/lint.yml`). A change to the product repository's `main`
 branch runs the `@smoke` tests (a `repository_dispatch` event of type `product-main-push`,
 sent by the product repository's workflow; a sample is in `docs/ci/product-repo-trigger.yml`)
-through `.github/workflows/smoke-on-commit.yml`. All tests run nightly at 02:00 UTC through
+through `.github/workflows/smoke-on-commit.yml`. All tests run nightly, scheduled for 02:00 UTC, through
 `.github/workflows/nightly.yml`; both can be started by hand, and their shared steps live in
 composite actions under `.github/actions/`. A red run therefore reports the product's state,
 including the known defects until they are fixed.

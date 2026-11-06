@@ -104,7 +104,7 @@ commit to the product repository triggers the smoke tests, and the full suite ru
 flowchart LR
     pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, script tests, typecheck, lint"]
     push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
-    nightly["02:00 UTC or by hand"] --> api["api-local"]
+    nightly["Nightly schedule or by hand"] --> api["api-local"]
     nightly --> smoke["smoke-local<br/>one job per browser"]
     nightly --> regression["regression-local"]
 ```
@@ -142,6 +142,8 @@ resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (te
 Run Playwright from the repository root. Specs load their test data from
 repo-root-relative paths (`./resources/testData/...`), so launching from a subfolder with
 `-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
+
+Run the conventions check locally with `npm run check:conventions`.
 
 ## Test documentation
 
@@ -260,7 +262,7 @@ Two workflows run the tests. This repository is the test project, not the produc
 | Workflow | Runs | When |
 |---|---|---|
 | `smoke-on-commit.yml` | `@smoke` tests on chromium | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
-| `nightly.yml` | all tests, in separate jobs, then publishes the results to GitHub Pages | 02:00 UTC every night (GitHub runs schedules on the default branch only) |
+| `nightly.yml` | all tests, in separate jobs, then publishes the results to GitHub Pages | Nightly, scheduled for 02:00 UTC. GitHub can start it hours later, and runs schedules on the default branch only |
 
 Both can also be started by hand, narrowed by tag, test title or path, or pointed at another deployment.
 Every job writes its results to the run's Summary page, with failures split into newly failing, fixed
