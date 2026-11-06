@@ -11,7 +11,7 @@ as well as failing ones:
 |---|---|---|
 | HTML report and Allure step titles | `Fill "<password>"`, `Fill "<email>"` | Every run that signs in |
 | `error-context.md` (HTML report attachment) | The page snapshot lists the password field's value | A test that fails with a filled form still on the page |
-| Traces | The typed value and the login request body | Every recorded trace (on CI: the first retry) |
+| Traces | The typed value and the login request body | Every failed test's trace (on CI: its first attempt) |
 
 Seen on 2026-11-05 in this repository's CI artifacts (smoke runs 42029953335 and 42031934295).
 Playwright 1.63 renders the value into the title of every input call (`fill`, `type`,
@@ -34,7 +34,9 @@ access and retention and to prefer disposable credentials, which is what this pr
   The Allure report is always uploaded. `src/utils/AllureReport.ts` masks the value typed
   into a field whose locator looks secret (`REDACTED_FIELD_LOCATOR`), so its step titles show
   `Fill "***"` for passwords; emails stay visible, and a failure's page snapshot attachment can
-  still show a filled password field. The run's Summary page
+  still show a filled password field. A failed test's trace is embedded in it too, so the two places
+  that type the admin password record no trace: the `setup` project and `tests/LoginTests.spec.ts`. Traces of
+  tests signed in as the admin can still show that session's token. The run's Summary page
   (`scripts/ci-summary.mjs`) shows the results as well.
 
 ## Requested
