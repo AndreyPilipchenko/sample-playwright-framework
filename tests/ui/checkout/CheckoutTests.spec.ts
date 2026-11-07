@@ -64,7 +64,7 @@ test.describe('Checkout', () => {
     await checkoutSignInPage.verifyEmailPasswordAndSubmitShown();
   });
 
-  test('Valid credentials authenticate and allow proceeding', { tag: ['@regression'] }, async () => {
+  test('Valid credentials authenticate and allow proceeding', { tag: ['@smoke'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CSI-3');
     const user = await registerCustomer(testData.tcCSI3.user);
@@ -184,7 +184,7 @@ test.describe('Checkout', () => {
     await checkoutPaymentPage.verifyExpirationDateError(expectedError);
   });
 
-  test('Valid payment places the order and shows the invoice number', { tag: ['@regression'] }, async () => {
+  test('Valid payment places the order and shows the invoice number', { tag: ['@smoke'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-12');
     const { billing, bank, expectedPaymentMessage } = testData.tcCPAY12;

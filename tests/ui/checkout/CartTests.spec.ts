@@ -97,7 +97,7 @@ test.describe('Checkout Cart', () => {
     await cartPage.verifyCartTotal(testData.tcCART7.expectedCartTotal);
   });
 
-  test('Proceed advances to the next checkout step', { tag: ['@regression'] }, async () => {
+  test('Proceed advances to the next checkout step', { tag: ['@smoke'] }, async () => {
     await allure.feature('Checkout Cart');
     await allure.testCaseId('TC-CART-8');
 

@@ -14,7 +14,7 @@ A manual run takes optional inputs (by default, the local stack and every test):
 
 | Input | Effect |
 |---|---|
-| `target` | The site to test: `local stack` (the default), `https://practicesoftwaretesting.com/` or `https://with-bugs.practicesoftwaretesting.com/`. The workflow picks the site's API. A public site's run starts no stack, uses 2 workers and uploads no traces, which could hold a live token. It leaves out the `@db` tests, and tests that need the local mail inbox fail. The repository's admin login is sent to the site, and the results aren't published to the live site. The tests are written for the `with-bugs` build: `practicesoftwaretesting.com` is a newer build with different registration and routes, so most of its tests can't start yet. |
+| `target` | The site to test: `local stack` (the default), `https://practicesoftwaretesting.com/` or `https://with-bugs.practicesoftwaretesting.com/`. The workflow picks the site's API. A public site's run starts no stack, uses 2 workers and uploads no traces, which could hold a live token. The nightly leaves out the `@local` tests, which need the stack's database or mail inbox. The repository's admin login is sent to the site, and the results aren't published to the live site. The tests are written for the `with-bugs` build: `practicesoftwaretesting.com` is a newer build with different registration and routes, so most of its tests can't start yet. |
 | `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
 | `name` | Only tests whose title contains this text, case-insensitive |
 | `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
@@ -37,9 +37,9 @@ The nightly jobs start together, and each tests its own private Docker instance 
 
 | Job | What it does |
 |---|---|
-| `api-local` | The browserless API specs (`tests/api`) |
+| `api-local` | The browserless API specs (`tests/api`): `@regression`, plus `@local` on the local stack |
 | `smoke-local` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
-| `regression-local` | Every other spec on chromium |
+| `regression-local` | The `@regression` specs on chromium, plus `@local` on the local stack |
 | `publish-site` | Runs after them: publishes the dashboard and Allure reports to GitHub Pages, unless the run was filtered or the secret check fails |
 
 ## Shared steps

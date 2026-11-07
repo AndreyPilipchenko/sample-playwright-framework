@@ -54,7 +54,7 @@ test.describe('Change Password', () => {
     await profilePage.verifyErrorShown(expectedError);
   });
 
-  test('Successful change confirms and logs out after 5s', { tag: ['@regression'] }, async () => {
+  test('Successful change confirms and logs out after 5s', { tag: ['@smoke'] }, async () => {
     await allure.feature('Change Password');
     await allure.testCaseId('TC-CPW-6');
     const { user, newPassword } = testData.tcCPW6;

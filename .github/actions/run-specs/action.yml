@@ -15,7 +15,7 @@ inputs:
     description: Suffix of the artifact names (playwright-report-<name>, allure-report-<name>); must be unique within the run.
     required: true
   stage-tag:
-    description: The tag this job always runs (e.g. @smoke); the filters below narrow it further.
+    description: The tags this job runs, separated by commas; a test matches if it has any of them (e.g. @smoke). The filters below narrow it further.
     default: ''
   tag:
     description: Manual-run filter. Tags, separated by commas or spaces; a test matches if it has any of them (e.g. "@smoke, @regression").
@@ -91,8 +91,6 @@ runs:
 
         lookaheads="$(tag_lookahead "$STAGE_TAG")$(tag_lookahead "$TAGS")"
         [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
-        # Another site offers no database to reach, so the tests that use one stay out.
-        [ -n "${APP_URL:-}" ] && lookaheads+='(?!.*(?:^|\s)@db(?:\s|$))'
         selection=()
         # That deployment may be a shared site, so stay modest.
         [ -n "${APP_URL:-}" ] && selection+=(--workers=2)

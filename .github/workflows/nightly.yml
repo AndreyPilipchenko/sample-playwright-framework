@@ -4,9 +4,9 @@
 # product fixes them (docs/test-plan.md §4.1).
 #
 # JOBS start together and gate nothing; each tests its own private Docker instance:
-#   api-local         the browserless API specs (tests/api)
+#   api-local         the browserless API specs (tests/api), @regression and, on the local stack, @local
 #   smoke-local       the @smoke subset, one job per browser (chromium, firefox, webkit)
-#   regression-local  every other spec on chromium
+#   regression-local  the @regression specs on chromium and, on the local stack, the @local ones
 # publish-site then puts the results on GitHub Pages.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
@@ -18,9 +18,9 @@
 # Manual-run inputs (all optional; blank means "as configured"):
 #   target            local stack (default), or one of the two public sites; the workflow's env
 #                     sets its API address. A public site's run starts no stack, uses 2 workers,
-#                     uploads no traces, which could hold a live token, and leaves out the @db
-#                     tests. The repository's admin login is sent to that site. Tests that need the
-#                     local mail inbox fail.
+#                     uploads no traces, which could hold a live token, and leaves out the @local
+#                     tests, which need the stack's database or mail inbox. The repository's admin
+#                     login is sent to that site.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow each job's own selection, so a job can end up empty;
@@ -53,7 +53,7 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       target:
-        description: Site to test. The local stack is a private copy started on the runner; a public site's tests skip those that use the database
+        description: Site to test. The local stack is a private copy started on the runner; a public site's run leaves out the @local tests
         type: choice
         default: local stack
         options:
@@ -104,11 +104,20 @@ jobs:
         if: env.APP_URL == ''
         uses: ./.github/actions/start-local-app
 
+      # The @local tests need the local stack's database or mail inbox.
+      - name: Pick the tags to run
+        id: tags
+        run: |
+          tags='@regression'
+          [ -n "$APP_URL" ] || tags+=',@local'
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
       - name: Run the API specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
           args: -- --project=api
+          stage-tag: ${{ steps.tags.outputs.tags }}
           report-name: local-api
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
@@ -192,11 +201,20 @@ jobs:
         if: env.APP_URL == ''
         uses: ./.github/actions/start-local-app
 
-      - name: Run the non-smoke specs
+      # The @local tests need the local stack's database or mail inbox.
+      - name: Pick the tags to run
+        id: tags
+        run: |
+          tags='@regression'
+          [ -n "$APP_URL" ] || tags+=',@local'
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Run the regression specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
-          args: -- --project=chromium --grep-invert @smoke --pass-with-no-tests
+          args: -- --project=chromium
+          stage-tag: ${{ steps.tags.outputs.tags }}
           report-name: local-regression
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}

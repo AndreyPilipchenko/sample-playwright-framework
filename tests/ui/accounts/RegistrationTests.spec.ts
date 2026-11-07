@@ -20,7 +20,7 @@ let testData: typeof import('../../../resources/testData/RegistrationTestJsonFil
 test.describe('User Registration', () => {
   test.describe.configure({ retries: 0 });
 
-  test('Valid submission creates the account and redirects to login', { tag: ['@regression'] }, async () => {
+  test('Valid submission creates the account and redirects to login', { tag: ['@smoke'] }, async () => {
     await allure.feature('User Registration');
     await allure.testCaseId('TC-REG-9');
     const form = withUniqueEmail(testData.tcREG9.form, newUuid());

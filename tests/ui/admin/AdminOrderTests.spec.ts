@@ -21,7 +21,7 @@ test.describe('Admin orders', () => {
   test.use({ role: 'admin' });
   test.describe.configure({ retries: 0 });
 
-  test('Orders can be listed and viewed', { tag: ['@regression'] }, async () => {
+  test('Orders can be listed and viewed', { tag: ['@smoke'] }, async () => {
     await allure.feature('Admin orders');
     await allure.testCaseId('TC-ADM-5');
     const { order, expectedStatus, expectedListedTotal, expectedTotal, expectedPaymentMethod, expectedLine } = testData.tcADM5;

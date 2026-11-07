@@ -26,7 +26,7 @@ let testData: typeof import('../../../resources/testData/ChatWidgetTestJsonFile.
 test.describe('Chat widget', () => {
   test.describe.configure({ retries: 0 });
 
-  test('Chat checkout walks a customer who signs in through cart, address, payment and confirmation', { tag: ['@regression'] }, async () => {
+  test('Chat checkout walks a customer who signs in through cart, address, payment and confirmation', { tag: ['@smoke'] }, async () => {
     await allure.feature('Chat widget');
     await allure.testCaseId('TC-CHAT-6a');
     const data = testData.tcCHAT6SignIn;

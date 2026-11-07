@@ -14,9 +14,8 @@
 # Manual-run inputs (all optional; blank means "as configured"):
 #   target            local stack (default), or one of the two public sites; the workflow's env
 #                     sets its API address. A public site's run starts no stack, uses 2 workers,
-#                     uploads no traces, which could hold a live token, and leaves out the @db
-#                     tests. The repository's admin login is sent to that site. Tests that need the
-#                     local mail inbox fail.
+#                     uploads no traces, which could hold a live token. The repository's admin login
+#                     is sent to that site.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow the @smoke selection; nothing outside @smoke runs here.
@@ -47,7 +46,7 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       target:
-        description: Site to test. The local stack is a private copy started on the runner; a public site's tests skip those that use the database
+        description: Site to test. The local stack is a private copy started on the runner
         type: choice
         default: local stack
         options:

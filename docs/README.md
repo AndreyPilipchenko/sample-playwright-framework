@@ -6,8 +6,8 @@ Test documentation for the Toolshop application under test, compiled from the up
 [Practice Software Testing documentation](https://testsmith-io.github.io/practice-software-testing/)
 and verified against the live target on 2026-11-02.
 
-Organised by **feature area**. Testing targets the latest deployed build of the
-application, and only the features actually present in that build are documented.
+Organised by **feature area**. Tests run against a private copy of the
+`with-bugs` build in Docker, because the public instance is too unstable to test against. Only the features actually present in that build are documented.
 
 | Document | Contents |
 |---|---|
@@ -25,8 +25,8 @@ single fact drives most of the decisions in these documents:
   red until the functionality is fixed. See [test plan §4.1](test-plan.md).
 - Routing is **hash-based** (`#/checkout`, not `/checkout`). Clean paths return 404.
   This was verified live and contradicts the upstream release notes.
-- The instance is **public and shared**. Account and catalogue state is mutable by
-  anyone, so tests must create the data they depend on.
+- The public instance is **shared**, and account and catalogue state there is mutable by
+  anyone, so tests create the data they depend on, on the local copy too.
 
 ## Related
 
