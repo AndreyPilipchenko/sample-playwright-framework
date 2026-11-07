@@ -10,11 +10,11 @@ Both can be started by hand (Actions → Run workflow, or `gh workflow run smoke
 commits tests only the newest one; nightly runs have their own queue, so a product commit never
 cancels a waiting nightly run.
 
-A manual run takes optional inputs (all blank = the local stack and every test):
+A manual run takes optional inputs (by default, the local stack and every test):
 
 | Input | Effect |
 |---|---|
-| `app_url`, `api_url` | Test another deployment instead of the local stack: give both. The deployment needs the same demo accounts, and the repository's admin login is sent to it. The run starts no stack, uses 2 workers and uploads no traces, which could hold a live token. Tests that need the local mail inbox or database fail, and the results aren't published to the live site. |
+| `target` | The site to test: `local stack` (the default), `https://practicesoftwaretesting.com/` or `https://with-bugs.practicesoftwaretesting.com/`. The workflow picks the site's API. A public site's run starts no stack, uses 2 workers and uploads no traces, which could hold a live token. It leaves out the `@db` tests, and tests that need the local mail inbox fail. The repository's admin login is sent to the site, and the results aren't published to the live site. The tests are written for the `with-bugs` build: `practicesoftwaretesting.com` is a newer build with different registration and routes, so most of its tests can't start yet. |
 | `tag` | Only tests with any of these tags, comma-separated (`@smoke, @regression`) |
 | `name` | Only tests whose title contains this text, case-insensitive |
 | `path` | Only these spec files or folders, space-separated, `:line` allowed (`tests/ui/accounts/LoginTests.spec.ts:38`) |
