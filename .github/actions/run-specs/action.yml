@@ -67,7 +67,7 @@ runs:
         if [ -n "${APP_URL:-}${APP_API_URL:-}" ]; then
           address='^https?://[^[:space:]]+$'
           if ! [[ ${APP_URL:-} =~ $address && ${APP_API_URL:-} =~ $address ]]; then
-            echo "::error::A run against another deployment needs both app_url and api_url, each starting with http:// or https://."
+            echo "::error::A run against another site needs both APP_URL and APP_API_URL, each starting with http:// or https://."
             echo "exit-code=2" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -91,6 +91,8 @@ runs:
 
         lookaheads="$(tag_lookahead "$STAGE_TAG")$(tag_lookahead "$TAGS")"
         [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
+        # Another site offers no database to reach, so the tests that use one stay out.
+        [ -n "${APP_URL:-}" ] && lookaheads+='(?!.*(?:^|\s)@db(?:\s|$))'
         selection=()
         # That deployment may be a shared site, so stay modest.
         [ -n "${APP_URL:-}" ] && selection+=(--workers=2)
@@ -144,7 +146,7 @@ runs:
         PATHS: ${{ inputs.paths }}
         PUBLISH_HTML_REPORT: ${{ inputs.publish-html-report }}
       run: |
-        # APP_URL / APP_API_URL come from the calling step's env on a manual run with overrides.
+        # APP_URL / APP_API_URL come from the workflow's env on a manual run against a public site.
         note=''
         if [ -n "$TAGS$NAME$PATHS" ]; then
           note="Manual selection: tag \`${TAGS:-any}\`, name \`${NAME:-any}\`, path \`${PATHS:-any}\`. "
@@ -205,7 +207,7 @@ runs:
     # type the admin password, record none. Open one with `npx playwright show-trace trace.zip`.
     - name: Publish traces of failed tests
       # A trace from another deployment could hold a token that still works, and this repository is public.
-      if: always() && !github.event.inputs.app_url && !github.event.inputs.api_url
+      if: always() && env.APP_URL == '' && env.APP_API_URL == ''
       uses: actions/upload-artifact@v7
       with:
         name: traces-${{ inputs.report-name }}

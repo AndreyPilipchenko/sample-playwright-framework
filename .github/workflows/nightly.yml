@@ -16,11 +16,11 @@
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   app_url, api_url  test another deployment instead of the local stack; give both (APP_URL /
-#                     APP_API_URL, src/config/targets.ts). The deployment needs the same demo
-#                     accounts, and the repository's admin login is sent to it. The run starts no
-#                     stack, uses 2 workers and uploads no traces, which could hold a live token.
-#                     Tests that need the local mail inbox or database fail.
+#   target            local stack (default), or one of the two public sites; the workflow's env
+#                     sets its API address. A public site's run starts no stack, uses 2 workers,
+#                     uploads no traces, which could hold a live token, and leaves out the @db
+#                     tests. The repository's admin login is sent to that site. Tests that need the
+#                     local mail inbox fail.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow each job's own selection, so a job can end up empty;
@@ -52,14 +52,14 @@ on:
   workflow_dispatch:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
-      app_url:
-        description: App base URL to test instead of the local stack; needs api_url too (blank = local stack)
-        type: string
-        default: ''
-      api_url:
-        description: API base URL to use instead of the local stack; needs app_url too (blank = local stack)
-        type: string
-        default: ''
+      target:
+        description: Site to test. The local stack is a private copy started on the runner; a public site's tests skip those that use the database
+        type: choice
+        default: local stack
+        options:
+          - local stack
+          - https://practicesoftwaretesting.com/
+          - https://with-bugs.practicesoftwaretesting.com/
       tag:
         description: Only tests with any of these tags, comma-separated (e.g. @smoke, @regression)
         type: string
@@ -80,6 +80,11 @@ concurrency:
   group: test-suite-nightly
   cancel-in-progress: false
 
+# The site picked for a manual run, with its API. Empty on any other trigger and for the local stack.
+env:
+  APP_URL: ${{ startsWith(inputs.target, 'https://') && inputs.target || '' }}
+  APP_API_URL: ${{ inputs.target == 'https://practicesoftwaretesting.com/' && 'https://api.practicesoftwaretesting.com' || inputs.target == 'https://with-bugs.practicesoftwaretesting.com/' && 'https://api-with-bugs.practicesoftwaretesting.com' || '' }}
+
 jobs:
   # These bring the application under test up on their own runners and test that private
   # instance, not the shared public one. Each has its own stack, report and summary. They start
@@ -96,7 +101,7 @@ jobs:
           browsers: none
 
       - name: Start the application under test
-        if: inputs.app_url == '' && inputs.api_url == ''
+        if: env.APP_URL == ''
         uses: ./.github/actions/start-local-app
 
       - name: Run the API specs
@@ -112,14 +117,12 @@ jobs:
         # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL: the
         # disabled-account case (customer-account-api-6) disables its account in the database.
         env:
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure() && inputs.app_url == '' && inputs.api_url == ''
+        if: failure() && env.APP_URL == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-api
@@ -145,7 +148,7 @@ jobs:
           browsers: ${{ matrix.browser }}
 
       - name: Start the application under test
-        if: inputs.app_url == '' && inputs.api_url == ''
+        if: env.APP_URL == ''
         uses: ./.github/actions/start-local-app
 
       - name: Run the @smoke specs on ${{ matrix.browser }}
@@ -161,13 +164,11 @@ jobs:
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
         # The local stack seeds the same demo accounts as the hosted target.
         env:
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure() && inputs.app_url == '' && inputs.api_url == ''
+        if: failure() && env.APP_URL == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-smoke-${{ matrix.browser }}
@@ -188,7 +189,7 @@ jobs:
           browsers: chromium
 
       - name: Start the application under test
-        if: inputs.app_url == '' && inputs.api_url == ''
+        if: env.APP_URL == ''
         uses: ./.github/actions/start-local-app
 
       - name: Run the non-smoke specs
@@ -205,14 +206,12 @@ jobs:
         # local MariaDB credentials as JSON ({"user":…,"password":…}); TC-LOGIN-10 disables its
         # account in the database, the only route this build offers.
         env:
-          APP_URL: ${{ inputs.app_url }}
-          APP_API_URL: ${{ inputs.api_url }}
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure() && inputs.app_url == '' && inputs.api_url == ''
+        if: failure() && env.APP_URL == ''
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-local-regression
@@ -227,7 +226,7 @@ jobs:
   # Settings > Pages > Source set to GitHub Actions.
   publish-site:
     needs: [api-local, smoke-local, regression-local]
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.app_url == '' && inputs.api_url == '' }}
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && !startsWith(inputs.target, 'https://') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

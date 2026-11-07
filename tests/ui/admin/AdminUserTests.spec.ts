@@ -67,7 +67,7 @@ test.describe('Admin users', () => {
     await apisUserAccount.verifyLoginDisabled(user.email, user.password);
   });
 
-  test('Re-enabling a user restores their access', { tag: ['@regression'] }, async () => {
+  test('Re-enabling a user restores their access', { tag: ['@regression', '@db'] }, async () => {
     await allure.feature('Admin users');
     await allure.testCaseId('TC-ADM-9');
     const uuid = newUuid();

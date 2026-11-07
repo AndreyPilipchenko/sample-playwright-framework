@@ -117,7 +117,7 @@ test.describe('User Login', () => {
     await apisUserAccount.verifyLoginLocked(user.email, user.password);
   });
 
-  test('Disabled account shows "Account disabled." and is not authenticated', { tag: ['@regression'] }, async () => {
+  test('Disabled account shows "Account disabled." and is not authenticated', { tag: ['@regression', '@db'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-10');
     const user = withUniqueEmail(testData.tcLogin10.user, newUuid());
