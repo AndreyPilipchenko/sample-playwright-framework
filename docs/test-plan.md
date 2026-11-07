@@ -7,8 +7,8 @@ Compiled from the upstream
 ([source repo](https://github.com/testsmith-io/practice-software-testing)) and verified
 against the live target on 2026-11-02.
 
-Organised by **feature area**. Testing targets the latest deployed build of the
-application, and only the features actually present in that build are in scope.
+Organised by **feature area**. Tests run against a private copy of the
+`with-bugs` build in Docker, because the public instance is too unstable to test against. Only the features actually present in that build are in scope.
 
 ---
 
@@ -16,9 +16,13 @@ application, and only the features actually present in that build are in scope.
 
 | Component | URL |
 |---|---|
-| Application | <https://with-bugs.practicesoftwaretesting.com> |
-| REST API | <https://api-with-bugs.practicesoftwaretesting.com> |
-| Swagger (REST) | <https://api-with-bugs.practicesoftwaretesting.com/api/documentation> |
+| Application (local copy, what the tests use) | <http://localhost:4200> |
+| REST API (local) | <http://localhost:8091> |
+| Swagger (local) | <http://localhost:8091/api/documentation> |
+| Database and mail inbox (local only) | MariaDB on port `3306`, inbox on <http://localhost:1080> |
+| Application (public) | <https://with-bugs.practicesoftwaretesting.com> |
+| REST API (public) | <https://api-with-bugs.practicesoftwaretesting.com> |
+| Swagger (public) | <https://api-with-bugs.practicesoftwaretesting.com/api/documentation> |
 | GraphQL / GraphiQL | `/graphql` and `/graphiql` on the API host |
 
 "Toolshop" is an e-commerce demo store (Angular front end, Laravel REST + GraphQL API,
@@ -55,8 +59,8 @@ Even though these are public, keep them out of committed code and step titles: p
 the admin in the git-ignored `.env` under `APP_ADMIN_*` (see `.env.example`; customers are registered per run), per
 this framework's secrets rule. The values above are documentation, not configuration.
 
-> **Shared-state warning.** This is a public instance used concurrently by other
-> learners, and these accounts are shared. Account state (profile fields, password,
+> **Shared-state warning.** The public instance is used concurrently by other
+> learners, and these accounts are shared there. Account state (profile fields, password,
 > favorites, lock status) can be changed by anyone at any time. Tests must not depend
 > on a pre-existing account state they did not create themselves — see §4.3.
 
@@ -173,7 +177,8 @@ reason. Prefer stable `data-test` attributes — the build exposes them widely
 
 ### 4.3 Test independence on shared, mutable data
 
-The instance is public and its data is shared and mutable:
+The public instance is shared and mutable, and data on a local stack lasts until its volumes are dropped, so the
+same rules apply everywhere:
 
 - Create the data a test needs; never rely on seeded records surviving.
 - Register a fresh user per test for account-state scenarios rather than reusing the

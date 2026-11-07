@@ -25,7 +25,7 @@ framework reports them.
 
 | | |
 |---|---|
-| **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 9 are `@smoke` and also run on Firefox and WebKit |
+| **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 20 are `@smoke` and also run on Firefox and WebKit |
 | **Automated cases** | [116 test cases](docs/test-cases.md) from the test design |
 | **Defects** | 40 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
 | **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
@@ -239,7 +239,7 @@ The local stack also has a database (target `appDb-local`). Specs that need it r
 as JSON from `APP_DB_LOCAL` in `.env`, shaped `APP_DB_LOCAL='{"user":"…","password":"…"}'`, with the
 `MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `api-local` and
 `regression-local` jobs read the secret of the same name.
-Only the disabled-account cases use it (TC-LOGIN-10, TC-ADM-9, `customer-account-api-6`, tagged `@db`): this build's admin
+Only the disabled-account cases use it (TC-LOGIN-10, TC-ADM-9, `customer-account-api-6`, tagged `@local`): this build's admin
 API cannot disable an account. Without it they fail with a database connection error.
 
 To point a single run at another address without adding an environment, override it

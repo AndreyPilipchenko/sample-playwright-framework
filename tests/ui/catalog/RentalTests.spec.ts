@@ -46,7 +46,7 @@ test.describe('Rentals', () => {
     await rentalsPage.verifyEveryRentalShowsImageNameAndDescription();
   });
 
-  test('Rental detail page shows the duration selector', { tag: ['@regression'] }, async () => {
+  test('Rental detail page shows the duration selector', { tag: ['@smoke'] }, async () => {
     await allure.feature('Rentals');
     await allure.testCaseId('TC-RENT-3');
     const { minimumHours, maximumHours, startHours, chosenHours } = testData.tcRENT3;

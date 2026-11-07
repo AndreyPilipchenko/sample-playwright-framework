@@ -64,7 +64,7 @@ test.describe('Discounts', () => {
     await productDetailPage.verifyDiscountBadge(badges.newYork);
   });
 
-  test('Cart line carries the location discount', { tag: ['@regression'] }, async ({ page }) => {
+  test('Cart line carries the location discount', { tag: ['@smoke'] }, async ({ page }) => {
     await allure.feature('Discounts');
     await allure.testCaseId('TC-DISC-4');
     const { position, expectedLinePrice, cartItemCount } = testData.tcDISC4;

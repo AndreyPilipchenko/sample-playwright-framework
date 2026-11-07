@@ -20,7 +20,7 @@ test.describe('Contact form', () => {
     await contactPage.verifySubjectOptions(testData.tcCONT3.expectedSubjects);
   });
 
-  test('Valid submission confirms and sends the email', { tag: ['@regression'] }, async ({ request }) => {
+  test('Valid submission confirms and sends the email', { tag: ['@local'] }, async ({ request }) => {
     await allure.feature('Contact form');
     await allure.testCaseId('TC-CONT-8');
     const contact = withUniqueEmail(testData.tcCONT8.contact, newUuid());

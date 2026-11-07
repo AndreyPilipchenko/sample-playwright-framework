@@ -16,7 +16,7 @@ let testData: typeof import('../../../resources/testData/CategoryTestJsonFile.js
 
 test.describe('Category', () => {
 
-  test("Category page lists only that category's products", { tag: ['@regression'] }, async () => {
+  test("Category page lists only that category's products", { tag: ['@smoke'] }, async () => {
     await allure.feature('Category');
     await allure.testCaseId('TC-CAT-1');
 

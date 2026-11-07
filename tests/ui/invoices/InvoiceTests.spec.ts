@@ -38,7 +38,7 @@ async function openOwnInvoiceDetail(seed: OwnInvoiceSeed): Promise<{ user: UserS
 test.describe('Invoices', () => {
   test.describe.configure({ retries: 0 });
 
-  test('Invoice detail shows number, date and total', { tag: ['@regression'] }, async () => {
+  test('Invoice detail shows number, date and total', { tag: ['@smoke'] }, async () => {
     await allure.feature('Invoices');
     await allure.testCaseId('TC-INV-3');
 

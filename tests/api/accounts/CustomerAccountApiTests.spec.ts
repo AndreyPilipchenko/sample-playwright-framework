@@ -72,7 +72,7 @@ test.describe('Customer account API', () => {
     await apisUserAccount.verifyLoginLocked(user.email, user.password);
   });
 
-  test('A disabled account is refused with HTTP 403', { tag: ['@regression', '@db'] }, async () => {
+  test('A disabled account is refused with HTTP 403', { tag: ['@local'] }, async () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-6');
     const user = withUniqueEmail(testData.customerAccountApi6.user, newUuid());
