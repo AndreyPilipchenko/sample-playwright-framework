@@ -7,7 +7,7 @@
         "name": "Checkout Product TC-CSI-1 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -21,7 +21,7 @@
         "name": "Checkout Product TC-CSI-2 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -35,7 +35,7 @@
         "name": "Checkout Product TC-CSI-3 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -43,9 +43,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -62,7 +63,7 @@
         "name": "Checkout Product TC-CBA-3 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -70,9 +71,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -90,7 +92,7 @@
         "name": "Checkout Product TC-CPAY-12 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -98,9 +100,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -109,13 +112,15 @@
       "password": "Sup3r-Secret!Cpay12"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },
     "bank": {
+      "bankName": "Checkout Bank",
       "accountName": "Checkout Customer",
       "accountNumber": "12345678"
     },
@@ -129,7 +134,7 @@
         "name": "Checkout Product TC-CPAY-13 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -137,9 +142,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -148,13 +154,15 @@
       "password": "Sup3r-Secret!Cpay13"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },
     "bank": {
+      "bankName": "Checkout Bank",
       "accountName": "Checkout Customer",
       "accountNumber": "12345678"
     },
@@ -168,7 +176,7 @@
         "name": "Checkout Product TC-CBA-1 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -176,9 +184,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -196,7 +205,7 @@
         "name": "Checkout Product TC-CBA-4 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -204,9 +213,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -215,9 +225,10 @@
       "password": "Sup3r-Secret!Cba4"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     }
@@ -230,7 +241,7 @@
         "name": "Checkout Product TC-CPAY-1 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -238,9 +249,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -249,9 +261,10 @@
       "password": "Sup3r-Secret!Cpay1"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },
@@ -271,7 +284,7 @@
         "name": "Checkout Product TC-CPAY-4 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -279,9 +292,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -290,9 +304,10 @@
       "password": "Sup3r-Secret!Cpay4"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },
@@ -306,7 +321,7 @@
         "name": "Checkout Product TC-CPAY-7 {uuid}",
         "description": "Seeded for the checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -314,9 +329,10 @@
     "user": {
       "firstName": "Checkout",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "State",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -325,9 +341,10 @@
       "password": "Sup3r-Secret!Cpay7"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },

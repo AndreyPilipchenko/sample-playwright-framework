@@ -4,10 +4,10 @@ import { applications } from '../config/applications';
 import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
 import { rowWithCell } from '../utils/TableRows';
 
-/** Admin user list (`#/admin/users`). Requires a signed-in admin session. */
+/** Admin user list (`/admin/users`). Requires a signed-in admin session. */
 export class AdminUsersPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/admin/users`;
+  readonly url: string = `${applications.app.routes}/admin/users`;
 
   // Locators
   private readonly search_input: Locator;

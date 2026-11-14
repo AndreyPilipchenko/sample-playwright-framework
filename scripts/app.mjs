@@ -172,7 +172,13 @@ async function seedDatabase() {
   for (let attempt = 1; attempt <= 5; attempt += 1) {
     console.log(`Seeding the database (attempt ${attempt}/5)...`);
     const status = run('docker', compose('exec', '-T', 'laravel-api', 'php', 'artisan', 'migrate:fresh', '--seed'));
-    if (status === 0) return true;
+    if (status === 0) {
+      // The cron container runs as root and shares the code volume. If its scheduler logs an error before
+      // the tables exist (a fresh volume), it creates storage/logs/laravel.log owned by root, and every API
+      // request that logs then fails with a 500. Hand the log directory back to the API's user.
+      run('docker', compose('exec', '-T', '-u', 'root', 'laravel-api', 'chown', '-R', 'www-data:www-data', 'storage/logs'));
+      return true;
+    }
     if (attempt < 5) await new Promise((resolve) => setTimeout(resolve, 10000));
   }
   return false;
@@ -189,6 +195,14 @@ async function commandUp(args) {
   const seed = !args.includes('--no-seed');
 
   console.log(`Starting the application under test (environment: ${environment}, compose ref: ${composeRef})`);
+  // The API's code lives in a named volume (laravel-app-code) that Docker fills from the image only
+  // while the volume is empty. A stack last started for the other environment would keep serving that
+  // build's API under the new image, so switching environments removes the volumes (code and data) first.
+  const previous = existsSync(path.join(workDir, '.env')) ? environmentOfEnvFile() : undefined;
+  if (previous && previous !== environment && existsSync(path.join(workDir, composeFile))) {
+    console.log(`Removing the ${previous} stack and its volumes before starting ${environment}.`);
+    if (run('docker', compose('down', '--volumes')) !== 0) fail('`docker compose down --volumes` failed.');
+  }
   await prepareWorkDir(environment);
 
   // --pull missing fetches the prebuilt images on first run and reuses them afterwards.
@@ -291,12 +305,16 @@ function commandTest(args) {
 
 /** The environment of the stack last started with `up`, read back from the build named in .app/.env. */
 function runningEnvironment() {
-  const envFile = path.join(workDir, '.env');
-  if (!existsSync(envFile)) fail('no stack has been started here; run `node scripts/app.mjs up` first.');
-  const build = readFileSync(envFile, 'utf8').match(/^SPRINT=(.*)$/m)?.[1]?.trim();
-  const environment = Object.keys(upstreamBuilds).find((name) => upstreamBuilds[name] === build);
-  if (!environment) fail(`.app/.env names a build no environment uses (${build}); run \`node scripts/app.mjs up\` again.`);
+  if (!existsSync(path.join(workDir, '.env'))) fail('no stack has been started here; run `node scripts/app.mjs up` first.');
+  const environment = environmentOfEnvFile();
+  if (!environment) fail(`.app/.env names a build no environment uses; run \`node scripts/app.mjs up\` again.`);
   return environment;
+}
+
+/** The environment whose build .app/.env names, or undefined when it names none. */
+function environmentOfEnvFile() {
+  const build = readFileSync(path.join(workDir, '.env'), 'utf8').match(/^SPRINT=(.*)$/m)?.[1]?.trim();
+  return Object.keys(upstreamBuilds).find((name) => upstreamBuilds[name] === build);
 }
 
 /** Reads `--flag value` from an argument list. */

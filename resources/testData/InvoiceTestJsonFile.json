@@ -21,17 +21,18 @@
           "name": "Invoice Product TC-INV-3 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -63,17 +64,18 @@
           "name": "Invoice Product TC-INV-6 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -105,17 +107,18 @@
           "name": "Invoice Product TC-INV-4 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Invoice Street 7",
-      "billingCity": "Utrecht",
-      "billingState": "Noord-Brabant",
+      "billingCity": "Einighausen",
+      "billingState": "Groningen",
       "billingCountry": "NL",
       "billingPostcode": "3511AB",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -123,8 +126,8 @@
     "expectedAddress": {
       "address": "Invoice Street 7",
       "postcode": "3511AB",
-      "city": "Utrecht",
-      "state": "Noord-Brabant",
+      "city": "Einighausen",
+      "state": "Groningen",
       "country": "NL"
     }
   },
@@ -150,17 +153,18 @@
           "name": "Invoice Product TC-INV-5 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Invoice Street 7",
-      "billingCity": "Utrecht",
-      "billingState": "Noord-Brabant",
+      "billingCity": "Einighausen",
+      "billingState": "Groningen",
       "billingCountry": "NL",
       "billingPostcode": "3511AB",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -193,22 +197,23 @@
           "name": "Invoice Product TC-INV-10 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Invoice Street 7",
-      "billingCity": "Utrecht",
-      "billingState": "Noord-Brabant",
+      "billingCity": "Einighausen",
+      "billingState": "Groningen",
       "billingCountry": "NL",
       "billingPostcode": "3511AB",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
     "quantity": 1,
-    "expectedCity": "Utrecht",
+    "expectedCity": "Einighausen",
     "expectedCountry": "NL"
   },
   "tcINV11": {
@@ -233,17 +238,18 @@
           "name": "Invoice Product TC-INV-11 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Invoice Street 7",
-      "billingCity": "Utrecht",
-      "billingState": "Noord-Brabant",
+      "billingCity": "Einighausen",
+      "billingState": "Groningen",
       "billingCountry": "NL",
       "billingPostcode": "3511AB",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -271,17 +277,18 @@
           "name": "Invoice Product TC-INV-7 {uuid}",
           "description": "Seeded for the invoice case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Invoice Street 7",
-      "billingCity": "Utrecht",
-      "billingState": "Noord-Brabant",
+      "billingCity": "Einighausen",
+      "billingState": "Groningen",
       "billingCountry": "NL",
       "billingPostcode": "3511AB",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -308,17 +315,18 @@
             "name": "Invoice Product TC-INV-7B {uuid}",
             "description": "Seeded for the invoice case.",
             "price": 14.15,
-            "co2Rating": "B",
+            "co2Rating": "D",
             "stock": 10
           }
         ]
       },
       "invoice": {
         "billingAddress": "Invoice Street 7",
-        "billingCity": "Utrecht",
-        "billingState": "Noord-Brabant",
+        "billingCity": "Einighausen",
+        "billingState": "Groningen",
         "billingCountry": "NL",
         "billingPostcode": "3511AB",
+        "paymentBankName": "Invoice Bank",
         "paymentAccountName": "Invoice Customer",
         "paymentAccountNumber": "12345678"
       },

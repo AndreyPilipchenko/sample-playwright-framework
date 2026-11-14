@@ -134,7 +134,7 @@ test.describe('Discounts', () => {
     await checkoutSignInPage.proceed();
     await checkoutAddressPage.enterAddress(billing);
     await checkoutAddressPage.proceed();
-    await checkoutPaymentPage.enterBankTransfer(bank.accountName, bank.accountNumber);
+    await checkoutPaymentPage.enterBankTransfer(bank);
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();

@@ -8,7 +8,7 @@
         "name": "Detail Quantity Product TC-PD-3 {uuid}",
         "description": "Seeded in-stock product for the quantity selector.",
         "price": 19.99,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -21,7 +21,7 @@
         "name": "Detail Product TC-PD-1 {uuid}",
         "description": "Seeded product for the detail page case.",
         "price": 19.99,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -35,7 +35,7 @@
         "name": "Detail Product TC-PD-4 {uuid}",
         "description": "Seeded for the detail case.",
         "price": 19.99,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -50,7 +50,7 @@
         "name": "Detail Product TC-PD-5 {uuid}",
         "description": "Seeded for the detail case.",
         "price": 19.99,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -65,7 +65,7 @@
         "name": "Detail Product TC-PD-8 {uuid}",
         "description": "Seeded for the detail case.",
         "price": 19.99,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -80,7 +80,7 @@
         "name": "Offer Product TC-PD-2 {uuid}",
         "description": "Seeded for the case.",
         "price": 100.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isLocationOffer": true
       }
@@ -101,7 +101,7 @@
         "name": "Detail Product TC-PD-6 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -115,7 +115,7 @@
         "name": "Detail Product TC-PD-7 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -133,7 +133,7 @@
         "name": "Detail Product TC-PD-9 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 50
       }
     ],
@@ -147,7 +147,7 @@
         "name": "Sold Out Product TC-PD-10 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 0
       }
     ],
@@ -162,7 +162,7 @@
         "name": "Rental Product TC-PD-11 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isRental": true
       }
@@ -181,7 +181,7 @@
         "name": "Detail Product TC-PD-12 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -208,7 +208,7 @@
         "name": "Detail Product TC-PD-14 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -222,7 +222,7 @@
         "name": "Detail Product TC-PD-16 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -236,14 +236,14 @@
         "name": "Shown Product TC-PD-17 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       },
       {
         "name": "Related Product TC-PD-17 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]

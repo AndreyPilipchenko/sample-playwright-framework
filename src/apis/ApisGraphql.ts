@@ -13,7 +13,9 @@ export interface GraphqlResult {
 
 /**
  * The GraphQL endpoint (`POST /graphql`). A guarded field that fails aborts the whole query, so a
- * case sends one guarded field per query.
+ * case sends one guarded field per query. List fields select only `__typename`: the with-bugs build
+ * returns a plain list and the fixed build a paginator (docs/app-versions.md, B6), and `__typename`
+ * is valid on both, so the same query reaches the guard on every build.
  */
 export class ApisGraphql {
   readonly apiActions: ApiActions;

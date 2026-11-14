@@ -59,10 +59,7 @@ test.describe('Chat widget', () => {
     await chatWidgetPage.confirmAddress();
     await chatWidgetPage.verifyMessage(prompts.paymentMethod);
     await chatWidgetPage.choosePaymentMethod(data.paymentMethod);
-    await chatWidgetPage.verifyMessage(prompts.accountName);
-    await chatWidgetPage.answer(data.accountName);
-    await chatWidgetPage.verifyMessage(prompts.accountNumber);
-    await chatWidgetPage.answer(data.accountNumber);
+    await chatWidgetPage.answerQuestions(data.bankTransferQuestions);
     await chatWidgetPage.verifyOrderSummary(data.summaryHeading, data.expectedSummaryLines);
     await chatWidgetPage.placeOrder();
     await chatWidgetPage.verifyMessage(data.expectedSuccess);

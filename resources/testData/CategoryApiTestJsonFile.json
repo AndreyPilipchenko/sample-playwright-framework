@@ -7,7 +7,7 @@
         "name": "Stored Category Product CATEGORY-API-1 {uuid}",
         "description": "Seeded to check the category is stored.",
         "price": 4.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 3
       }
     ]
@@ -20,14 +20,14 @@
         "name": "Listed Product A CATEGORY-API-2 {uuid}",
         "description": "First product of the listed category.",
         "price": 3.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 5
       },
       {
         "name": "Listed Product B CATEGORY-API-2 {uuid}",
         "description": "Second product of the listed category.",
         "price": 6.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 5
       }
     ]

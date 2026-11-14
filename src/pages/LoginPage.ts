@@ -5,7 +5,7 @@ import { expectToBeVisible, expectToHaveText, expectToHaveURL } from '../utils/E
 
 export class LoginPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/auth/login`;
+  readonly url: string = `${applications.app.routes}/auth/login`;
 
   // Locators
   private readonly email_input: Locator;

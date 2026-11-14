@@ -1,12 +1,13 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectNotToHaveCount, expectTextsToContainAll, expectTextsToEqualInAnyOrder, expectToBeHidden, expectToBeVisible, expectToHaveText } from '../utils/Expects';
 
-/** Products of one category (`#/category/<slug>`). */
+/** Products of one category (`/category/<slug>`). */
 export class CategoryPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/category`;
+  readonly url: string = `${applications.app.routes}/category`;
 
   // Locators
   private readonly pageTitle_txt: Locator;
@@ -22,11 +23,12 @@ export class CategoryPage {
     this.page = page;
     this.pageTitle_txt = page.getByTestId('page-title');
     this.notFound_msg = page.getByRole('heading', { name: 'Page Not Found' });
-    this.productNames_list = page.getByTestId(/^product-\d+$/).getByTestId('product-name');
+    this.productNames_list = page.getByTestId(/^product-(?:\d+|[0-9a-z]{26})$/i).getByTestId('product-name');
     this.categoryFilters_list = page.locator('input[name="category_id"]');
     this.brandFilters_list = page.locator('input[name="brand_id"]');
     this.sort_dropdown = page.getByTestId('sort');
-    this.pagination_list = page.getByRole('navigation', { name: 'Pagination' });
+    // The fixed build renders its own pagination, an unlabelled list (docs/app-versions.md, B13).
+    this.pagination_list = byBuild({ fixed: page.locator('ul.pagination'), default: page.getByRole('navigation', { name: 'Pagination' }) });
     this.priceSlider_input = page.locator('.ngx-slider-pointer-min');
   }
 

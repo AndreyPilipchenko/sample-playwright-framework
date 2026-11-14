@@ -21,17 +21,18 @@
           "name": "Invoice Api Product invoice-api-1 {uuid}",
           "description": "Seeded for the invoice API case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Api Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -59,17 +60,18 @@
           "name": "Invoice Api Product invoice-api-2 {uuid}",
           "description": "Seeded for the invoice API case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Api Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -98,17 +100,18 @@
           "name": "Invoice Api Product invoice-api-3 {uuid}",
           "description": "Seeded for the invoice API case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Api Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -136,17 +139,18 @@
           "name": "Invoice Api Product invoice-api-4 {uuid}",
           "description": "Seeded for the invoice API case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Api Customer",
       "paymentAccountNumber": "12345678"
     },
@@ -174,17 +178,18 @@
           "name": "Invoice Api Product invoice-api-5 {uuid}",
           "description": "Seeded for the invoice API case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Invoice Api Customer",
       "paymentAccountNumber": "12345678"
     },

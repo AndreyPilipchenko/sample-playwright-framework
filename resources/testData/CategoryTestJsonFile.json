@@ -7,14 +7,14 @@
         "name": "Listed Product A TC-CAT-1 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       },
       {
         "name": "Listed Product B TC-CAT-1 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -27,7 +27,7 @@
         "name": "Other Product TC-CAT-1 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]

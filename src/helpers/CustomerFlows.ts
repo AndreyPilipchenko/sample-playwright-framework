@@ -35,11 +35,15 @@ export class CustomerFlows {
     });
   }
 
-  /** Signs in as a new customer and opens the profile page. */
+  /**
+   * Signs in as a new customer and opens the profile page, ready to use: the forms act on the loaded account, and a
+   * submit before it has loaded fails in the browser (the hosted build throws and sends nothing).
+   */
   async openProfileAsNewCustomer(seed: UserSeed): Promise<UserSeed> {
     return await allure.step('Open the profile page as a new customer', async () => {
       const user = await this.signInAsNewCustomer(seed);
       await this.profilePage.navigate();
+      await this.profilePage.verifyProfileLoaded(user.email);
       return user;
     });
   }

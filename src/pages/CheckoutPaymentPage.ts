@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectTextsToEqualInAnyOrder, expectToBeVisible, expectToHaveText } from '../utils/Expects';
 
 /** The credit card values typed on the payment step; the expiration date reads MM/YYYY. */
@@ -10,7 +11,14 @@ export interface CreditCard {
   holderName: string;
 }
 
-/** Checkout step 4: the payment (`#/checkout`). Confirming twice places the order: first the payment, then the order. */
+/** The Bank Transfer values for the payment step. Only the fixed build asks for the bank name (docs/app-versions.md, B7). */
+export interface BankTransfer {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+}
+
+/** Checkout step 4: the payment (`/checkout`). Confirming twice places the order: first the payment, then the order. */
 export class CheckoutPaymentPage {
   readonly page: Page;
 
@@ -22,6 +30,7 @@ export class CheckoutPaymentPage {
   private readonly cvv_input: Locator;
   private readonly cardHolderName_input: Locator;
   private readonly expirationDateError_txt: Locator;
+  private readonly bankName_input: Locator;
   private readonly accountName_input: Locator;
   private readonly accountNumber_input: Locator;
   private readonly confirm_button: Locator;
@@ -41,21 +50,24 @@ export class CheckoutPaymentPage {
     this.cardHolderName_input = page.getByTestId('card_holder_name');
     // The error renders right after the field it belongs to, once that field is touched.
     this.expirationDateError_txt = page.locator('[data-test="expiration_date"] + .alert-danger');
-    this.accountName_input = page.getByTestId('account-name');
-    this.accountNumber_input = page.getByTestId('account-number');
+    // The fixed build adds a Bank Name field and writes the ids with underscores (docs/app-versions.md, B7).
+    this.bankName_input = page.getByTestId('bank_name');
+    this.accountName_input = page.getByTestId(byBuild({ fixed: 'account_name', default: 'account-name' }));
+    this.accountNumber_input = page.getByTestId(byBuild({ fixed: 'account_number', default: 'account-number' }));
     this.confirm_button = page.getByTestId('finish');
-    this.paymentMessage_txt = page.locator('.help-block');
+    this.paymentMessage_txt = byBuild({ fixed: page.getByTestId('payment-success-message'), default: page.locator('.help-block') });
     this.orderConfirmation_txt = page.getByText(/Thanks for your order! Your invoice number is INV-\d+/);
   }
 
   ///// Actions
 
-  /** Chooses Bank Transfer and types its account name and number. */
-  async enterBankTransfer(accountName: string, accountNumber: string) {
+  /** Chooses Bank Transfer and types its details: account name and number, and on the fixed build the bank name. */
+  async enterBankTransfer(bank: BankTransfer) {
     await step('Choose Bank Transfer and enter the account details', async () => {
       await this.choosePaymentMethod('Bank Transfer');
-      await this.accountName_input.fill(accountName);
-      await this.accountNumber_input.fill(accountNumber);
+      await byBuild<() => Promise<void>>({ fixed: () => this.bankName_input.fill(bank.bankName), default: async () => undefined })();
+      await this.accountName_input.fill(bank.accountName);
+      await this.accountNumber_input.fill(bank.accountNumber);
     });
   }
 

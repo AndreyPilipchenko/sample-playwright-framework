@@ -7,7 +7,7 @@
         "name": "Stored Brand Product BRAND-API-1 {uuid}",
         "description": "Seeded to check the brand is stored.",
         "price": 4.25,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 3
       }
     ]

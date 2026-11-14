@@ -2,7 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { expectNotToBeChecked, expectToBeChecked, expectToHaveValue } from '../utils/Expects';
 
-/** Admin user form (`#/admin/users/edit/{id}`). Requires a signed-in admin session. */
+/** Admin user form (`/admin/users/edit/{id}`). Requires a signed-in admin session. */
 export class AdminUserFormPage {
   readonly page: Page;
 

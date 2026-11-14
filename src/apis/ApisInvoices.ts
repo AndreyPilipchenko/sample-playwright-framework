@@ -1,6 +1,7 @@
 import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
+import { byBuild } from '../utils/AppEnvironment';
 import { applications } from '../config/applications';
 import { expectToBe, expectToBeAtLeast, expectToBeAtMost, expectToContain, expectToContainAll, expectToEqual } from '../utils/Expects';
 import { postEmptyAndGetReportedFields } from '../utils/ApiChecks';
@@ -12,46 +13,71 @@ export interface InvoiceLineSeed {
   quantity: number;
 }
 
-/** The values an invoice is created from (Swagger: InvoiceRequest); the billing address and payment are Bank Transfer values. */
+/**
+ * The values an invoice is created from (Swagger: InvoiceRequest); the billing address and payment are Bank
+ * Transfer values. The fixed build checks the city and state against its postcode lookup and needs a bank
+ * name (docs/app-versions.md, B7), so seeds use the city and state that lookup gives for their postcode.
+ */
 export interface InvoiceSeed {
+  /** The street line: `billing_address` on the with-bugs build, `billing_street` on the fixed build. */
   billingAddress: string;
   billingCity: string;
   billingState: string;
   billingCountry: string;
   billingPostcode: string;
+  paymentBankName: string;
   paymentAccountName: string;
   paymentAccountNumber: string;
 }
 
 /** What a created invoice looks like to the test: its number and date exactly as the API issued them. */
 export interface CreatedInvoice {
-  id: number;
+  /** A number on the with-bugs build, a string on the fixed build. */
+  id: number | string;
   invoiceNumber: string;
   invoiceDate: string;
 }
 
-/** An invoice as `GET /invoices/{id}` and `GET /invoices` return it (Swagger: InvoiceResponse), limited to what the specs read. */
+/**
+ * An invoice as `GET /invoices/{id}` and `GET /invoices` return it (Swagger: InvoiceResponse), limited to what
+ * the specs read. The with-bugs build has `billing_address`, `billing_postcode` and flat payment fields; the
+ * fixed build `billing_street`, `billing_postal_code` and a nested `payment` (docs/app-versions.md, B7).
+ */
 export interface InvoiceRecord {
-  id: number;
-  user_id: number;
+  id: number | string;
+  user_id: number | string;
   invoice_number: string;
   invoice_date: string;
-  billing_address: string;
+  billing_address?: string;
+  billing_street?: string;
   billing_city: string;
   billing_state: string;
   billing_country: string;
-  billing_postcode: string;
+  billing_postcode?: string;
+  billing_postal_code?: string;
   total: number;
-  payment_method: string;
-  payment_account_name: string;
-  payment_account_number: number | string;
+  payment_method?: string;
+  payment_account_name?: string;
+  payment_account_number?: number | string;
+  payment?: { payment_method: string; payment_details: { bank_name?: string; account_name?: string; account_number?: number | string } };
   invoicelines: { product_id: number | string; unit_price: number; quantity: number }[];
+}
+
+/** What came of an invoice sent with a client-supplied unit price and total. */
+export interface ForgedInvoiceOutcome {
+  status: number;
+  /** The invoice as stored, read back when the API accepted the request. */
+  stored?: InvoiceRecord;
 }
 
 export class ApisInvoices {
   readonly apiActions: ApiActions;
 
   readonly invoices_serviceName = `${applications.app.apiUrl}/invoices`;
+  /** The fixed build only: an order is placed from a server-side cart (docs/app-versions.md, B7). */
+  readonly carts_serviceName = `${applications.app.apiUrl}/carts`;
+  /** How the API names the Bank Transfer payment method. */
+  readonly bankTransfer_method = byBuild({ fixed: 'bank-transfer', default: 'Bank Transfer' });
 
   /** `bearerTokenProvider` signs in as the invoice owner (see ApisUserAccount.getAccessToken); the facade injects the token. */
   constructor(request: APIRequestContext, bearerTokenProvider: () => Promise<string>) {
@@ -65,28 +91,32 @@ export class ApisInvoices {
    * invoice is deliberately left behind: it belongs to a disposable customer whose email carries a
    * per-run UUID, and deleting it needs an admin token.
    */
-  async createInvoice(userId: number, seed: InvoiceSeed, lines: InvoiceLineSeed[]): Promise<CreatedInvoice> {
+  async createInvoice(userId: number | string, seed: InvoiceSeed, lines: InvoiceLineSeed[]): Promise<CreatedInvoice> {
     return await allure.step('Create an invoice through the API', async () => {
       const total = Number(lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0).toFixed(2));
-      const response = await this.apiActions.post(this.invoices_serviceName, { data: this.invoicePayload(userId, seed, lines, total) });
+      const response = await this.apiActions.post(this.invoices_serviceName, { data: await this.invoicePayload(userId, seed, lines, total) });
       expectToBe('the create invoice response status', response.status(), 201);
-      const body = (await response.json()) as { id: number; invoice_number: string; invoice_date: string };
+      const body = (await response.json()) as { id: number | string; invoice_number: string; invoice_date: string };
       return { id: body.id, invoiceNumber: body.invoice_number, invoiceDate: body.invoice_date };
     });
   }
 
   /**
-   * Creates an invoice whose unit price and total are not the product's real ones, and resolves to the
-   * response status. Records created by a defective build are left behind like every other invoice.
+   * Creates an invoice whose unit price and total are not the product's real ones. Resolves to the response
+   * status and, when the API accepted it, the invoice as stored, so the validation can tell a refusal, a
+   * server-side re-pricing and a stored forgery apart. Records are left behind like every other invoice.
    */
-  async createInvoiceWithForgedAmounts(userId: number, seed: InvoiceSeed, line: InvoiceLineSeed, forgedTotal: number): Promise<number> {
+  async createInvoiceWithForgedAmounts(userId: number | string, seed: InvoiceSeed, line: InvoiceLineSeed, forgedTotal: number): Promise<ForgedInvoiceOutcome> {
     return await allure.step('Create an invoice with a client-supplied unit price and total', async () => {
-      const response = await this.apiActions.post(this.invoices_serviceName, { data: this.invoicePayload(userId, seed, [line], forgedTotal) });
-      return response.status();
+      const response = await this.apiActions.post(this.invoices_serviceName, { data: await this.invoicePayload(userId, seed, [line], forgedTotal) });
+      const status = response.status();
+      if (status !== 201) return { status };
+      const { id } = (await response.json()) as { id: number | string };
+      return { status, stored: await this.getInvoice(id) };
     });
   }
 
-  async getInvoice(invoiceId: number): Promise<InvoiceRecord> {
+  async getInvoice(invoiceId: number | string): Promise<InvoiceRecord> {
     return await allure.step(`Get the invoice ${invoiceId}`, async () => {
       const response = await this.apiActions.get(`${this.invoices_serviceName}/${invoiceId}`);
       expectToBe('the get invoice response status', response.status(), 200);
@@ -120,19 +150,71 @@ export class ApisInvoices {
     });
   }
 
-  private invoicePayload(userId: number, seed: InvoiceSeed, lines: InvoiceLineSeed[], total: number) {
-    return {
+  /**
+   * The create invoice body. The with-bugs build takes the lines, their prices and the total from the
+   * client. The fixed build places the order from a cart, filled first, and prices it on the server; the
+   * client's prices and total still go along as extra fields, which is what the forged-amounts case sends.
+   */
+  private async invoicePayload(userId: number | string, seed: InvoiceSeed, lines: InvoiceLineSeed[], total: number): Promise<Record<string, unknown>> {
+    const clientAmounts = {
+      total,
+      invoice_items: lines.map((line) => ({ product_id: line.productId, unit_price: line.unitPrice, quantity: line.quantity })),
+    };
+    const fixedPayload = async () => ({
+      billing_street: seed.billingAddress,
+      billing_city: seed.billingCity,
+      billing_state: seed.billingState,
+      billing_country: seed.billingCountry,
+      billing_postal_code: seed.billingPostcode,
+      payment_method: this.bankTransfer_method,
+      payment_details: { bank_name: seed.paymentBankName, account_name: seed.paymentAccountName, account_number: seed.paymentAccountNumber },
+      cart_id: await this.createCart(lines),
+      ...clientAmounts,
+    });
+    const withBugsPayload = async () => ({
       user_id: userId,
       billing_address: seed.billingAddress,
       billing_city: seed.billingCity,
       billing_state: seed.billingState,
       billing_country: seed.billingCountry,
       billing_postcode: seed.billingPostcode,
-      total,
-      payment_method: 'Bank Transfer',
+      payment_method: this.bankTransfer_method,
       payment_account_name: seed.paymentAccountName,
       payment_account_number: seed.paymentAccountNumber,
-      invoice_items: lines.map((line) => ({ product_id: line.productId, unit_price: line.unitPrice, quantity: line.quantity })),
+      ...clientAmounts,
+    });
+    return await byBuild({ fixed: fixedPayload, default: withBugsPayload })();
+  }
+
+  /** The fixed build only: a cart holding the lines, filled the way the shop's checkout fills it. */
+  private async createCart(lines: InvoiceLineSeed[]): Promise<string> {
+    return await allure.step('Create a cart holding the invoice lines', async () => {
+      const response = await this.apiActions.post(this.carts_serviceName);
+      expectToBe('the create cart response status', response.status(), 201);
+      const { id } = (await response.json()) as { id: string };
+      for (const line of lines) {
+        const added = await this.apiActions.post(`${this.carts_serviceName}/${id}`, { data: { product_id: line.productId, quantity: line.quantity } });
+        expectToBe('the add to cart response status', added.status(), 200);
+      }
+      return id;
+    });
+  }
+
+  /** The billing address and payment of a stored invoice, read from wherever the build keeps them. */
+  private storedBillingAndPayment(invoice: InvoiceRecord) {
+    const payment = byBuild({
+      fixed: { method: invoice.payment?.payment_method, ...invoice.payment?.payment_details },
+      default: { method: invoice.payment_method, account_name: invoice.payment_account_name, account_number: invoice.payment_account_number },
+    });
+    return {
+      billingAddress: byBuild({ fixed: invoice.billing_street, default: invoice.billing_address }),
+      billingCity: invoice.billing_city,
+      billingState: invoice.billing_state,
+      billingCountry: invoice.billing_country,
+      billingPostcode: byBuild({ fixed: invoice.billing_postal_code, default: invoice.billing_postcode }),
+      paymentMethod: payment.method,
+      paymentAccountName: payment.account_name,
+      paymentAccountNumber: payment.account_number === undefined ? undefined : String(payment.account_number),
     };
   }
 
@@ -152,11 +234,30 @@ export class ApisInvoices {
     });
   }
 
-  /** The client's unit price and total are refused with a 4xx status, so no invoice carries them. */
-  async verifyForgedAmountsRefused(status: number) {
-    await allure.step('Verify an invoice with a client-supplied unit price and total is refused', async () => {
-      expectToBeAtLeast('the status of the forged invoice', status, 400);
-      expectToBeAtMost('the status of the forged invoice', status, 499);
+  /**
+   * No invoice keeps the client's unit price and total. The with-bugs build takes the amounts in the request, so
+   * there the request must be refused (4xx). The fixed build takes no amounts at all: it prices the server cart
+   * (docs/app-versions.md, B7), so there the invoice must be created (201) at the product's real price. A
+   * refusal on the fixed build fails: it would mean the order was rejected for some other reason, which proves
+   * nothing about pricing.
+   */
+  async verifyForgedAmountsNotStored(outcome: ForgedInvoiceOutcome, real: { unitPrice: number; quantity: number }) {
+    const check = byBuild({
+      fixed: () => {
+        expectToBe('the status of the order sent with forged amounts', outcome.status, 201);
+        expectToEqual(
+          'the unit price and total stored for the forged invoice',
+          { unitPrice: outcome.stored?.invoicelines[0]?.unit_price, total: outcome.stored?.total },
+          { unitPrice: real.unitPrice, total: Number((real.unitPrice * real.quantity).toFixed(2)) },
+        );
+      },
+      default: () => {
+        expectToBeAtLeast('the status of the forged invoice', outcome.status, 400);
+        expectToBeAtMost('the status of the forged invoice', outcome.status, 499);
+      },
+    });
+    await allure.step('Verify the invoice does not keep the client-supplied unit price and total', async () => {
+      check();
     });
   }
 
@@ -168,22 +269,11 @@ export class ApisInvoices {
     });
   }
 
-  async verifyInvoiceStored(invoice: InvoiceRecord, expected: { userId: number; seed: InvoiceSeed; total: number }) {
+  async verifyInvoiceStored(invoice: InvoiceRecord, expected: { userId: number | string; seed: InvoiceSeed; total: number }) {
     await allure.step(`Verify the invoice ${invoice.invoice_number} is stored with its billing address, payment and total`, async () => {
       expectToEqual(
         'the stored invoice',
-        {
-          userId: invoice.user_id,
-          billingAddress: invoice.billing_address,
-          billingCity: invoice.billing_city,
-          billingState: invoice.billing_state,
-          billingCountry: invoice.billing_country,
-          billingPostcode: invoice.billing_postcode,
-          paymentMethod: invoice.payment_method,
-          paymentAccountName: invoice.payment_account_name,
-          paymentAccountNumber: String(invoice.payment_account_number),
-          total: invoice.total,
-        },
+        { userId: invoice.user_id, ...this.storedBillingAndPayment(invoice), total: invoice.total },
         {
           userId: expected.userId,
           billingAddress: expected.seed.billingAddress,
@@ -191,7 +281,7 @@ export class ApisInvoices {
           billingState: expected.seed.billingState,
           billingCountry: expected.seed.billingCountry,
           billingPostcode: expected.seed.billingPostcode,
-          paymentMethod: 'Bank Transfer',
+          paymentMethod: this.bankTransfer_method,
           paymentAccountName: expected.seed.paymentAccountName,
           paymentAccountNumber: expected.seed.paymentAccountNumber,
           total: expected.total,

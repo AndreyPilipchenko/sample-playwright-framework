@@ -1,10 +1,11 @@
 import { apiUrl, appUrl } from './targets';
+import { byBuild } from '../utils/AppEnvironment';
 
 /**
  * All applications under test — one named entry per app; specs and page classes
  * pick what they need for the owning page's route:
  *
- *   readonly url: string = `${applications.app.url}/login`;
+ *   readonly url: string = `${applications.app.routes}/login`;
  *
  * Addresses come from the browser and API targets of the same name in .harness/targets.json,
  * shared with the harness runtime (see targets.ts for the per-machine override).
@@ -18,6 +19,12 @@ export const applications = {
   app: {
     name: 'app',
     url: appUrl('app'),
+    /**
+     * Base of the app's client-side routes, so a page builds `${routes}/account`. The with-bugs build
+     * routes after a hash (`/#/account`); the fixed build uses the path (`/account`) and ignores a hash
+     * route, landing on the home page (docs/app-versions.md, B1).
+     */
+    routes: byBuild({ fixed: appUrl('app'), default: `${appUrl('app')}/#` }),
     /** REST API base URL; API service classes build their `_serviceName` endpoints on it. */
     apiUrl: apiUrl('app'),
     /**

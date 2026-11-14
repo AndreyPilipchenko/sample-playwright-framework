@@ -7,7 +7,7 @@
         "name": "Stored Product PRODUCT-API-1 {uuid}",
         "description": "Seeded to check price, stock, category and brand are stored.",
         "price": 21.75,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 7
       }
     ]
@@ -29,8 +29,8 @@
         "name": "Catalog Api Product 1 {uuid}",
         "description": "Seeded for the catalog API case.",
         "price": 12.5,
-        "co2Rating": "B",
-        "stock": 3
+        "co2Rating": "D",
+        "stock": 0
       }
     ],
     "newStock": 9

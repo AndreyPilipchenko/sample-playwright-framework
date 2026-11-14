@@ -236,8 +236,12 @@ targets in `.harness/targets.json`:
 | `hosted` | https://practicesoftwaretesting.com | a newer build without them |
 
 `TEST_ENV` selects the environment, and `src/config/targets.ts` resolves every address from it.
-Page and service classes absorb the differences between builds through `byEnvironment()`
-(`src/utils/AppEnvironment.ts`). The two local environments share ports, so one runs at a time;
+The four environments run two builds (`src/config/builds.ts`): `local` and `hosted-with-bugs` the
+build with the deliberate defects, `local-fixed` and `hosted` the newer build without them. The two builds also
+differ in structure — routes, field names, the address form, the order API. Page and service classes absorb
+those differences through `byBuild()` (`src/utils/AppEnvironment.ts`), and a test data file can carry a
+`<name>.fixed.json` overlay for the values that differ. [App versions](docs/app-versions.md) lists each difference
+and which test results differ because a defect is fixed. The two local environments share ports, so one runs at a time;
 `app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it:
 
 ```sh

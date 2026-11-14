@@ -1,14 +1,19 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectNotToContainText, expectToBeVisible, expectToHaveText } from '../utils/Expects';
+import { waitUntilFilled } from '../utils/Waits';
 
 /** The values typed on the registration form. */
 export interface RegistrationForm {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  /** The street line: the Address field on the with-bugs build, the Street field on the fixed build. */
   address: string;
+  /** The fixed build's House number field, which it requires; the with-bugs build has none. */
+  houseNumber?: string;
   postcode: string;
   city: string;
   state: string;
@@ -25,6 +30,8 @@ export interface RegistrationLabels {
   lastName: string;
   dateOfBirth: string;
   address: string;
+  /** The fixed build only. */
+  houseNumber?: string;
   postcode: string;
   city: string;
   state: string;
@@ -34,10 +41,14 @@ export interface RegistrationLabels {
   password: string;
 }
 
-/** Customer registration (`#/auth/register`). */
+/**
+ * Customer registration (`/auth/register`). The fixed build names the address fields Street and Postal code,
+ * adds a required House number, and fills street, city and state from a postcode lookup once country,
+ * postal code and house number are in (docs/app-versions.md, B3).
+ */
 export class RegisterPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/auth/register`;
+  readonly url: string = `${applications.app.routes}/auth/register`;
 
   // Locators
   private readonly firstName_input: Locator;
@@ -45,6 +56,7 @@ export class RegisterPage {
   private readonly dateOfBirth_input: Locator;
   private readonly address_input: Locator;
   private readonly postcode_input: Locator;
+  private readonly houseNumber_input: Locator;
   private readonly city_input: Locator;
   private readonly state_input: Locator;
   private readonly country_dropdown: Locator;
@@ -58,6 +70,7 @@ export class RegisterPage {
   private readonly dateOfBirthLabel_txt: Locator;
   private readonly addressLabel_txt: Locator;
   private readonly postcodeLabel_txt: Locator;
+  private readonly houseNumberLabel_txt: Locator;
   private readonly cityLabel_txt: Locator;
   private readonly stateLabel_txt: Locator;
   private readonly countryLabel_txt: Locator;
@@ -70,8 +83,9 @@ export class RegisterPage {
     this.firstName_input = page.getByTestId('first-name');
     this.lastName_input = page.getByTestId('last-name');
     this.dateOfBirth_input = page.getByTestId('dob');
-    this.address_input = page.getByTestId('address');
-    this.postcode_input = page.getByTestId('postcode');
+    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
+    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
+    this.houseNumber_input = page.getByTestId('house_number');
     this.city_input = page.getByTestId('city');
     this.state_input = page.getByTestId('state');
     this.country_dropdown = page.getByTestId('country');
@@ -84,8 +98,9 @@ export class RegisterPage {
     this.firstNameLabel_txt = page.locator('label[for="first_name"]');
     this.lastNameLabel_txt = page.locator('label[for="last_name"]');
     this.dateOfBirthLabel_txt = page.locator('label[for="dob"]');
-    this.addressLabel_txt = page.locator('label[for="address"]');
-    this.postcodeLabel_txt = page.locator('label[for="postcode"]');
+    this.addressLabel_txt = page.locator(byBuild({ fixed: 'label[for="street"]', default: 'label[for="address"]' }));
+    this.postcodeLabel_txt = page.locator(byBuild({ fixed: 'label[for="postal_code"]', default: 'label[for="postcode"]' }));
+    this.houseNumberLabel_txt = page.locator('label[for="house_number"]');
     this.cityLabel_txt = page.locator('label[for="city"]');
     this.stateLabel_txt = page.locator('label[for="state"]');
     this.countryLabel_txt = page.locator('label[for="country"]');
@@ -108,13 +123,7 @@ export class RegisterPage {
       await this.firstName_input.fill(form.firstName);
       await this.lastName_input.fill(form.lastName);
       await this.dateOfBirth_input.fill(form.dateOfBirth);
-      await this.address_input.fill(form.address);
-      await this.postcode_input.fill(form.postcode);
-      await this.city_input.fill(form.city);
-      await this.state_input.fill(form.state);
-      // The form only registers the country once the dropdown has been clicked, as a person always does first.
-      await this.country_dropdown.click();
-      await this.country_dropdown.selectOption({ label: form.country });
+      await byBuild({ fixed: () => this.fillLookedUpAddress(form), default: () => this.fillAddress(form) })();
       await this.phone_input.fill(form.phone);
       await this.email_input.fill(form.email);
       await this.password_input.fill(form.password);
@@ -122,7 +131,49 @@ export class RegisterPage {
     });
   }
 
+  /** The with-bugs build: each address field, then the country. */
+  private async fillAddress(form: RegistrationForm) {
+    await this.address_input.fill(form.address);
+    await this.postcode_input.fill(form.postcode);
+    await this.city_input.fill(form.city);
+    await this.state_input.fill(form.state);
+    await this.selectCountry(form.country);
+  }
+
+  /**
+   * The fixed build: country, postal code and house number first, then the street, city and state the form's
+   * lookup filled in are replaced with the form's own, once the lookup has filled them (else it could
+   * overwrite them afterwards).
+   */
+  private async fillLookedUpAddress(form: RegistrationForm) {
+    await this.selectCountry(form.country);
+    await this.postcode_input.fill(form.postcode);
+    await this.houseNumber_input.fill(form.houseNumber ?? '');
+    await this.houseNumber_input.blur();
+    await waitUntilFilled(this.city_input);
+    await this.address_input.fill(form.address);
+    await this.city_input.fill(form.city);
+    await this.state_input.fill(form.state);
+  }
+
+  /** The form only registers the country once the dropdown has been clicked, as a person always does first. */
+  private async selectCountry(country: string) {
+    await this.country_dropdown.click();
+    await this.country_dropdown.selectOption({ label: country });
+  }
+
   ///// Validations
+
+  /** The fixed build adds a House number field to the address (docs/app-versions.md, B3); the with-bugs build has none. */
+  private async verifyHouseNumberShown(expectedLabel: string | undefined) {
+    await byBuild<() => Promise<void>>({
+      fixed: async () => {
+        await expectToBeVisible('the House number field', this.houseNumber_input);
+        await expectToHaveText('the label of the House number field', this.houseNumberLabel_txt, expectedLabel ?? '');
+      },
+      default: async () => undefined,
+    })();
+  }
 
   /** Every required field is shown under its own label. */
   async verifyRequiredFieldsShown(expected: RegistrationLabels) {
@@ -137,6 +188,7 @@ export class RegisterPage {
       await expectToHaveText(`the label of the ${expected.address} field`, this.addressLabel_txt, expected.address);
       await expectToBeVisible(`the ${expected.postcode} field`, this.postcode_input);
       await expectToHaveText(`the label of the ${expected.postcode} field`, this.postcodeLabel_txt, expected.postcode);
+      await this.verifyHouseNumberShown(expected.houseNumber);
       await expectToBeVisible(`the ${expected.city} field`, this.city_input);
       await expectToHaveText(`the label of the ${expected.city} field`, this.cityLabel_txt, expected.city);
       await expectToBeVisible(`the ${expected.state} field`, this.state_input);

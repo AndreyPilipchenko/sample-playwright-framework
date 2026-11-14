@@ -2,6 +2,7 @@ import { type APIRequestContext, type APIResponse } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectToBe, expectToBeAtMost, expectToBeTruthy } from '../utils/Expects';
 
 /** Body of a successful `POST /users/login` (Swagger: TokenResponse). */
@@ -15,7 +16,10 @@ interface LoginTokenResponse {
 export interface UserSeed {
   firstName: string;
   lastName: string;
+  /** The street line: the with-bugs build stores one address line, the fixed build a street and a house number. */
   address: string;
+  /** The fixed build's house number. Its registration form requires one; its API does not, and the with-bugs build has none. */
+  houseNumber?: string;
   city: string;
   state: string;
   country: string;
@@ -143,15 +147,18 @@ export class ApisUserAccount {
     });
   }
 
+  /** The with-bugs build takes the address as flat fields; the fixed build as one object (docs/app-versions.md, B3). */
   private registerPayload(user: UserSeed) {
+    const address = byBuild<Record<string, unknown>>({
+      fixed: {
+        address: { street: user.address, house_number: user.houseNumber, city: user.city, state: user.state, country: user.country, postal_code: user.postcode },
+      },
+      default: { address: user.address, city: user.city, state: user.state, country: user.country, postcode: user.postcode },
+    });
     return {
       first_name: user.firstName,
       last_name: user.lastName,
-      address: user.address,
-      city: user.city,
-      state: user.state,
-      country: user.country,
-      postcode: user.postcode,
+      ...address,
       phone: user.phone,
       dob: user.dob,
       email: user.email,

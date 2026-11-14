@@ -2,6 +2,7 @@ import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { withUuid } from '../utils/UniqueData';
+import { byBuild } from '../utils/AppEnvironment';
 import { applications } from '../config/applications';
 import { expectToBe, expectToBeGreaterThan, expectToContainAll, expectToEqual } from '../utils/Expects';
 import { expectRefusedWithoutToken, postEmptyAndGetReportedFields } from '../utils/ApiChecks';
@@ -16,7 +17,10 @@ export interface ProductRecord {
   id: number;
   name: string;
   price: number;
-  stock: number | null;
+  /** The with-bugs build only; the fixed build publishes `in_stock` instead (docs/app-versions.md, B5). */
+  stock?: number | null;
+  /** The fixed build only. */
+  in_stock?: boolean;
   category: { id: number; name: string; slug: string };
   brand: { id: number; name: string };
 }
@@ -32,6 +36,7 @@ export interface ProductSeed {
   name: string;
   description: string;
   price: number;
+  /** The fixed build counts A and B as eco-friendly and takes 5% off them at checkout (docs/app-versions.md, B8); seeds use D unless a case is about the rating. */
   co2Rating: string;
   /** Not in the Swagger ProductRequest, but PUT /products/{id} honours it — a created product has no stock and the UI shows it out of stock. */
   stock: number;
@@ -121,7 +126,7 @@ export class ApisProducts {
     });
   }
 
-  async setStock(productId: number, product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
+  async setStock(productId: number | string, product: ProductSeed, categoryId: number, brandId: number, imageId: number) {
     await allure.step(`Set the stock of product ${productId} to ${product.stock}`, async () => {
       const response = await this.apiActions.put(`${this.products_serviceName}/${productId}`, {
         data: { ...this.productPayload(product, categoryId, brandId, imageId), stock: product.stock },
@@ -211,8 +216,8 @@ export class ApisProducts {
     await allure.step(`Verify the product is stored as: ${expected.name}`, async () => {
       expectToEqual(
         'the stored product',
-        { id: String(product.id), name: product.name, price: product.price, stock: product.stock, categoryId: product.category.id, brandId: product.brand.id },
-        expected,
+        { id: String(product.id), name: product.name, price: product.price, stock: this.publishedStock(product), categoryId: product.category.id, brandId: product.brand.id },
+        { ...expected, stock: this.expectedPublishedStock(expected.stock) },
       );
     });
   }
@@ -231,8 +236,21 @@ export class ApisProducts {
 
   async verifyProductStock(product: ProductRecord, expectedStock: number) {
     await allure.step(`Verify the product ${product.name} has the stock ${expectedStock}`, async () => {
-      expectToBe('the stored stock', product.stock, expectedStock);
+      expectToBe('the stored stock', this.publishedStock(product), this.expectedPublishedStock(expectedStock));
     });
+  }
+
+  /**
+   * What a public read reveals of the stock: the with-bugs build publishes the count, the fixed build
+   * only whether the product is in stock (docs/app-versions.md, B5). The two methods below keep each
+   * stock validation comparing like with like.
+   */
+  private publishedStock(product: ProductRecord): number | boolean | null | undefined {
+    return byBuild({ fixed: product.in_stock, default: product.stock });
+  }
+
+  private expectedPublishedStock(stock: number): number | boolean {
+    return byBuild<number | boolean>({ fixed: stock > 0, default: stock });
   }
 
   async verifyNotFound(subject: string, status: number) {

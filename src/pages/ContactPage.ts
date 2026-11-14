@@ -12,10 +12,10 @@ export interface ContactMessage {
   message: string;
 }
 
-/** Contact form (`#/contact`). */
+/** Contact form (`/contact`). */
 export class ContactPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/contact`;
+  readonly url: string = `${applications.app.routes}/contact`;
 
   // Locators
   private readonly firstName_input: Locator;

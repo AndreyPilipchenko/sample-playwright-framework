@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import {
   expectToBeDisabled,
   expectToBeHidden,
@@ -12,10 +13,11 @@ import {
   expectToHaveURL,
   expectToHaveValue,
 } from '../utils/Expects';
+import { escapeRegExp } from '../utils/TextPatterns';
 
 export class ProductDetailPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/product`;
+  readonly url: string = `${applications.app.routes}/product`;
 
   // Locators
   private readonly productName_txt: Locator;
@@ -50,7 +52,8 @@ export class ProductDetailPage {
     this.description_txt = page.getByTestId('product-description');
     this.productImage_img = page.locator('img[src*="assets/img/products/"]').first();
     this.discount_txt = page.locator('.badge.bg-danger');
-    this.toast_msg = page.locator('.toast');
+    // The fixed build shows its messages with another toast library (docs/app-versions.md, B11).
+    this.toast_msg = page.locator(byBuild({ fixed: '.ngx-toastr .toast-message', default: '.toast' }));
     this.addToFavorites_button = page.getByTestId('add-to-favorites');
     this.originalPrice_txt = page.locator('.discounted').filter({ has: this.unitPrice_txt });
     this.offerPrice_txt = page.getByTestId('offer-price');
@@ -106,9 +109,19 @@ export class ProductDetailPage {
     });
   }
 
+  /**
+   * The with-bugs build keeps the cart in the browser, so the click is the whole add. The fixed build adds the
+   * item on the server (docs/app-versions.md, B7): the action ends once the server confirmed it, so leaving
+   * the page right after cannot abort the add.
+   */
   async addToCart() {
     await step('Click Add to cart on the product detail page', async () => {
+      const added = byBuild<() => Promise<unknown>>({
+        fixed: () => this.page.waitForResponse((response) => response.request().method() === 'POST' && /\/carts\/[^/]+$/.test(response.url())),
+        default: async () => undefined,
+      })();
       await this.addToCart_button.click();
+      await added;
     });
   }
 
@@ -117,7 +130,8 @@ export class ProductDetailPage {
   /** Arrival first: the home grid also renders `product-name`, so the name is checked only once the route changed. */
   async verifyProductDetailOpened(productName: string) {
     await step(`Verify the product detail page opened for: ${productName}`, async () => {
-      await expectToHaveURL(this.page, /\/#\/product\/[^/]+$/);
+      // Under this page's route (`.../product/<id>`); the route base differs between builds (applications.app.routes).
+      await expectToHaveURL(this.page, new RegExp(`^${escapeRegExp(this.url)}/[^/]+$`));
       await expectToHaveText('the product name', this.productName_txt, productName);
     });
   }

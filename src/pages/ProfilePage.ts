@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { PASSWORD_CHANGE_ANSWER_MS } from '../config/timeouts';
 import {
   expectToBeAtLeast, expectToBeAtMost, expectToBeHidden, expectToBeVisible, expectToHaveText, expectToHaveURL,
@@ -15,10 +16,10 @@ export interface ProfileEdit extends AddressValues {
   phone: string;
 }
 
-/** Customer profile (`#/account/profile`), including the change password section. Requires a signed-in session. */
+/** Customer profile (`/account/profile`), including the change password section. Requires a signed-in session. */
 export class ProfilePage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/account/profile`;
+  readonly url: string = `${applications.app.routes}/account/profile`;
 
   // Locators
   private readonly firstName_input: Locator;
@@ -50,8 +51,9 @@ export class ProfilePage {
     this.lastName_input = page.getByTestId('last-name');
     this.email_input = page.getByTestId('email');
     this.phone_input = page.getByTestId('phone');
-    this.address_input = page.getByTestId('address');
-    this.postcode_input = page.getByTestId('postcode');
+    // The fixed build names them Street and Postal code (docs/app-versions.md, B3).
+    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
+    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
     this.city_input = page.getByTestId('city');
     this.state_input = page.getByTestId('state');
     this.country_input = page.getByTestId('country');
@@ -225,7 +227,7 @@ export class ProfilePage {
   /** The app signs the user out about 5 seconds after a successful change; the window comes from the test data. */
   async verifyLoggedOutAfterAbout(window: { minSeconds: number; maxSeconds: number }) {
     await step('Verify the user is logged out to the login page after about 5 seconds', async () => {
-      await expectToHaveURL(this.page, `${applications.app.url}/#/auth/login`);
+      await expectToHaveURL(this.page, `${applications.app.routes}/auth/login`);
       const seconds = (Date.now() - this.submittedAt) / 1000;
       expectToBeAtLeast('the seconds from submit to logout', seconds, window.minSeconds);
       expectToBeAtMost('the seconds from submit to logout', seconds, window.maxSeconds);

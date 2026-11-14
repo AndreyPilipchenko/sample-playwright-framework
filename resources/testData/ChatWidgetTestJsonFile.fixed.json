@@ -1,0 +1,9 @@
+{
+  "tcCHAT6SignIn": {
+    "bankTransferQuestions": [
+      { "question": "Please enter your bank name:", "answer": "Chat Bank" },
+      { "question": "Please enter the account holder name:", "answer": "Chat Customer" },
+      { "question": "Please enter your account number:", "answer": "1234567890" }
+    ]
+  }
+}

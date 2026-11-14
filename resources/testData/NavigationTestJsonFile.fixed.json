@@ -1,0 +1,11 @@
+{
+  "tcNAV3": {
+    "handTools": {
+      "knownProduct": "Claw Hammer"
+    },
+    "chainsaws": {
+      "entry": "Special Tools",
+      "expectedTitle": "Category: Special Tools"
+    }
+  }
+}

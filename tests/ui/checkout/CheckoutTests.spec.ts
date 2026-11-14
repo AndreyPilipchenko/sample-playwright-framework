@@ -197,7 +197,7 @@ test.describe('Checkout', () => {
     await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
     await checkoutAddressPage.enterAddress(billing);
     await checkoutAddressPage.proceed();
-    await checkoutPaymentPage.enterBankTransfer(bank.accountName, bank.accountNumber);
+    await checkoutPaymentPage.enterBankTransfer(bank);
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();
@@ -217,7 +217,7 @@ test.describe('Checkout', () => {
     await checkoutAddressPage.verifySavedAddressPrefilled(user.address);
     await checkoutAddressPage.enterAddress(billing);
     await checkoutAddressPage.proceed();
-    await checkoutPaymentPage.enterBankTransfer(bank.accountName, bank.accountNumber);
+    await checkoutPaymentPage.enterBankTransfer(bank);
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();

@@ -7,7 +7,7 @@
         "name": "Card Search Product TC-PO-2 {uuid}",
         "description": "Seeded product reached through the search box.",
         "price": 7.75,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -20,7 +20,7 @@
         "name": "Card Category Product TC-PO-2 {uuid}",
         "description": "Seeded product reached through its own category filter.",
         "price": 8.25,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -33,7 +33,7 @@
         "name": "Search Product TC-PO-5 {uuid}",
         "description": "Seeded product the search must find.",
         "price": 5.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -46,14 +46,14 @@
         "name": "Filter Product A TC-PO-8 {uuid}",
         "description": "First seeded product of the category.",
         "price": 6.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       },
       {
         "name": "Filter Product B TC-PO-8 {uuid}",
         "description": "Second seeded product of the category.",
         "price": 9.5,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -134,7 +134,7 @@
         "name": "Filtered Product TC-PO-6 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -147,7 +147,7 @@
         "name": "Searched Product TC-PO-6 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -169,7 +169,7 @@
         "name": "First Brand Product TC-PO-11 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -182,7 +182,7 @@
         "name": "Second Brand Product TC-PO-11 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -191,7 +191,7 @@
     "name": "Crossed Product TC-PO-11 {uuid}",
     "description": "Seeded for the case.",
     "price": 20.0,
-    "co2Rating": "B",
+    "co2Rating": "D",
     "stock": 10
   },
   "tcPO12First": {
@@ -202,7 +202,7 @@
         "name": "First Both Product TC-PO-12 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -215,7 +215,7 @@
         "name": "Second Both Product TC-PO-12 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ]
@@ -224,14 +224,14 @@
     "name": "Category Only Product TC-PO-12 {uuid}",
     "description": "Seeded for the case.",
     "price": 20.0,
-    "co2Rating": "B",
+    "co2Rating": "D",
     "stock": 10
   },
   "tcPO12BrandOnly": {
     "name": "Brand Only Product TC-PO-12 {uuid}",
     "description": "Seeded for the case.",
     "price": 20.0,
-    "co2Rating": "B",
+    "co2Rating": "D",
     "stock": 10
   },
   "tcPO14": {
@@ -247,7 +247,7 @@
         "name": "Offer Product TC-PO-16 {uuid}",
         "description": "Seeded for the case.",
         "price": 100.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isLocationOffer": true
       }
@@ -267,14 +267,14 @@
         "name": "Sold Out Product TC-PO-17 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 0
       },
       {
         "name": "Stocked Product TC-PO-17 {uuid}",
         "description": "Seeded for the case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],

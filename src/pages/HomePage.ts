@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import {
   expectNotToBeChecked,
   expectNotToHaveTexts,
@@ -46,8 +47,9 @@ export class HomePage {
     this.sort_dropdown = page.getByTestId('sort');
     this.minPrice_input = page.locator('.ngx-slider-pointer-min');
     this.maxPrice_input = page.locator('.ngx-slider-pointer-max');
-    this.pagination_list = page.getByRole('navigation', { name: 'Pagination' });
-    this.currentPage_txt = this.pagination_list.locator('li.current');
+    // The fixed build renders its own pagination: an unlabelled list with Page-N buttons and an active item (docs/app-versions.md, B13).
+    this.pagination_list = byBuild({ fixed: page.locator('ul.pagination'), default: page.getByRole('navigation', { name: 'Pagination' }) });
+    this.currentPage_txt = this.pagination_list.locator(byBuild({ fixed: 'li.active', default: 'li.current' }));
   }
 
   /** The product card whose name is exactly `productName`. */
@@ -82,7 +84,10 @@ export class HomePage {
 
   /** The link to page `pageNumber` in the pagination. */
   private pageNumber_link(pageNumber: string): Locator {
-    return this.pagination_list.locator('a').filter({ hasText: new RegExp(`^\\s*page\\s*${pageNumber}\\s*$`) });
+    return byBuild({
+      fixed: () => this.pagination_list.getByRole('button', { name: `Page-${pageNumber}`, exact: true }),
+      default: () => this.pagination_list.locator('a').filter({ hasText: new RegExp(`^\\s*page\\s*${pageNumber}\\s*$`) }),
+    })();
   }
 
   private cardName_txt(card: Locator): Locator {
