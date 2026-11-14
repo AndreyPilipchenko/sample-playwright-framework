@@ -1,0 +1,104 @@
+# The suite against one of the PUBLIC sites, started by hand only. The nightly runs test private
+# Docker stacks (nightly.yml); this workflow checks that the suite also holds against the public
+# deployments (docs/app-versions.md, "Hosted and local"):
+#   hosted-with-bugs  https://with-bugs.practicesoftwaretesting.com, the build with the deliberate defects
+#   hosted            https://practicesoftwaretesting.com, a newer release of the fixed build
+#
+# One job runs the API specs and one browser's UI specs, @smoke and @regression. A public site is
+# shared with everyone, so the job:
+#   - starts no stack and leaves out the @local tests, which need the stack's database or mail inbox;
+#   - uses 2 workers;
+#   - uploads no traces, which could hold a token that still works;
+#   - saves no results for the next comparison and publishes nothing to GitHub Pages.
+# The public sites answer an occasional 500 under load; a rerun of the failed test tells a hiccup
+# from a finding.
+#
+# Run it: Actions → Tests on a public site → Run workflow, or
+#   gh workflow run hosted.yml -f site=hosted -f tag=@smoke
+#
+# Manual-run inputs:
+#   site              hosted-with-bugs (default) or hosted. It names the run and the job.
+#   browser           chromium (default), firefox or webkit, for the UI specs.
+#   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
+#                     containing the text, in the given spec files/folders (:line allowed).
+#
+# SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
+# §1.2), mapped onto the spec-running step only, are sent to the chosen site, which publishes the
+# same demo login. Mind defect #21: one failed login locks the account.
+#
+# REPORTS: the Allure report is always attached; the Playwright HTML report only when the
+# repository variable PUBLISH_REPORTS is 'true' (its failure pages can contain the credentials).
+
+name: Tests on a public site
+
+run-name: Tests on ${{ inputs.site }} (${{ inputs.browser }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: Public site to test. hosted-with-bugs has the deliberate defects, hosted is the newer build without them
+        type: choice
+        default: hosted-with-bugs
+        options:
+          - hosted-with-bugs
+          - hosted
+      browser:
+        description: Browser for the UI specs
+        type: choice
+        default: chromium
+        options:
+          - chromium
+          - firefox
+          - webkit
+      tag:
+        description: Only tests with any of these tags, comma-separated (e.g. @smoke)
+        type: string
+        default: ''
+      name:
+        description: Only tests whose title contains this text, case-insensitive
+        type: string
+        default: ''
+      path:
+        description: Only these spec files or folders, space-separated, optional :line (e.g. tests/ui/accounts/LoginTests.spec.ts:38)
+        type: string
+        default: ''
+
+# One run at a time, so two runs never double the load on a public site.
+concurrency:
+  group: test-suite-hosted
+  cancel-in-progress: false
+
+# The environment under test (.harness/project.json).
+env:
+  TEST_ENV: ${{ inputs.site }}
+
+jobs:
+  suite:
+    name: API and ${{ inputs.browser }} specs on ${{ inputs.site }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node, dependencies and ${{ inputs.browser }}
+        uses: ./.github/actions/setup
+        with:
+          browsers: ${{ inputs.browser }}
+
+      # Every test has exactly one stage tag, so these two leave out the @local tests.
+      - name: Run the specs
+        uses: ./.github/actions/run-specs
+        with:
+          command: node scripts/app.mjs test
+          args: -- --project=api --project=${{ inputs.browser }}
+          stage-tag: '@smoke,@regression'
+          report-name: ${{ inputs.site }}-${{ inputs.browser }}
+          tag: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          paths: ${{ inputs.path }}
+          shared-site: 'true'
+          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
+        env:
+          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}

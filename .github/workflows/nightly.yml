@@ -1,12 +1,14 @@
 # The FULL suite every night on the default branch (GitHub runs `schedule` triggers only
-# there). Product commits run only the smoke tests (smoke-on-commit.yml). Tests of broken
-# functionality assert the documented behaviour, so they fail (and the run is red) until the
-# product fixes them (docs/test-plan.md §4.1).
+# there), against both builds of the shop, each in its own private Docker stack: `local` (with
+# the deliberate defects) and `local-fixed` (the newer build without them; docs/app-versions.md).
+# Product commits run only the smoke tests (smoke-on-commit.yml); the public sites are tested by
+# hand (hosted.yml). Tests of broken functionality assert the documented behaviour, so they fail
+# (and the run is red) until the product fixes them (docs/test-plan.md §4.1).
 #
-# JOBS start together and gate nothing; each tests its own private Docker instance:
-#   api-local         the browserless API specs (tests/api), @regression and, on the local stack, @local
-#   smoke-local       the @smoke subset, one job per browser (chromium, firefox, webkit)
-#   regression-local  the @regression specs on chromium and, on the local stack, the @local ones
+# JOBS start together and gate nothing; each runs once per environment and tests its own stack:
+#   api         the browserless API specs (tests/api), @regression and @local
+#   smoke       the @smoke subset, one job per browser (chromium, firefox, webkit)
+#   regression  the @regression and @local specs on chromium
 # publish-site then puts the results on GitHub Pages.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
@@ -16,12 +18,7 @@
 # Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   environment       local (default), local-fixed (the build without the deliberate defects, also in
-#                     Docker), or a public site: hosted-with-bugs or hosted. It names the run and
-#                     every job. A public site's run starts no stack, uses 2 workers, uploads no
-#                     traces, which could hold a live token, and leaves out the @local tests, which
-#                     need the stack's database or mail inbox. The repository's admin login is sent
-#                     to that site.
+#   environment       both (default), local or local-fixed. It names the run.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow each job's own selection, so a job can end up empty;
@@ -40,15 +37,15 @@
 # admin credentials. They are the published demo account, so the Allure report and the traces of
 # failed tests (`traces-*`, 7 days) are always attached; this repository is public, so the jobs that
 # sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
+# Artifact names carry the environment: `allure-report-local-api`, `allure-report-local-fixed-api`, …
 # publish-site puts the Allure reports on a public page, so it checks them for secrets first.
 #
-# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack. A manual
-# run against another deployment uses 2 (run-specs), because that site may be shared.
+# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack.
 
 name: Nightly tests
 
-# The environment under test, visible in the run list.
-run-name: Nightly tests on ${{ inputs.environment || 'local' }}
+# The environments under test, visible in the run list.
+run-name: Nightly tests on ${{ (inputs.environment == 'local' || inputs.environment == 'local-fixed') && inputs.environment || 'local and local-fixed' }}
 
 on:
   schedule:
@@ -57,14 +54,13 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       environment:
-        description: Application to test. local and local-fixed are private copies started on the runner (with and without the deliberate defects); hosted-with-bugs and hosted are the public sites, which leave out the @local tests
+        description: Build to test, each in a private Docker stack on the runner. local has the deliberate defects, local-fixed is the newer build without them
         type: choice
-        default: local
+        default: both
         options:
+          - both
           - local
           - local-fixed
-          - hosted-with-bugs
-          - hosted
       tag:
         description: Only tests with any of these tags, comma-separated (e.g. @smoke, @regression)
         type: string
@@ -78,27 +74,29 @@ on:
         type: string
         default: ''
 
-# Its own group, separate from smoke-on-commit.yml's: GitHub keeps one pending run per group,
-# so a shared group would let a product push cancel a waiting nightly run. A nightly run may
-# therefore overlap a smoke run now and then.
+# Its own group, separate from smoke-on-commit.yml's and hosted.yml's: GitHub keeps one pending run
+# per group, so a shared group would let a product push cancel a waiting nightly run. A nightly
+# run may therefore overlap a smoke run now and then.
 concurrency:
   group: test-suite-nightly
   cancel-in-progress: false
 
-# The environment under test (.harness/project.json): `local` unless a manual run picks another.
-# A public site (hosted-*) starts no stack.
-env:
-  TEST_ENV: ${{ inputs.environment || 'local' }}
-  PUBLIC_SITE: ${{ startsWith(inputs.environment, 'hosted') }}
-
 jobs:
-  # These bring the application under test up on their own runners and test that private
-  # instance, not the shared public one. Each has its own stack, report and summary. They start
+  # Each job brings the application under test up on its own runner and tests that private
+  # instance, once per environment. Each has its own stack, report and summary. They start
   # together and have no `needs`, so one job's failure hides no other job's results.
-  api-local:
-    name: API specs on ${{ inputs.environment || 'local' }}
+  api:
+    name: API specs on ${{ matrix.environment }}
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # A scheduled run and the manual default (both) test both builds.
+        environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
+    # The environment under test (.harness/project.json).
+    env:
+      TEST_ENV: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v7
 
@@ -108,31 +106,22 @@ jobs:
           browsers: none
 
       - name: Start the application under test
-        if: env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/start-local-app
         with:
-          environment: ${{ env.TEST_ENV }}
-
-      # The @local tests need the local stack's database or mail inbox.
-      - name: Pick the tags to run
-        id: tags
-        run: |
-          tags='@regression'
-          [ "$PUBLIC_SITE" = true ] || tags+=',@local'
-          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          environment: ${{ matrix.environment }}
 
       - name: Run the API specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
           args: -- --project=api
-          stage-tag: ${{ steps.tags.outputs.tags }}
-          report-name: local-api
+          stage-tag: '@regression,@local'
+          report-name: ${{ matrix.environment }}-api
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL: the
+        # The local stack seeds the same demo accounts as the public sites. APP_DB_LOCAL: the
         # disabled-account case (customer-account-api-6) disables its account in the database.
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
@@ -140,24 +129,27 @@ jobs:
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure() && env.PUBLIC_SITE != 'true'
+        if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-local-api
+          artifact-name: app-logs-${{ matrix.environment }}-api
 
       - name: Stop the application under test
         if: always()
         run: node scripts/app.mjs down --volumes || true
 
-  # One job per browser; fail-fast is off so one browser's failure does not cancel the others.
-  smoke-local:
-    name: Smoke on ${{ matrix.browser }}, ${{ inputs.environment || 'local' }}
+  # One job per browser and environment; fail-fast is off so one job's failure cancels no other.
+  smoke:
+    name: Smoke on ${{ matrix.browser }}, ${{ matrix.environment }}
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
+        environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
         browser: [chromium, firefox, webkit]
+    env:
+      TEST_ENV: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v7
 
@@ -167,10 +159,9 @@ jobs:
           browsers: ${{ matrix.browser }}
 
       - name: Start the application under test
-        if: env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/start-local-app
         with:
-          environment: ${{ env.TEST_ENV }}
+          environment: ${{ matrix.environment }}
 
       - name: Run the @smoke specs on ${{ matrix.browser }}
         uses: ./.github/actions/run-specs
@@ -178,30 +169,35 @@ jobs:
           command: node scripts/app.mjs test
           args: -- --project=${{ matrix.browser }}
           stage-tag: '@smoke'
-          report-name: local-smoke-${{ matrix.browser }}
+          report-name: ${{ matrix.environment }}-smoke-${{ matrix.browser }}
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the hosted target.
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure() && env.PUBLIC_SITE != 'true'
+        if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-local-smoke-${{ matrix.browser }}
+          artifact-name: app-logs-${{ matrix.environment }}-smoke-${{ matrix.browser }}
 
       - name: Stop the application under test
         if: always()
         run: node scripts/app.mjs down --volumes || true
 
-  regression-local:
-    name: Regression on ${{ inputs.environment || 'local' }}
+  regression:
+    name: Regression on ${{ matrix.environment }}
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
+    env:
+      TEST_ENV: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v7
 
@@ -211,31 +207,22 @@ jobs:
           browsers: chromium
 
       - name: Start the application under test
-        if: env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/start-local-app
         with:
-          environment: ${{ env.TEST_ENV }}
-
-      # The @local tests need the local stack's database or mail inbox.
-      - name: Pick the tags to run
-        id: tags
-        run: |
-          tags='@regression'
-          [ "$PUBLIC_SITE" = true ] || tags+=',@local'
-          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          environment: ${{ matrix.environment }}
 
       - name: Run the regression specs
         uses: ./.github/actions/run-specs
         with:
           command: node scripts/app.mjs test
           args: -- --project=chromium
-          stage-tag: ${{ steps.tags.outputs.tags }}
-          report-name: local-regression
+          stage-tag: '@regression,@local'
+          report-name: ${{ matrix.environment }}-regression
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the hosted target. APP_DB_LOCAL holds the
+        # The local stack seeds the same demo accounts as the public sites. APP_DB_LOCAL holds the
         # local MariaDB credentials as JSON ({"user":…,"password":…}); TC-LOGIN-10 disables its
         # account in the database, the only route this build offers.
         env:
@@ -244,22 +231,23 @@ jobs:
           APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
 
       - name: Publish application logs
-        if: failure() && env.PUBLIC_SITE != 'true'
+        if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-local-regression
+          artifact-name: app-logs-${{ matrix.environment }}-regression
 
       - name: Stop the application under test
         if: always()
         run: node scripts/app.mjs down --volumes || true
 
   # Publishes the latest full run to GitHub Pages: the results dashboard and each job's Allure report.
-  # A failing test doesn't stop it, since failures are what the site shows, but a filtered run or
-  # one against another URL would replace the full results, so those don't publish. It needs
-  # Settings > Pages > Source set to GitHub Actions. Only `local` runs publish, so the site shows one build.
+  # A failing test doesn't stop it, since failures are what the site shows, but a filtered run
+  # would replace the full results, so it doesn't publish. It needs Settings > Pages > Source set to
+  # GitHub Actions. For now the site shows the `local` build only (scripts/build-site.mjs picks the
+  # local-* reports), so a run that left `local` out doesn't publish.
   publish-site:
-    needs: [api-local, smoke-local, regression-local]
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && (inputs.environment || 'local') == 'local' }}
+    needs: [api, smoke, regression]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.environment != 'local-fixed' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -276,6 +264,7 @@ jobs:
         with:
           node-version: '24'
 
+      # The patterns also match the local-fixed artifacts; build-site.mjs reads only the names it knows.
       - name: Download the Allure reports
         uses: actions/download-artifact@v8
         with:

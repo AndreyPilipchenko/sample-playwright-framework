@@ -106,19 +106,21 @@ flowchart TD
 ```
 
 Tests never run on commits to this repository, because it's the test project, not the product. A
-commit to the product repository triggers the smoke tests, and the full suite runs every night.
+commit to the product repository triggers the smoke tests, the full suite runs every night against both
+versions of the shop, and the public sites are tested by hand.
 
 ```mermaid
 flowchart LR
     pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, script tests, typecheck, lint"]
     push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
-    nightly["Nightly schedule or by hand"] --> api["api-local"]
-    nightly --> smoke["smoke-local<br/>one job per browser"]
-    nightly --> regression["regression-local"]
+    nightly["Nightly schedule or by hand"] --> api["api<br/>per version"]
+    nightly --> smoke["smoke<br/>per version and browser"]
+    nightly --> regression["regression<br/>per version"]
+    manual["By hand"] --> hosted["hosted.yml<br/>one public site"]
 ```
 
-Each test job brings up its own Docker copy of the shop, so jobs can't disturb each other, and one
-job's failure doesn't stop the others.
+Each nightly and smoke job brings up its own Docker copy of the shop, so jobs can't disturb each other, and
+one job's failure doesn't stop the others.
 
 ## Reports
 
@@ -215,8 +217,11 @@ a patched copy. The suite runs against both, as a test team would against a prod
 
 | Version | Environments | What it is |
 |---|---|---|
-| With bugs | `local`, `hosted-with-bugs` | The release with 90+ deliberate defects. The nightly runs use it |
+| With bugs | `local`, `hosted-with-bugs` | The release with 90+ deliberate defects |
 | Fixed | `local-fixed`, `hosted` | A newer release without them, and with structural changes |
+
+The nightly run tests both local environments, each in its own Docker stack; the public sites are tested by
+hand (`hosted.yml`).
 
 Each environment belongs to a version (`src/config/builds.ts`). The difference between the versions falls
 into three kinds, and the framework treats each differently:
@@ -285,8 +290,8 @@ TEST_ENV=local npx playwright test
 
 The local stack also has a database (target `appDb-local`, or `appDb-local-fixed`). Specs that need it read its credentials
 as JSON from `APP_DB_LOCAL` in `.env`, shaped `APP_DB_LOCAL='{"user":"…","password":"…"}'`, with the
-`MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `api-local` and
-`regression-local` jobs read the secret of the same name.
+`MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `api` and
+`regression` jobs read the secret of the same name.
 Only the disabled-account cases use it (TC-LOGIN-10, TC-ADM-9, `customer-account-api-6`, tagged `@local`): this build's admin
 API cannot disable an account. Without it they fail with a database connection error.
 
@@ -306,18 +311,20 @@ after a full run it holds hundreds of mails, so the contact-mail test (TC-CONT-8
 
 ## CI
 
-Two workflows run the tests. This repository is the test project, not the product, so
+Three workflows run the tests. This repository is the test project, not the product, so
 **commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, script tests, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|
 | `smoke-on-commit.yml` | `@smoke` tests on chromium | Every commit to the product repository's `main`: its workflow sends a `repository_dispatch` of type `product-main-push`; the run is titled with the product commit (`Smoke: <repo>@<sha>`) |
-| `nightly.yml` | all tests, in separate jobs, then publishes the results to GitHub Pages | Nightly, scheduled for 02:00 UTC. GitHub can start it hours later, and runs schedules on the default branch only |
+| `nightly.yml` | all tests on `local` and `local-fixed`, in separate jobs per version, then publishes the results to GitHub Pages | Nightly, scheduled for 02:00 UTC. GitHub can start it hours later, and runs schedules on the default branch only |
+| `hosted.yml` | the API and one browser's specs, without `@local`, on `hosted-with-bugs` or `hosted`, with 2 workers and no traces | By hand only: the public sites are shared and sometimes unstable |
 
-Both can also be started by hand, narrowed by tag, test title or path, or pointed at a public site.
+All three can be started by hand and narrowed by tag, test title or path; the nightly and smoke runs can
+be limited to one version.
 Every job writes its results to the run's Summary page, with failures split into newly failing, fixed
-and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs, the nightly jobs and the
-shared composite actions.
+and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs, the jobs and the shared
+composite actions.
 
 ### Connecting the product repository
 
