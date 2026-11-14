@@ -36,10 +36,10 @@ export class AdminUserFormPage {
     });
   }
 
-  /** Saves and waits for the update call to finish, so the next step sees the stored record. */
+  /** Saves and waits for the update call to finish, so the next step sees the stored record. The fixed build's ids are ULIDs (B7). */
   async save() {
     await step('Click Save on the user form', async () => {
-      const saved = this.page.waitForResponse((response) => response.request().method() === 'PUT' && /\/users\/\d+$/.test(response.url()));
+      const saved = this.page.waitForResponse((response) => response.request().method() === 'PUT' && /\/users\/(?:\d+|[0-9a-z]{26})$/i.test(response.url()));
       await this.save_button.click();
       await saved;
     });

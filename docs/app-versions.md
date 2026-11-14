@@ -41,9 +41,11 @@ public-instance hiccups that passed on a rerun: three 500s on `hosted-with-bugs`
 `hosted` (TC-CPAY-1). `local-fixed` includes TC-CONT-8, which fails in a full run there only because of the local
 mail queue (B15).
 
-Every environment has the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failing with "No saved session", and the admin
-setup and TC-LOGIN-3 skipped: `.env` holds no admin credentials (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`), so
-the `setup` project cannot sign in as admin. They are left out of the tables below.
+These counts come from runs without admin credentials (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin
+UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved session", and the admin setup and TC-LOGIN-3 were skipped.
+The admin specs were run separately on 2026-11-15 with the demo admin login (CI has it as secrets), on `local` and
+`local-fixed`. On `local`, TC-ADM-5 and 6 pass and TC-ADM-2, 7, 8, 9 and 12 fail on their recorded causes. On
+`local-fixed`, all pass except TC-ADM-2. The tables below include these results.
 
 ## A. Fixed defects
 
@@ -94,6 +96,7 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 | TC-CONT-8 | — | A valid contact submission sends the mail (local-fixed with a short mail queue, see B15; the hosted environments have no inbox) |
 | TC-CONT-9 | 60 | The subject dropdown has no Error 101 or Error 202 entries |
 | TC-CHAT-6b | — | The chat asks a guest for email and name before the address |
+| TC-ADM-7, 8, 9 | — | An admin can save an edited user, and disabling or re-enabling the account takes effect ([report](bug-reports/admin-user-save-refused-phone.md)) |
 | TC-ADM-12 | 83 | A customer token gets 403 on an admin-only call |
 
 ## B. Real changes between the builds
@@ -102,11 +105,11 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 |---|---|---|---|---|
 | B1 | Routing | Hash routes (`/#/checkout`) | Path routes (`/checkout`) | `applications.app.routes` |
 | B2 | Header | Account menu `nav-user-menu` / `nav-admin-menu`; category entry `nav-robotic-tools` | One account menu `nav-menu`; category entry `nav-other` | `HeaderPage` |
-| B3 | Address | `address`, `postcode`; registration sends flat fields | `street`, `house_number`, `postal_code`; registration sends a nested `address` object; the country comes first and a postcode lookup fills street, city and state | `RegisterPage`, `ProfilePage`, `CheckoutAddressPage`, `InvoiceDetailPage`, `ApisUserAccount` |
+| B3 | Address | `address`, `postcode`; registration sends flat fields | `street`, `house_number`, `postal_code`; registration sends a nested `address` object; the country comes first and a postcode lookup fills street, city and state | `RegisterPage`, `ProfilePage`, `CheckoutAddressPage`, `InvoiceDetailPage`, `AdminOrderPage`, `ApisUserAccount` |
 | B4 | Categories API | `GET /categories/{id}` | `GET /categories/tree/{id}` (the plain read is gone, 405) | `ApisCategories` |
 | B5 | Products API | Public reads show `stock` | Public reads show `in_stock` only (defect 75 fixed) | `ApisProducts` |
 | B6 | GraphQL | List fields return arrays | List fields return paginators | `ApisGraphql`, GraphQL queries in test data |
-| B7 | Orders | The cart lives in the browser; `POST /invoices` takes the lines and the client's total | A server cart: `POST /carts`, `POST /carts/{id}` per product, then `POST /invoices` with `cart_id`, `billing_street`, `billing_postal_code` and `payment_details` (bank transfer: `bank_name`, `account_name`, `account_number`). The server prices the order and checks city and state against the postcode. Ids are ULIDs (strings). The UI and the chat ask for the bank name too | `ApisInvoices`, `ProductDetailPage.addToCart`, `CheckoutPaymentPage`, `ChatWidgetPage.answerQuestions`, id parameters widened to `number \| string` |
+| B7 | Orders | The cart lives in the browser; `POST /invoices` takes the lines and the client's total | A server cart: `POST /carts`, `POST /carts/{id}` per product, then `POST /invoices` with `cart_id`, `billing_street`, `billing_postal_code` and `payment_details` (bank transfer: `bank_name`, `account_name`, `account_number`). The server prices the order and checks city and state against the postcode. Ids are ULIDs (strings). The UI and the chat ask for the bank name too | `ApisInvoices`, `ProductDetailPage.addToCart`, `CheckoutPaymentPage`, `ChatWidgetPage.answerQuestions`, the account fields of `InvoiceDetailPage` and `AdminOrderPage` (label only), the user update call `AdminUserFormPage.save` waits for, id parameters widened to `number \| string` |
 | B8 | Eco discount | None | Products rated CO₂ A or B get 5% off at checkout, so seeded products use rating D | Test data |
 | B9 | Geolocation | Handshake keys in `sessionStorage` | In `localStorage` | `GEOLOCATION_SESSION_KEYS` |
 | B10 | Sign-in | Token in `sessionStorage` | Token `auth-token` in `localStorage` | `AuthSession`, `auth.sessionArea` |
@@ -151,6 +154,7 @@ state "Limburg") and `3511AB` (city "Einighausen", state "Groningen"). The looku
 | TC-REG-7 | both builds | The duplicate-email error is not "Email is already in use." (AC5): the with-bugs build reveals a password hint (defect 50), the fixed build says "A customer with this email address already exists." |
 | TC-LOGIN-10 | both builds | The fixed build says "Account disabled" without the full stop AC6 quotes (`@local`; needs the database credentials) |
 | TC-DISC-8 | both builds | The with-bugs build applies no combination discount. On a discounted invoice the fixed build gives the subtotal, discount and total fields the same test id `total`, labels the discount "Discount (15%)" instead of "Discount amount", and points all three labels at the total field, so no field is named Subtotal |
+| TC-ADM-2 | both builds | The with-bugs build saves the edit, but the list keeps showing the old price ([report](bug-reports/admin-product-list-stale-after-save.md)). The fixed build's edit form opens with Stock, Brand, Category and Image empty, because `GET /products/{id}` no longer returns them (B5), so saving an edit fails with "Quantity is required". Creating a product works on both |
 | TC-CBA-3 | fixed only | Clearing the street disables Proceed, but no error message names the field |
 | TC-CPAY-13 | fixed only | After an order the cart page shows no "cart is empty" message; it appears only after removing items by hand |
 | TC-DISC-4 | fixed only | A location offer at 80.00 shows as "$80", without cents (other prices keep them, "$38.73") |
