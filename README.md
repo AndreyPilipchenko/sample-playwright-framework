@@ -21,6 +21,13 @@ against: many people use it at once, and it sometimes breaks completely.
 the product doesn't do what its documentation says, and those failures stay visible to show how the
 framework reports them.
 
+**The suite runs against two versions of the shop**, to simulate a product under active development.
+Toolshop ships the version with the deliberate defects and a newer version without them. The newer one
+differs in more than fixed bugs: other routes, another address form, a server-side cart, other field names.
+That's what a test team meets between two releases of a product that keeps moving, so the same suite runs
+unchanged on both, and the results show which failures went away because a defect was fixed
+([details](#two-versions-of-the-shop)).
+
 ## At a glance
 
 | | |
@@ -61,7 +68,8 @@ the two `.env` values, the admin and disabled-account specs fail ([details](#run
 | Problem | What the framework does | Where |
 |---|---|---|
 | **One new failure among 70 is easy to miss** | The CI summary compares with the previous run and separates newly failing, fixed and still failing tests | [`scripts/ci-summary.mjs`](scripts/ci-summary.mjs) |
-| **Logging in before every test is slow, and repeated logins put a shared account at risk** | Each role signs in once per run. The session is saved to a gitignored file, and tests that opt into a role reuse it, restored through an init script because the app keeps it in sessionStorage, which Playwright's `storageState` can't save. Passwords stay in `.env` or GitHub secrets | [`AuthSession.ts`](src/utils/AuthSession.ts), [`fixtures/test.ts`](src/fixtures/test.ts) |
+| **The product changes between releases** | Two versions of the shop run the same specs. Pages and API classes pick the version's routes, fields and endpoints through `byBuild()`, test data carries per-version overlays, and a defect never turns green just because the version changed | [`AppEnvironment.ts`](src/utils/AppEnvironment.ts), [App versions](docs/app-versions.md) |
+| **Logging in before every test is slow, and repeated logins put a shared account at risk** | Each role signs in once per run. The session is saved to a gitignored file, and tests that opt into a role reuse it, restored through an init script because the app keeps it in web storage (sessionStorage or, in the newer version, localStorage), which Playwright's `storageState` can't fully save. Passwords stay in `.env` or GitHub secrets | [`AuthSession.ts`](src/utils/AuthSession.ts), [`fixtures/test.ts`](src/fixtures/test.ts) |
 | **One failed login locks an account** (defect #21), so a retry can do damage | Customers are throwaway accounts registered through the API, and the sign-in specs never retry | [`auth.setup.ts`](setup/auth.setup.ts) |
 | **"Why did it fail?" often isn't in the assertion** | A failed test gets a report of what the browser did: console errors, failed requests, 5xx responses, dialogs, new tabs and toasts | [`BrowserDiagnostics.ts`](src/utils/BrowserDiagnostics.ts) |
 | **Toast messages cover the controls under them** | A fixture holds the test until the toast fades, and specs that read toasts turn this off | [`fixtures/test.ts`](src/fixtures/test.ts) |
@@ -131,11 +139,11 @@ src/apis/     API business layer — service classes per domain (accounts, catal
 src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
 src/helpers/  Flows across the API and several pages, shared by specs (CustomerFlows)
 src/utils/    Reusable core: technical layer — ApiActions/DBActions facades, Allure/report plumbing
-src/config/   App settings: environment & target coordinates (reads .harness/targets.json / .env)
+src/config/   App settings: environment & target coordinates (reads .harness/targets.json / .env), the version each environment runs (builds.ts)
 src/fixtures/ Reusable core: the suite's `test` with the `role` option (signed-in sessions)
 tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only
 setup/        Setup project — signs each role in once per run
-resources/    testData/ (per-spec JSON files), Queries/ and apisCollections/ (team libraries)
+resources/    testData/ (per-spec JSON files, plus *.fixed.json overlays for the newer app version), Queries/ and apisCollections/ (team libraries)
 .harness/     Project config, targets and a vendored package
 ```
 
@@ -157,6 +165,7 @@ compiled from the upstream Practice Software Testing docs:
 - [Known defects](docs/known-defects.md): the defect register, and how test cases map to it
 - [Bug reports](docs/bug-reports/): written reports with their reproductions
 - [Automated tests](docs/automated-tests.md): every spec, the cases it covers and which are red
+- [App versions](docs/app-versions.md): how the two versions of the shop differ, and the results on each
 
 ### Not automated yet
 
@@ -169,8 +178,8 @@ address and payment steps, login and registration is automated; the catalog, car
 
 The `setup` project (`setup/auth.setup.ts`) signs each role in once per run and saves
 its session to the gitignored `playwright/.auth/`. The app keeps its token in
-sessionStorage, which Playwright's `storageState` does not capture, so specs opt in through
-the `role` fixture instead:
+sessionStorage (the newer version: localStorage, see [Two versions of the shop](#two-versions-of-the-shop)),
+which Playwright's `storageState` does not capture reliably, so specs opt in through the `role` fixture instead:
 
 ```ts
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
@@ -196,6 +205,36 @@ public, so the jobs that sign in attach the Playwright HTML report (failure page
 when the repository variable `PUBLISH_REPORTS` is `true` (set it once the repository is
 private). The run's Summary page always shows the results. See
 [docs/harness-change-requests/report-credential-masking.md](docs/harness-change-requests/report-credential-masking.md).
+
+## Two versions of the shop
+
+A real product doesn't stand still: between two releases, defects get fixed, but routes move, forms
+gain fields and APIs change shape. Toolshop offers a way to simulate that. Besides the version with the
+deliberate defects, it publishes a newer version without them, and the newer one is a different release, not
+a patched copy. The suite runs against both, as a test team would against a product under active development.
+
+| Version | Environments | What it is |
+|---|---|---|
+| With bugs | `local`, `hosted-with-bugs` | The release with 90+ deliberate defects. The nightly runs use it |
+| Fixed | `local-fixed`, `hosted` | A newer release without them, and with structural changes |
+
+Each environment belongs to a version (`src/config/builds.ts`). The difference between the versions falls
+into three kinds, and the framework treats each differently:
+
+- **A fixed defect** needs nothing: the test asserts the documented behaviour, so it is red on one version
+  and green on the other.
+- **A real change** (path routes instead of `/#/` routes, a street / house number / postcode form with a
+  postcode lookup, a server-side cart, string ids, another pagination component, mail sent through a queue)
+  is absorbed once, where it lives: page and service classes pick the version's value with `byBuild()`
+  (`src/utils/AppEnvironment.ts`), and a test data file can carry a `<name>.fixed.json` overlay with the
+  values observed on the newer version. Specs don't change.
+- **Anything still wrong** stays red. `byBuild()` and the overlays only carry what the version really
+  changed. They never replace a text a story or a bug report specifies, and never pick a value that makes
+  a defect pass.
+
+[App versions](docs/app-versions.md) lists every structural change (B1 to B15), the defects each version
+fixes, the findings still red on the newer version, and the results of the four environments. The public
+`hosted` site runs an even newer release than the `local-fixed` images, which that page notes too.
 
 ## Running the app locally
 
@@ -236,13 +275,9 @@ targets in `.harness/targets.json`:
 | `hosted` | https://practicesoftwaretesting.com | a newer build without them |
 
 `TEST_ENV` selects the environment, and `src/config/targets.ts` resolves every address from it.
-The four environments run two builds (`src/config/builds.ts`): `local` and `hosted-with-bugs` the
-build with the deliberate defects, `local-fixed` and `hosted` the newer build without them. The two builds also
-differ in structure — routes, field names, the address form, the order API. Page and service classes absorb
-those differences through `byBuild()` (`src/utils/AppEnvironment.ts`), and a test data file can carry a
-`<name>.fixed.json` overlay for the values that differ. [App versions](docs/app-versions.md) lists each difference
-and which test results differ because a defect is fixed. The two local environments share ports, so one runs at a time;
-`app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it:
+The four environments run the two versions described in [Two versions of the shop](#two-versions-of-the-shop).
+The two local environments share ports, so one runs at a time; `app.mjs up` drops the other version's data
+volumes when it switches, and `app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it:
 
 ```sh
 TEST_ENV=local npx playwright test
@@ -265,7 +300,9 @@ because the API sends mail on checkout and the upstream compose file defines no 
 and `cron` images are published for **linux/arm64 only** — Docker Desktop emulates
 them transparently, but a bare amd64 Linux host needs binfmt handlers registered
 (`docker run --privileged --rm tonistiigi/binfmt --install arm64`), which is what the
-CI job's QEMU step does.
+CI job's QEMU step does. The emulation makes the newer version's mail queue slow (the `cron` image sends it):
+after a full run it holds hundreds of mails, so the contact-mail test (TC-CONT-8) is reliable on
+`local-fixed` only when run on its own.
 
 ## CI
 
