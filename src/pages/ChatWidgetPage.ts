@@ -2,6 +2,12 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { expectTextsToContainAll, expectToBeVisible } from '../utils/Expects';
 
+/** One question the chat asks and the answer to give it. */
+export interface ChatQuestion {
+  question: string;
+  answer: string;
+}
+
 /** The chat widget, on every page: its window, its answers and its action buttons. */
 export class ChatWidgetPage {
   readonly page: Page;
@@ -73,6 +79,20 @@ export class ChatWidgetPage {
     await step('Answer the chat', async () => {
       await this.answer_input.fill(text);
       await this.send_button.click();
+    });
+  }
+
+  /**
+   * Answers a run of questions in order, each once the chat has asked it (an unasked question times the wait out).
+   * For runs whose questions differ between builds, such as the bank-transfer details (docs/app-versions.md, B7):
+   * the test data lists them per build.
+   */
+  async answerQuestions(questions: ChatQuestion[]) {
+    await step(`Answer the chat questions: ${questions.map(({ question }) => question).join(' / ')}`, async () => {
+      for (const { question, answer } of questions) {
+        await this.window_txt.getByText(question, { exact: true }).waitFor();
+        await this.answer(answer);
+      }
     });
   }
 

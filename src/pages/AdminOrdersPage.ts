@@ -3,10 +3,10 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectToBeVisible, expectToHaveText } from '../utils/Expects';
 
-/** Admin order list (`#/admin/orders`). Requires a signed-in admin session. */
+/** Admin order list (`/admin/orders`). Requires a signed-in admin session. */
 export class AdminOrdersPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/admin/orders`;
+  readonly url: string = `${applications.app.routes}/admin/orders`;
 
   // Locators
   private readonly search_input: Locator;
@@ -22,7 +22,7 @@ export class AdminOrdersPage {
    * The list row of the order with this id (its Edit link carries it). The invoice number is no key: the
    * local build can issue the same number twice when two invoices are created at the same moment.
    */
-  private row(orderId: number): Locator {
+  private row(orderId: number | string): Locator {
     return this.page.getByRole('row').filter({ has: this.page.getByTestId(`order-edit-${orderId}`) });
   }
 
@@ -41,7 +41,7 @@ export class AdminOrdersPage {
     });
   }
 
-  async openOrder(orderId: number) {
+  async openOrder(orderId: number | string) {
     await step(`Open the order ${orderId}`, async () => {
       await this.row(orderId).getByRole('link', { name: 'Edit' }).click();
     });
@@ -49,7 +49,7 @@ export class AdminOrdersPage {
 
   ///// Validations
 
-  async verifyOrderListed(orderId: number, invoiceNumber: string, billingAddress: string, status: string, total: string) {
+  async verifyOrderListed(orderId: number | string, invoiceNumber: string, billingAddress: string, status: string, total: string) {
     await step(`Verify the order ${invoiceNumber} is listed with its address, status and total`, async () => {
       const row = this.row(orderId);
       await expectToBeVisible(`the row of the order ${invoiceNumber}`, row);

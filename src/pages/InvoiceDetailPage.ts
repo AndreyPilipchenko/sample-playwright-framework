@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectNotToHaveValue, expectToBeVisible, expectToHaveValue, expectToHaveText } from '../utils/Expects';
 import { expectAddressFieldsToShow, type AddressValues } from './AddressFields';
 import { rowWithCell } from '../utils/TableRows';
@@ -12,10 +13,10 @@ export interface InvoicePayment {
   accountNumber: string;
 }
 
-/** Invoice detail (`#/account/invoices/<id>`), opened from the invoice list. Requires a signed-in session. */
+/** Invoice detail (`/account/invoices/<id>`), opened from the invoice list. Requires a signed-in session. */
 export class InvoiceDetailPage {
   readonly page: Page;
-  readonly urlPrefix: string = `${applications.app.url}/#/account/invoices`;
+  readonly urlPrefix: string = `${applications.app.routes}/account/invoices`;
 
   // Locators
   private readonly invoiceNumber_input: Locator;
@@ -38,14 +39,16 @@ export class InvoiceDetailPage {
     this.invoiceNumber_input = page.getByTestId('invoice-number');
     this.invoiceDate_input = page.getByTestId('invoice-date');
     this.total_input = page.getByTestId('total');
-    this.address_input = page.getByTestId('address');
-    this.postcode_input = page.getByTestId('postcode');
+    // The fixed build names the address fields street / postal_code (docs/app-versions.md, B3); its payment fields
+    // carry no test id, only a label (B7).
+    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
+    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
     this.city_input = page.getByTestId('city');
     this.state_input = page.getByTestId('state');
     this.country_input = page.getByTestId('country');
     this.paymentMethod_input = page.getByTestId('payment-method');
-    this.accountName_input = page.getByTestId('account-name');
-    this.accountNumber_input = page.getByTestId('account-number');
+    this.accountName_input = byBuild({ fixed: page.getByLabel('Account Name', { exact: true }), default: page.getByTestId('account-name') });
+    this.accountNumber_input = byBuild({ fixed: page.getByLabel('Account Number', { exact: true }), default: page.getByTestId('account-number') });
     this.subtotal_input = page.getByLabel('Subtotal', { exact: true });
     this.discount_input = page.getByLabel('Discount amount', { exact: true });
     this.notExist_txt = page.locator('p', { hasText: /This invoice doesn't exist/ });
@@ -59,10 +62,10 @@ export class InvoiceDetailPage {
   ///// Actions
 
   /**
-   * Opens the detail of the invoice with this id. Going from one invoice to another only changes the URL hash, so
-   * the page is reloaded to make the app fetch the new invoice.
+   * Opens the detail of the invoice with this id. Going from one invoice to another stays inside the running app,
+   * so the page is reloaded to make the app fetch the new invoice.
    */
-  async navigate(invoiceId: number) {
+  async navigate(invoiceId: number | string) {
     await step(`Navigate to the invoice ${invoiceId}`, async () => {
       await this.page.goto(`${this.urlPrefix}/${invoiceId}`);
       const fetched = this.page.waitForResponse((response) => response.url().endsWith(`/invoices/${invoiceId}`));

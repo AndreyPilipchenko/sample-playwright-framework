@@ -1,8 +1,9 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectToBeEnabled, expectToBeVisible } from '../utils/Expects';
 
-/** Checkout step 2: the sign-in step (`#/checkout`, shown to a guest after the cart step). Reached by proceeding from the cart. */
+/** Checkout step 2: the sign-in step (`/checkout`, shown to a guest after the cart step). Reached by proceeding from the cart. */
 export class CheckoutSignInPage {
   readonly page: Page;
 
@@ -15,7 +16,8 @@ export class CheckoutSignInPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.loginHeading_txt = page.getByRole('heading', { name: 'Customer login' });
+    // The fixed build titles the step Login (docs/app-versions.md, B12).
+    this.loginHeading_txt = page.getByRole('heading', { name: byBuild({ fixed: 'Login', default: 'Customer login' }), exact: true });
     this.email_input = page.getByTestId('email');
     this.password_input = page.getByTestId('password');
     this.login_button = page.getByTestId('login-submit');

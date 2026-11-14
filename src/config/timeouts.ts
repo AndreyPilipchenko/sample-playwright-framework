@@ -31,3 +31,10 @@ export const SLOW_SURFACE_MS = 60_000;
 
 /** How long a submitted password change may take to answer. */
 export const PASSWORD_CHANGE_ANSWER_MS = 5_000;
+
+/**
+ * How long a queued mail may take to reach the inbox. The fixed build queues mail and a cron job sends the queue once a
+ * minute (docs/app-versions.md, B15): measured on the local stack (2026-11-14), a contact mail arrived ~50s after the
+ * submission. One full cycle plus the send, with margin.
+ */
+export const QUEUED_MAIL_MS = 90_000;

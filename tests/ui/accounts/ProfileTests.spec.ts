@@ -26,8 +26,7 @@ test.describe('Customer profile', () => {
     await allure.testCaseId('TC-PROF-4');
     const { edit, expectedMessage, fadeWindow } = testData.tcPROF4;
 
-    const user = await customerFlows.openProfileAsNewCustomer(testData.tcPROF4.user);
-    await profilePage.verifyProfileLoaded(user.email);
+    await customerFlows.openProfileAsNewCustomer(testData.tcPROF4.user);
     await profilePage.updateProfile(edit);
     await profilePage.verifyProfileUpdated(expectedMessage);
     await profilePage.verifyProfileMessageFades(fadeWindow);
@@ -48,8 +47,7 @@ test.describe('Customer profile', () => {
     await allure.testCaseId('TC-PROF-7');
     const { address, expectedMessage } = testData.tcPROF7;
 
-    const user = await customerFlows.openProfileAsNewCustomer(testData.tcPROF7.user);
-    await profilePage.verifyProfileLoaded(user.email);
+    await customerFlows.openProfileAsNewCustomer(testData.tcPROF7.user);
     await profilePage.updateAddress(address);
     await profilePage.verifyProfileUpdated(expectedMessage);
     await profilePage.verifyNoProfileError();

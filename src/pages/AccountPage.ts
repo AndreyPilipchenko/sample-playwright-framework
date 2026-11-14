@@ -3,10 +3,10 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectToHaveURL } from '../utils/Expects';
 
-/** Customer account overview (`#/account`). Requires a signed-in session; without one the app redirects to the login page. */
+/** Customer account overview (`/account`). Requires a signed-in session; without one the app redirects to the login page. */
 export class AccountPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/account`;
+  readonly url: string = `${applications.app.routes}/account`;
 
   constructor(page: Page) {
     this.page = page;

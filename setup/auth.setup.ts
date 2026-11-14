@@ -1,6 +1,6 @@
 import { test as setup } from '@playwright/test';
 import { applications } from '../src/config/applications';
-import { authStateFile } from '../src/config/auth';
+import { authStateFile, sessionArea } from '../src/config/auth';
 import { LoginPage } from '../src/pages/LoginPage';
 import { HeaderPage } from '../src/pages/HeaderPage';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
@@ -37,7 +37,7 @@ setup('authenticate as customer', async ({ page, request }) => {
   await loginPage.navigate();
   await loginPage.login(user.email, user.password);
   await headerPage.verifySignedIn();
-  await saveSession(page, authStateFile('customer'));
+  await saveSession(page, authStateFile('customer'), sessionArea);
 });
 
 setup('authenticate as admin', async ({ page }) => {
@@ -50,5 +50,5 @@ setup('authenticate as admin', async ({ page }) => {
   await loginPage.navigate();
   await loginPage.login(username, password);
   await headerPage.verifySignedIn();
-  await saveSession(page, authStateFile('admin'));
+  await saveSession(page, authStateFile('admin'), sessionArea);
 });

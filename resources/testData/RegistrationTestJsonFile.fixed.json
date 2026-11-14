@@ -1,0 +1,11 @@
+{
+  "tcREG1": {
+    "labels": {
+      "dateOfBirth": "Date of Birth *",
+      "address": "Street",
+      "houseNumber": "House number",
+      "postcode": "Postal code",
+      "email": "Email address"
+    }
+  }
+}

@@ -14,10 +14,10 @@ export interface AdminOrderDetails {
   accountNumber: string;
 }
 
-/** Admin order view and status form (`#/admin/orders/edit/{id}`). Requires a signed-in admin session. */
+/** Admin order view and status form (`/admin/orders/edit/{id}`). Requires a signed-in admin session. */
 export class AdminOrderPage {
   readonly page: Page;
-  readonly urlPrefix: string = `${applications.app.url}/#/admin/orders/edit`;
+  readonly urlPrefix: string = `${applications.app.routes}/admin/orders/edit`;
 
   // Locators
   private readonly invoiceNumber_input: Locator;
@@ -47,7 +47,7 @@ export class AdminOrderPage {
 
   ///// Actions
 
-  async navigate(orderId: number) {
+  async navigate(orderId: number | string) {
     await step(`Navigate to the order ${orderId}`, async () => {
       await this.page.goto(`${this.urlPrefix}/${orderId}`);
     });

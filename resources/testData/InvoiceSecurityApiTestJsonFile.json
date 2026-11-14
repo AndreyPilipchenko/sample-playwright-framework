@@ -22,17 +22,18 @@
             "name": "Security Product TC-API-8 {uuid}",
             "description": "Seeded for the API security case.",
             "price": 14.15,
-            "co2Rating": "B",
+            "co2Rating": "D",
             "stock": 10
           }
         ]
       },
       "invoice": {
         "billingAddress": "Street 1",
-        "billingCity": "Amsterdam",
-        "billingState": "Noord-Holland",
+        "billingCity": "Idaerd",
+        "billingState": "Limburg",
         "billingCountry": "NL",
         "billingPostcode": "1234AA",
+        "paymentBankName": "Invoice Bank",
         "paymentAccountName": "Security Customer",
         "paymentAccountNumber": "12345678"
       },
@@ -74,17 +75,18 @@
           "name": "Security Product TC-API-11 {uuid}",
           "description": "Seeded for the API security case.",
           "price": 14.15,
-          "co2Rating": "B",
+          "co2Rating": "D",
           "stock": 10
         }
       ]
     },
     "invoice": {
       "billingAddress": "Street 1",
-      "billingCity": "Amsterdam",
-      "billingState": "Noord-Holland",
+      "billingCity": "Idaerd",
+      "billingState": "Limburg",
       "billingCountry": "NL",
       "billingPostcode": "1234AA",
+      "paymentBankName": "Invoice Bank",
       "paymentAccountName": "Security Customer",
       "paymentAccountNumber": "12345678"
     },

@@ -3,10 +3,10 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { rowWithCell } from '../utils/TableRows';
 
-/** Customer invoice list (`#/account/invoices`). Requires a signed-in session; without one the app redirects to the login page. */
+/** Customer invoice list (`/account/invoices`). Requires a signed-in session; without one the app redirects to the login page. */
 export class InvoicesPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/account/invoices`;
+  readonly url: string = `${applications.app.routes}/account/invoices`;
 
   constructor(page: Page) {
     this.page = page;

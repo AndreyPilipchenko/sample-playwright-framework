@@ -7,7 +7,7 @@
         "name": "Offer Product TC-DISC-1 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 100.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isLocationOffer": true
       }
@@ -50,7 +50,7 @@
         "name": "Offer Product TC-DISC-4 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 100.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isLocationOffer": true
       }
@@ -70,7 +70,7 @@
         "name": "Rental Product TC-DISC-5 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 50.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isRental": true
       },
@@ -78,7 +78,7 @@
         "name": "Tool Product TC-DISC-5 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -94,7 +94,7 @@
         "name": "Rental Product TC-DISC-6 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 50.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isRental": true
       },
@@ -102,7 +102,7 @@
         "name": "Tool Product TC-DISC-6 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -120,7 +120,7 @@
         "name": "Rental Product TC-DISC-8 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 50.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10,
         "isRental": true
       },
@@ -128,7 +128,7 @@
         "name": "Tool Product TC-DISC-8 {uuid}",
         "description": "Seeded for the discount case.",
         "price": 20.0,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -136,9 +136,10 @@
     "user": {
       "firstName": "Discount",
       "lastName": "Customer",
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA",
       "phone": "0987654321",
@@ -147,13 +148,15 @@
       "password": "Sup3r-Secret!Disc8"
     },
     "billing": {
-      "address": "Street 1",
-      "city": "Amsterdam",
-      "state": "Noord-Holland",
+      "address": "de Bruijnsingel",
+      "houseNumber": "12",
+      "city": "Idaerd",
+      "state": "Limburg",
       "country": "NL",
       "postcode": "1234AA"
     },
     "bank": {
+      "bankName": "Checkout Bank",
       "accountName": "Discount Customer",
       "accountNumber": "12345678"
     },

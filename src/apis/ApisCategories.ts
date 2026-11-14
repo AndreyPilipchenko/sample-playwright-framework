@@ -1,6 +1,7 @@
 import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
+import { byBuild } from '../utils/AppEnvironment';
 import { slugOf } from '../utils/UniqueData';
 import { applications } from '../config/applications';
 import { expectToBe, expectToContainAll, expectToEqual } from '../utils/Expects';
@@ -38,7 +39,9 @@ export class ApisCategories {
 
   async getCategory(categoryId: number): Promise<CategoryRecord> {
     return await allure.step(`Get the category ${categoryId}`, async () => {
-      const response = await this.apiActions.get(`${this.categories_serviceName}/${categoryId}`);
+      // The fixed build reads one category at /categories/tree/{id} (docs/app-versions.md, B4).
+      const path = byBuild({ fixed: `tree/${categoryId}`, default: `${categoryId}` });
+      const response = await this.apiActions.get(`${this.categories_serviceName}/${path}`);
       expectToBe('the get category response status', response.status(), 200);
       return (await response.json()) as CategoryRecord;
     });

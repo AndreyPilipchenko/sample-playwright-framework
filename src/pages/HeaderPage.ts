@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectToBeVisible, expectToHaveCount, expectToHaveText } from '../utils/Expects';
 
 // Routeless skeleton area: the navigation bar rendered on every page.
@@ -17,7 +18,8 @@ export class HeaderPage {
   constructor(page: Page) {
     this.page = page;
     this.navHome_link = page.getByTestId('nav-home');
-    this.accountMenu_button = page.getByTestId('nav-user-menu').or(page.getByTestId('nav-admin-menu'));
+    // The fixed build shows one account menu for every role (docs/app-versions.md, B2).
+    this.accountMenu_button = byBuild({ fixed: page.getByTestId('nav-menu'), default: page.getByTestId('nav-user-menu').or(page.getByTestId('nav-admin-menu')) });
     this.cartQuantity_txt = page.getByTestId('cart-quantity');
     this.categoriesMenu_button = page.getByTestId('nav-categories');
   }

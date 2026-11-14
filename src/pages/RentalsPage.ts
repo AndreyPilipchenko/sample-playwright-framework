@@ -3,10 +3,10 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectNotToHaveCount, expectTextsToContainAll, expectToHaveMatchingCount, expectToHaveText, expectToHaveURL } from '../utils/Expects';
 
-/** Rental products (`#/rentals`). Its cards have no test id for their parts, only for the card itself. */
+/** Rental products (`/rentals`). Its cards have no test id for their parts, only for the card itself. */
 export class RentalsPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/rentals`;
+  readonly url: string = `${applications.app.routes}/rentals`;
 
   // Locators
   private readonly pageTitle_txt: Locator;
@@ -18,7 +18,7 @@ export class RentalsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle_txt = page.getByTestId('page-title');
-    this.rentalCards_list = page.getByTestId(/^product-\d+$/);
+    this.rentalCards_list = page.getByTestId(/^product-(?:\d+|[0-9a-z]{26})$/i);
     this.rentalNames_list = this.rentalCards_list.locator('.card-title');
     this.rentalDescriptions_list = this.rentalCards_list.locator('.card-text');
     this.visibleRentalImages_list = this.rentalCards_list.locator('img').locator('visible=true');
@@ -47,7 +47,7 @@ export class RentalsPage {
 
   async verifyPageOpened(expectedTitle: string) {
     await step(`Verify the rentals page opened: ${expectedTitle}`, async () => {
-      await expectToHaveURL(this.page, /\/#\/rentals$/);
+      await expectToHaveURL(this.page, this.url);
       await expectToHaveText('the page title', this.pageTitle_txt, expectedTitle);
     });
   }

@@ -13,10 +13,10 @@ export interface AdminProductSeed {
   categoryName: string;
 }
 
-/** Admin product form (`#/admin/products/add` and `#/admin/products/edit/{id}`). Requires a signed-in admin session. */
+/** Admin product form (`/admin/products/add` and `/admin/products/edit/{id}`). Requires a signed-in admin session. */
 export class AdminProductFormPage {
   readonly page: Page;
-  readonly addUrl: string = `${applications.app.url}/#/admin/products/add`;
+  readonly addUrl: string = `${applications.app.routes}/admin/products/add`;
 
   // Locators
   private readonly name_input: Locator;

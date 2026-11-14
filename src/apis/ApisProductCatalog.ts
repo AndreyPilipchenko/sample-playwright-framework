@@ -63,7 +63,7 @@ export class ApisProductCatalog {
   async restockSeededProduct(catalog: SeededCatalog, template: ProductSeed, stock: number) {
     await allure.step(`Restock the seeded product ${catalog.products[0].name} to ${stock}`, async () => {
       const imageId = await this.apisProducts.getAnyProductImageId();
-      await this.apisProducts.setStock(Number(catalog.products[0].id), { ...template, name: catalog.products[0].name, stock }, catalog.categoryId, catalog.brandId, imageId);
+      await this.apisProducts.setStock(catalog.products[0].id, { ...template, name: catalog.products[0].name, stock }, catalog.categoryId, catalog.brandId, imageId);
     });
   }
 

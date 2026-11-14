@@ -7,7 +7,7 @@
         "name": "Chat Checkout Product TC-CHAT-6 {uuid}",
         "description": "Seeded for the chat checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],
@@ -33,24 +33,24 @@
       "state": "Please enter your state/province:",
       "country": "Please enter your country:",
       "postcode": "Please enter your postal code:",
-      "paymentMethod": "Please select your payment method:",
-      "accountName": "Please enter the account name:",
-      "accountNumber": "Please enter the account number:"
+      "paymentMethod": "Please select your payment method:"
     },
     "address": {
       "street": "Chat Street 2",
-      "city": "Utrecht",
-      "state": "Province Chat",
+      "city": "Einighausen",
+      "state": "Groningen",
       "country": "NL",
-      "postcode": "3511AA"
+      "postcode": "3511AB"
     },
     "addressHeading": "Please confirm your billing address:",
-    "expectedAddressLines": ["Chat Street 2", "Utrecht, Province Chat", "NL 3511AA"],
+    "expectedAddressLines": ["Chat Street 2", "Einighausen, Groningen", "NL 3511AB"],
     "paymentMethod": "Bank Transfer",
-    "accountName": "Chat Customer",
-    "accountNumber": "1234567890",
+    "bankTransferQuestions": [
+      { "question": "Please enter the account name:", "answer": "Chat Customer" },
+      { "question": "Please enter the account number:", "answer": "1234567890" }
+    ],
     "summaryHeading": "Order Summary:",
-    "expectedSummaryLines": ["Total:", "$14.15", "Shipping to:", "Chat Street 2, Utrecht", "Payment method:", "Bank Transfer"],
+    "expectedSummaryLines": ["Total:", "$14.15", "Shipping to:", "Chat Street 2, Einighausen", "Payment method:", "Bank Transfer"],
     "expectedSuccess": "Your order has been placed successfully!"
   },
   "tcCHAT6Guest": {
@@ -61,7 +61,7 @@
         "name": "Chat Guest Product TC-CHAT-6 {uuid}",
         "description": "Seeded for the guest chat checkout case.",
         "price": 14.15,
-        "co2Rating": "B",
+        "co2Rating": "D",
         "stock": 10
       }
     ],

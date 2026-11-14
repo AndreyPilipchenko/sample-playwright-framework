@@ -33,9 +33,9 @@ test.describe('Invoice API security', () => {
 
     const { apisInvoices, userId, uuid } = await apisOwnInvoices.registerInvoiceOwner(testData.tcApi11.user);
     const seeded = await new ApisProductCatalog(request).seedCatalog(uuid, catalog);
-    const status = await apisInvoices.createInvoiceWithForgedAmounts(
+    const outcome = await apisInvoices.createInvoiceWithForgedAmounts(
       userId, invoice, { productId: seeded.products[0].id, unitPrice: forgedUnitPrice, quantity }, forgedTotal);
-    await apisInvoices.verifyForgedAmountsRefused(status);
+    await apisInvoices.verifyForgedAmountsNotStored(outcome, { unitPrice: catalog.products[0].price, quantity });
   });
 
   test.beforeAll(async () => {

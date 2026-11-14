@@ -1,12 +1,17 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
+import { byBuild } from '../utils/AppEnvironment';
 import { expectToBeVisible, expectToContainText, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
+import { escapeRegExp } from '../utils/TextPatterns';
 
-/** Checkout step 1: the cart review table (`#/checkout`). The cart is client-side state, so it must be filled in the same browser session. */
+/**
+ * Checkout step 1: the cart review table (`/checkout`). The cart belongs to the browser session (the with-bugs build keeps it
+ * in the browser, the fixed build keeps a server cart for it, docs/app-versions.md B7), so it must be filled in the same session.
+ */
 export class CartPage {
   readonly page: Page;
-  readonly url: string = `${applications.app.url}/#/checkout`;
+  readonly url: string = `${applications.app.routes}/checkout`;
 
   // Locators
   private readonly columnHeaders_list: Locator;
@@ -25,12 +30,30 @@ export class CartPage {
     this.emptyCart_msg = page.getByText(/cart is empty/i);
     this.subtotal_txt = page.getByTestId('cart-subtotal');
     this.discount_txt = page.getByTestId('cart-discount');
-    this.discountLabel_txt = page.getByRole('row').filter({ has: page.getByTestId('cart-discount') }).getByRole('cell').first();
+    // The label sits in the first cell on the with-bugs build and after empty spacer cells on the fixed build: the first cell with text.
+    this.discountLabel_txt = page.getByRole('row').filter({ has: page.getByTestId('cart-discount') }).getByRole('cell').filter({ hasText: /\S/ }).first();
   }
 
-  /** The table row of the cart item named exactly `productName`. */
+  /**
+   * The table row of the cart item named exactly `productName`. The fixed build puts the location-offer badge (`-20%`)
+   * inside the title, so the name may be followed by one.
+   */
   private cartItem_row(productName: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.page.getByTestId('product-title').and(this.page.getByText(productName, { exact: true })) });
+    const title = new RegExp(`^\\s*${escapeRegExp(productName)}(?:\\s+-\\d+%)?\\s*$`);
+    return this.page.getByRole('row').filter({ has: this.page.getByTestId('product-title').filter({ hasText: title }) });
+  }
+
+  /**
+   * The unit price the customer pays for the cart item. The fixed build strikes the list price through and shows the
+   * offer price after it (docs/app-versions.md, B14); without an offer, and on the with-bugs build, it is the one price.
+   */
+  private payablePrice_txt(productName: string): Locator {
+    const row = this.cartItem_row(productName);
+    return byBuild({
+      fixed: () =>
+        row.getByRole('cell').filter({ has: this.page.getByTestId('product-price') }).locator('[data-test="offer-price"], [data-test="product-price"]:not(.discounted)'),
+      default: () => row.getByTestId('product-price'),
+    })();
   }
 
   /** The delete button of the cart item named exactly `productName` (an unlabelled icon link, no test id). */
@@ -82,7 +105,7 @@ export class CartPage {
 
   async verifyItemPrice(productName: string, expectedPrice: string) {
     await step(`Verify the price of ${productName} in the cart is ${expectedPrice}`, async () => {
-      await expectToHaveText(`the price of ${productName}`, this.cartItem_row(productName).getByTestId('product-price'), expectedPrice);
+      await expectToHaveText(`the price of ${productName}`, this.payablePrice_txt(productName), expectedPrice);
     });
   }
 

@@ -579,7 +579,10 @@ build, on defects 71 to 74, 76 and 78 to 81; only TC-API-16 passes. Expected beh
   token, 60-minute refresh window). Only the refreshed token's lifetime is observable; the refresh window is not.
 - TC-API-4 and 6 expect 401 or 403 and then check the record still exists. TC-API-4 seeds a brand with no products,
   because a brand that has products answers 409 and would hide the missing check.
-- TC-API-11 expects a 4xx. A fixed build that re-prices on the server and returns 201 would need a wider assertion.
+- TC-API-11 expects a 4xx on the with-bugs build, which takes the amounts in the request. The fixed build takes no
+  amounts at all: it prices the server cart, so there the test expects the invoice created (201) at the catalogue
+  price (see [app versions](app-versions.md), B7). That second expectation widens the case title ("rejects") and
+  awaits the case owner's acceptance.
 - TC-API-16 sends one guarded field per query, since an unauthenticated guarded field aborts the whole query; the
   expected error is "Unauthenticated." and no non-null field data.
 
@@ -615,6 +618,10 @@ is used.
 ---
 
 ## Reasons recorded per test
+
+The notes and this table describe the build with the deliberate defects (`local`, `hosted-with-bugs`). On the fixed
+build (`local-fixed`, `hosted`) most of these tests pass; [app versions](app-versions.md) lists which ones, and the
+findings that are red only there.
 
 These automated tests fail for a reason described in the notes above that the Defect column doesn't give: it is empty,
 lists a related defect that isn't why the test fails today, or belongs to one of a case's tests.

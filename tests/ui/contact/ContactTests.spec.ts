@@ -1,6 +1,7 @@
 import { test } from '../../../src/fixtures/test'; // conventions-ok: session and browser diagnostics fixture
 import * as allure from 'allure-js-commons';
 import { ApisMailInbox } from '../../../src/apis/ApisMailInbox';
+import { TEST_DEFAULT_MS } from '../../../src/config/timeouts';
 import { ContactPage } from '../../../src/pages/ContactPage';
 import { loadTestData } from '../../../src/utils/TestData';
 import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
@@ -23,6 +24,7 @@ test.describe('Contact form', () => {
   test('Valid submission confirms and sends the email', { tag: ['@local'] }, async ({ request }) => {
     await allure.feature('Contact form');
     await allure.testCaseId('TC-CONT-8');
+    test.setTimeout(TEST_DEFAULT_MS + ApisMailInbox.deliveryBudgetMs); // the mail may wait for the fixed build's queue
     const contact = withUniqueEmail(testData.tcCONT8.contact, newUuid());
 
     await contactPage.navigate();

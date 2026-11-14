@@ -22,17 +22,18 @@
             "name": "Admin Product adm-5 {uuid}",
             "description": "Seeded for the admin case.",
             "price": 14.15,
-            "co2Rating": "B",
+            "co2Rating": "D",
             "stock": 10
           }
         ]
       },
       "invoice": {
         "billingAddress": "Street 1",
-        "billingCity": "Amsterdam",
-        "billingState": "Noord-Holland",
+        "billingCity": "Idaerd",
+        "billingState": "Limburg",
         "billingCountry": "NL",
         "billingPostcode": "1234AA",
+        "paymentBankName": "Invoice Bank",
         "paymentAccountName": "Admin Customer",
         "paymentAccountNumber": "12345678"
       },
@@ -71,17 +72,18 @@
             "name": "Admin Product adm-6 {uuid}",
             "description": "Seeded for the admin case.",
             "price": 14.15,
-            "co2Rating": "B",
+            "co2Rating": "D",
             "stock": 10
           }
         ]
       },
       "invoice": {
         "billingAddress": "Street 1",
-        "billingCity": "Amsterdam",
-        "billingState": "Noord-Holland",
+        "billingCity": "Idaerd",
+        "billingState": "Limburg",
         "billingCountry": "NL",
         "billingPostcode": "1234AA",
+        "paymentBankName": "Invoice Bank",
         "paymentAccountName": "Admin Customer",
         "paymentAccountNumber": "12345678"
       },
