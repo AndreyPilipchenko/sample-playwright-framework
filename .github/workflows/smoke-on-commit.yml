@@ -1,8 +1,9 @@
 # Smoke tests on every commit to the PRODUCT repository's main branch. That repository's
 # workflow sends a `repository_dispatch` of type `product-main-push` here (a sample to copy is
 # docs/ci/product-repo-trigger.yml; README "CI" explains the token it needs). The full suite
-# runs nightly (nightly.yml). This repository is the test project, not the product, so its own
-# commits and pull requests run nothing but the static checks (`lint.yml`).
+# runs nightly (nightly.yml); the public sites are tested by hand (hosted.yml). This repository
+# is the test project, not the product, so its own commits and pull requests run nothing but the
+# static checks (`lint.yml`).
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
 # (the Docker stack), run-specs (run Playwright, publish the reports, reflect the outcome) and
@@ -12,14 +13,12 @@
 # `gh workflow run smoke-on-commit.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   environment       local (default), local-fixed (the build without the deliberate defects, also in
-#                     Docker), or a public site: hosted-with-bugs or hosted. It names the run and the
-#                     job. A public site's run starts no stack, uses 2 workers, uploads no traces,
-#                     which could hold a live token. The repository's admin login is sent to that site.
+#   environment       local (default) or local-fixed (the newer build without the deliberate defects),
+#                     each in a private Docker stack on the runner. It names the run and the job.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow the @smoke selection; nothing outside @smoke runs here.
-#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f environment=hosted-with-bugs
+#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f environment=local-fixed
 #
 # RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
 # the shop's images need.
@@ -46,14 +45,12 @@ on:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
       environment:
-        description: Application to test. local and local-fixed are private copies started on the runner (with and without the deliberate defects); hosted-with-bugs and hosted are the public sites, which leave out the @local tests
+        description: Build to test, in a private Docker stack on the runner. local has the deliberate defects, local-fixed is the newer build without them
         type: choice
         default: local
         options:
           - local
           - local-fixed
-          - hosted-with-bugs
-          - hosted
       tag:
         description: Only tests with any of these tags, comma-separated (e.g. @smoke, @regression)
         type: string
@@ -70,16 +67,14 @@ on:
 # Smoke runs queue behind each other. Product pushes can arrive in bursts; GitHub keeps one
 # pending run per group, so a newer push replaces an older one that has not started yet (the
 # newest commit is the one worth testing). The group is separate from nightly.yml's, so a
-# product push can never cancel a pending nightly run.
+# product push can never cancel a pending nightly or hosted run.
 concurrency:
   group: test-suite-smoke
   cancel-in-progress: false
 
-# The environment under test (.harness/project.json): `local` unless a manual run picks another.
-# A public site (hosted-*) starts no stack.
+# The environment under test (.harness/project.json): `local` unless a manual run picks local-fixed.
 env:
   TEST_ENV: ${{ inputs.environment || 'local' }}
-  PUBLIC_SITE: ${{ startsWith(inputs.environment, 'hosted') }}
 
 jobs:
   # The smoke subset on chromium, against a private local instance started on the runner.
@@ -94,7 +89,6 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Start the application under test
-        if: env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/start-local-app
         with:
           environment: ${{ env.TEST_ENV }}
@@ -105,7 +99,7 @@ jobs:
           command: node scripts/app.mjs test
           args: --project=chromium
           stage-tag: '@smoke'
-          report-name: smoke-local
+          report-name: smoke-${{ env.TEST_ENV }}
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
@@ -115,10 +109,10 @@ jobs:
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure() && env.PUBLIC_SITE != 'true'
+        if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-smoke-local
+          artifact-name: app-logs-smoke-${{ env.TEST_ENV }}
 
       - name: Stop the application under test
         if: always()

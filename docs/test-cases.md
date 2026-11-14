@@ -313,7 +313,7 @@ live instance:
   login after three failures answers 200, not 423.
 - **TC-LOGIN-10** passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
   test disables its account with `UPDATE users SET enabled = 0` (`src/dbs/DbsUserAccount.ts`). It runs only where
-  `APP_DB_LOCAL` is set (local stack; the nightly `regression-local` job reads the secret of that name) and fails with
+  `APP_DB_LOCAL` is set (local stack; the nightly `regression` jobs read the secret of that name) and fails with
   a database connection error without it ("Access denied" on the local stack).
 
 ## 12. Forgot Password
