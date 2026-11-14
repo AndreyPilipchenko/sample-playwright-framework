@@ -12,14 +12,14 @@
 # `gh workflow run smoke-on-commit.yml`.
 #
 # Manual-run inputs (all optional; blank means "as configured"):
-#   target            local stack (default), or one of the two public sites; the workflow's env
-#                     sets its API address. A public site's run starts no stack, uses 2 workers,
-#                     uploads no traces, which could hold a live token. The repository's admin login
-#                     is sent to that site.
+#   environment       local (default), local-fixed (the build without the deliberate defects, also in
+#                     Docker), or a public site: hosted-with-bugs or hosted. It names the run and the
+#                     job. A public site's run starts no stack, uses 2 workers, uploads no traces,
+#                     which could hold a live token. The repository's admin login is sent to that site.
 #   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
 #                     containing the text, in the given spec files/folders (:line allowed).
 #                     They narrow the @smoke selection; nothing outside @smoke runs here.
-#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f target=https://with-bugs.practicesoftwaretesting.com/
+#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f environment=hosted-with-bugs
 #
 # RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
 # the shop's images need.
@@ -36,8 +36,8 @@
 
 name: Smoke on product commit
 
-# The product commit under test, so each run is traceable to it.
-run-name: "${{ github.event_name == 'repository_dispatch' && format('Smoke: {0}@{1}', github.event.client_payload.repository, github.event.client_payload.sha) || 'Smoke (manual run)' }}"
+# The product commit under test, so each run is traceable to it, and the environment it ran on.
+run-name: "${{ github.event_name == 'repository_dispatch' && format('Smoke: {0}@{1} on local', github.event.client_payload.repository, github.event.client_payload.sha) || format('Smoke (manual run) on {0}', inputs.environment || 'local') }}"
 
 on:
   repository_dispatch:
@@ -45,14 +45,15 @@ on:
   workflow_dispatch:
     # Manual runs only; every other trigger leaves them empty, which means "as configured".
     inputs:
-      target:
-        description: Site to test. The local stack is a private copy started on the runner
+      environment:
+        description: Application to test. local and local-fixed are private copies started on the runner (with and without the deliberate defects); hosted-with-bugs and hosted are the public sites, which leave out the @local tests
         type: choice
-        default: local stack
+        default: local
         options:
-          - local stack
-          - https://practicesoftwaretesting.com/
-          - https://with-bugs.practicesoftwaretesting.com/
+          - local
+          - local-fixed
+          - hosted-with-bugs
+          - hosted
       tag:
         description: Only tests with any of these tags, comma-separated (e.g. @smoke, @regression)
         type: string
@@ -74,14 +75,16 @@ concurrency:
   group: test-suite-smoke
   cancel-in-progress: false
 
-# The site picked for a manual run, with its API. Empty on any other trigger and for the local stack.
+# The environment under test (.harness/project.json): `local` unless a manual run picks another.
+# A public site (hosted-*) starts no stack.
 env:
-  APP_URL: ${{ startsWith(inputs.target, 'https://') && inputs.target || '' }}
-  APP_API_URL: ${{ inputs.target == 'https://practicesoftwaretesting.com/' && 'https://api.practicesoftwaretesting.com' || inputs.target == 'https://with-bugs.practicesoftwaretesting.com/' && 'https://api-with-bugs.practicesoftwaretesting.com' || '' }}
+  TEST_ENV: ${{ inputs.environment || 'local' }}
+  PUBLIC_SITE: ${{ startsWith(inputs.environment, 'hosted') }}
 
 jobs:
   # The smoke subset on chromium, against a private local instance started on the runner.
   smoke-local:
+    name: Smoke on ${{ inputs.environment || 'local' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -91,8 +94,10 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Start the application under test
-        if: env.APP_URL == ''
+        if: env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/start-local-app
+        with:
+          environment: ${{ env.TEST_ENV }}
 
       - name: Run the @smoke specs
         uses: ./.github/actions/run-specs
@@ -110,7 +115,7 @@ jobs:
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
 
       - name: Publish application logs
-        if: failure() && env.APP_URL == ''
+        if: failure() && env.PUBLIC_SITE != 'true'
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-smoke-local

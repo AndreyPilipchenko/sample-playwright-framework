@@ -1,6 +1,11 @@
 name: Start the application under test
 description: Brings the Docker stack up on the runner and waits until it is ready
 
+inputs:
+  environment:
+    description: The local environment to start, local (with the deliberate defects) or local-fixed (without them).
+    default: local
+
 runs:
   using: composite
   steps:
@@ -16,4 +21,6 @@ runs:
 
     - name: Start the stack
       shell: bash
-      run: node scripts/app.mjs up --timeout 900
+      env:
+        APP_ENVIRONMENT: ${{ inputs.environment }}
+      run: node scripts/app.mjs up --env "$APP_ENVIRONMENT" --timeout 900
