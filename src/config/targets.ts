@@ -7,8 +7,8 @@ import type { DBConnectionConfig } from '../utils/DBActions';
  * the harness is configured, which its exploration runtime reads too — and the
  * config modules take them from here, so specs, pages and services use the same values:
  *
- *   url: appUrl('app'),              // browser target of "app": its first origin
- *   apiUrl: apiUrl('app'),           // API target of "app": its base URL
+ *   url: appUrl('app'),              // browser target for "app" (app-<environment>): its first origin
+ *   apiUrl: apiUrl('app'),           // API target for "app" (app-<environment>): its base URL
  *   appDb: databaseTarget('appDb'),  // database target of "appDb": server, port, database
  *
  * Environments (`.harness/project.json`) decide WHICH target a name resolves to. The run
@@ -49,6 +49,8 @@ const project = readHarnessFile<HarnessProject>('project.json');
 /** The environment this run targets: TEST_ENV, else the project's default. */
 export const environmentName: string = process.env.TEST_ENV || project.defaultEnvironment || '';
 const environment: HarnessEnvironment | undefined = project.environments?.[environmentName];
+/** Every environment .harness/project.json defines. */
+export const environmentNames: readonly string[] = Object.keys(project.environments ?? {});
 if (process.env.TEST_ENV && !environment) {
   const known = Object.keys(project.environments ?? {}).join(', ');
   throw new Error(`TEST_ENV="${process.env.TEST_ENV}" is not an environment in .harness/project.json (known: ${known}).`);

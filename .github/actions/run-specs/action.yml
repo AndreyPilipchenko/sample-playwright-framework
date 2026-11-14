@@ -61,8 +61,15 @@ runs:
         TAGS: ${{ inputs.tag }}
         NAME: ${{ inputs.name }}
         PATHS: ${{ inputs.paths }}
+        WORKFLOW: ${{ github.workflow }}
+        REPORT_NAME: ${{ inputs.report-name }}
       run: |
         set +e
+        # Each environment has its own comparison history. `local` keeps the original key, and the others
+        # put the environment first, so no key prefix of one environment matches another's.
+        prefix="ci-results-$WORKFLOW-"
+        [ -n "${TEST_ENV:-}" ] && [ "$TEST_ENV" != local ] && prefix+="on-$TEST_ENV-"
+        echo "baseline-prefix=$prefix$REPORT_NAME-" >> "$GITHUB_OUTPUT"
         # Another deployment needs both addresses, or the UI and API would be different systems.
         if [ -n "${APP_URL:-}${APP_API_URL:-}" ]; then
           address='^https?://[^[:space:]]+$'
@@ -93,7 +100,7 @@ runs:
         [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
         selection=()
         # That deployment may be a shared site, so stay modest.
-        [ -n "${APP_URL:-}" ] && selection+=(--workers=2)
+        if [ -n "${APP_URL:-}" ] || [ "${PUBLIC_SITE:-}" = true ]; then selection+=(--workers=2); fi
         [ -n "$lookaheads" ] && selection+=(--grep "^$lookaheads")
 
         read -ra paths <<< "$PATHS"
@@ -127,8 +134,8 @@ runs:
       uses: actions/cache/restore@v6
       with:
         path: reports/ci-baseline/results.json
-        key: ci-results-${{ github.workflow }}-${{ inputs.report-name }}-${{ github.run_id }}-${{ github.run_attempt }}
-        restore-keys: ci-results-${{ github.workflow }}-${{ inputs.report-name }}-
+        key: ${{ steps.run.outputs.baseline-prefix }}${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: ${{ steps.run.outputs.baseline-prefix }}
 
     # Passed/failed/flaky/skipped counts and the failing tests on the run's Summary page,
     # read from the JSON report. Never fails the job; the last step does that.
@@ -144,19 +151,21 @@ runs:
         PATHS: ${{ inputs.paths }}
         PUBLISH_HTML_REPORT: ${{ inputs.publish-html-report }}
       run: |
-        # APP_URL / APP_API_URL come from the workflow's env on a manual run against a public site.
-        note=''
+        # TEST_ENV and PUBLIC_SITE come from the workflow's env; APP_URL / APP_API_URL only from an ad-hoc override.
+        note="Environment \`${TEST_ENV:-default}\`. "
         if [ -n "$TAGS$NAME$PATHS" ]; then
           note="Manual selection: tag \`${TAGS:-any}\`, name \`${NAME:-any}\`, path \`${PATHS:-any}\`. "
         fi
         [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
-        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. Traces not uploaded: they could hold a live token. "
+        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
+        [ -n "${APP_API_URL:-}" ] || [ "${PUBLIC_SITE:-}" = true ] && note+="Traces not uploaded: they could hold a live token. "
         if [ "$PUBLISH_HTML_REPORT" != "true" ]; then
           note+="HTML report not published: its failure pages and step titles can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report and the traces of failed tests are attached."
         fi
-        # A filtered run or one against another URL is not a fair comparison for the next run.
+        # A filtered run, or one against a shared site or another URL, is not a fair comparison for the next run.
         update=true
         [ -n "$TAGS$NAME$PATHS${APP_URL:-}${APP_API_URL:-}" ] && update=false
+        [ "${PUBLIC_SITE:-}" = true ] && update=false
         CI_BASELINE_UPDATE="$update" CI_SUMMARY_NOTE="$note" node scripts/ci-summary.mjs "$REPORT_NAME"
 
     - name: Save this run's results for the next comparison
@@ -164,7 +173,7 @@ runs:
       uses: actions/cache/save@v6
       with:
         path: reports/ci-baseline/results.json
-        key: ci-results-${{ github.workflow }}-${{ inputs.report-name }}-${{ github.run_id }}-${{ github.run_attempt }}
+        key: ${{ steps.run.outputs.baseline-prefix }}${{ github.run_id }}-${{ github.run_attempt }}
 
     # A selection with no specs writes no reports; that is not an error.
     - name: Publish HTML report
@@ -205,7 +214,7 @@ runs:
     # type the admin password, record none. Open one with `npx playwright show-trace trace.zip`.
     - name: Publish traces of failed tests
       # A trace from another deployment could hold a token that still works, and this repository is public.
-      if: always() && env.APP_URL == '' && env.APP_API_URL == ''
+      if: always() && env.APP_URL == '' && env.APP_API_URL == '' && env.PUBLIC_SITE != 'true'
       uses: actions/upload-artifact@v7
       with:
         name: traces-${{ inputs.report-name }}

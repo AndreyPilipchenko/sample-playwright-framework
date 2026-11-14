@@ -1,14 +1,24 @@
 {
   "version": 1,
-  "defaultEnvironment": "practice",
+  "defaultEnvironment": "hosted-with-bugs",
   "environments": {
-    "practice": {
+    "hosted-with-bugs": {
       "environmentMode": "test",
       "browserTargets": [
-        "app"
+        "app-hosted-with-bugs"
       ],
       "apiTargets": [
-        "app"
+        "app-hosted-with-bugs"
+      ],
+      "databaseTargets": []
+    },
+    "hosted": {
+      "environmentMode": "test",
+      "browserTargets": [
+        "app-hosted"
+      ],
+      "apiTargets": [
+        "app-hosted"
       ],
       "databaseTargets": []
     },
@@ -23,6 +33,19 @@
       ],
       "databaseTargets": [
         "appDb-local"
+      ]
+    },
+    "local-fixed": {
+      "environmentMode": "test",
+      "browserTargets": [
+        "app-local-fixed"
+      ],
+      "apiTargets": [
+        "app-local-fixed",
+        "mail-local-fixed"
+      ],
+      "databaseTargets": [
+        "appDb-local-fixed"
       ]
     }
   }

@@ -220,22 +220,31 @@ npm run app:down      # stop it (add -- --volumes to drop the data too)
 images, so no application source is cloned. Useful options:
 
 ```sh
-node scripts/app.mjs up --variant sprint5 --timeout 900   # a different upstream build
+node scripts/app.mjs up --env local-fixed                 # the build without the deliberate defects
+node scripts/app.mjs up --timeout 900                     # allow a slower first start
 node scripts/app.mjs test -- --headed --project=chromium  # pass args through to Playwright
 ```
 
-The local instance is an environment, `local`, defined in
-`.harness/project.json`. Its browser and API targets are `app-local` in
-`.harness/targets.json`. `TEST_ENV` selects the environment, and
-`src/config/targets.ts` resolves every address from it; without `TEST_ENV` the
-default environment, `practice` (the public instance), is used. Any Playwright
-invocation honours it:
+Each build of the application is an environment, defined in `.harness/project.json` with its
+targets in `.harness/targets.json`:
+
+| Environment | Application | Build |
+|---|---|---|
+| `local` | Docker on `localhost:4200` | with the deliberate defects (the default for `app:up`, and what CI runs) |
+| `local-fixed` | Docker on `localhost:4200` | without them |
+| `hosted-with-bugs` | https://with-bugs.practicesoftwaretesting.com | with the deliberate defects (the default without `TEST_ENV`) |
+| `hosted` | https://practicesoftwaretesting.com | a newer build without them |
+
+`TEST_ENV` selects the environment, and `src/config/targets.ts` resolves every address from it.
+Page and service classes absorb the differences between builds through `byEnvironment()`
+(`src/utils/AppEnvironment.ts`). The two local environments share ports, so one runs at a time;
+`app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it:
 
 ```sh
 TEST_ENV=local npx playwright test
 ```
 
-The local stack also has a database (target `appDb-local`). Specs that need it read its credentials
+The local stack also has a database (target `appDb-local`, or `appDb-local-fixed`). Specs that need it read its credentials
 as JSON from `APP_DB_LOCAL` in `.env`, shaped `APP_DB_LOCAL='{"user":"…","password":"…"}'`, with the
 `MYSQL_USER` / `MYSQL_PASSWORD` values from `.app/docker-compose.prod.yml`; the nightly `api-local` and
 `regression-local` jobs read the secret of the same name.

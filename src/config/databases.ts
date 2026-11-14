@@ -17,9 +17,9 @@ import { databaseTarget } from './targets';
  */
 export const databases = {
   /**
-   * The application's MariaDB (engine `mysql`). Only the `local` environment has one
-   * (target `appDb-local`, credentials in APP_DB_LOCAL); the public `practice` instance
-   * exposes no database, so DB-backed specs need TEST_ENV=local.
+   * The application's MariaDB (engine `mysql`). Only the local environments have one
+   * (targets `appDb-local` and `appDb-local-fixed`, credentials in APP_DB_LOCAL); the public
+   * `hosted-with-bugs` and `hosted` instances expose no database, so DB-backed specs need a local environment.
    */
   appDb: databaseTarget('appDb'),
 } satisfies Record<string, DBConnectionConfig | MySqlConnectionConfig>;

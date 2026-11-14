@@ -3,7 +3,7 @@
  * Runs the application under test locally in Docker, so the suite can be exercised
  * against a private instance instead of the shared public one.
  *
- *   node scripts/app.mjs up      [--variant <name>] [--no-seed] [--timeout <seconds>]
+ *   node scripts/app.mjs up      [--env local|local-fixed] [--no-seed] [--timeout <seconds>]
  *   node scripts/app.mjs down    [--volumes]
  *   node scripts/app.mjs status
  *   node scripts/app.mjs logs    [service] [--follow]
@@ -14,7 +14,7 @@
  * implementation serves Windows developers and the Linux CI runner alike.
  *
  * It uses the upstream project's prebuilt images (`docker-compose.prod.yml`), so no
- * application source is cloned: that file plus an `.env` naming the variant is all
+ * application source is cloned: that file plus an `.env` naming the build is all
  * Docker needs. Building from source is the upstream repo's own documented workflow
  * and is not reproduced here.
  */
@@ -44,28 +44,29 @@ const mailCompose = `services:
 const composeProject = 'pst-local';
 
 /**
- * Upstream variant to run. `sprint5-with-bugs` matches the deployed target this
- * project is configured against, so the local instance carries the same intentional
- * defects. `SPRINT` is the upstream compose file's own interpolation variable
- * (it selects the image tag), which is why that name appears in the generated .env.
+ * The environments this stack can serve, each with the upstream build it runs. `local` is the
+ * with-bugs build, the same one `hosted-with-bugs` serves, so it carries the same intentional
+ * defects; `local-fixed` is the build without them. Both use the same ports, so one runs at a time.
+ * `SPRINT` is the upstream compose file's own interpolation variable (it selects the image tag),
+ * which is why that name appears in the generated .env; nothing outside this script uses it.
  */
-const defaultVariant = 'sprint5-with-bugs';
+const upstreamBuilds = { local: 'sprint5-with-bugs', 'local-fixed': 'sprint5' };
+const defaultEnvironment = 'local';
 const composeRef = process.env.APP_COMPOSE_REF || 'main';
 const composeUrl = `https://raw.githubusercontent.com/testsmith-io/practice-software-testing/${composeRef}/${composeFile}`;
 
 /**
- * The harness environment that describes this stack. Its addresses (fixed by the
- * upstream compose file) live in `.harness/targets.json` like every other environment's,
- * and `test` selects it through TEST_ENV — the same switch src/config/targets.ts reads.
+ * Addresses are fixed by the upstream compose file, so they are the same for every local
+ * environment; they live in `.harness/targets.json` like every other environment's. `test`
+ * selects the running stack's environment through TEST_ENV, the switch src/config/targets.ts reads.
  */
-const localEnvironment = 'local';
 const readHarness = (name) => JSON.parse(readFileSync(path.join(projectRoot, '.harness', name), 'utf8'));
 const harnessTargets = readHarness('targets.json');
-const localProfile = readHarness('project.json').environments?.[localEnvironment];
+const localProfile = readHarness('project.json').environments?.[defaultEnvironment];
 const appUrl = harnessTargets.browser?.[localProfile?.browserTargets?.[0]]?.origins?.[0];
 const apiUrl = harnessTargets.api?.[localProfile?.apiTargets?.[0]]?.baseUrl?.replace(/\/+$/, '');
 if (!appUrl || !apiUrl) {
-  console.error(`app.mjs: the '${localEnvironment}' environment in .harness/project.json needs a browser target and an API target.`);
+  console.error(`app.mjs: the '${defaultEnvironment}' environment in .harness/project.json needs a browser target and an API target.`);
   process.exit(1);
 }
 /** Cheap always-200 endpoint used as the API readiness probe (the API root returns 404). */
@@ -112,7 +113,7 @@ const compose = (...args) => ['compose', '-f', composeFile, '-f', mailComposeFil
  * Writes the compose file and its .env into the work directory.
  * Re-downloads on every `up` so a stale cached file cannot silently pin an old stack.
  */
-async function prepareWorkDir(variant) {
+async function prepareWorkDir(environment) {
   mkdirSync(workDir, { recursive: true });
 
   const response = await fetch(composeUrl);
@@ -124,7 +125,7 @@ async function prepareWorkDir(variant) {
 
   // DISABLE_LOGGING is interpolated by the compose file without a default; setting it
   // explicitly keeps compose from warning about an unset variable.
-  writeFileSync(path.join(workDir, '.env'), `SPRINT=${variant}\nDISABLE_LOGGING=false\n`);
+  writeFileSync(path.join(workDir, '.env'), `SPRINT=${upstreamBuilds[environment]}\nDISABLE_LOGGING=false\n`);
 }
 
 /**
@@ -180,12 +181,15 @@ async function seedDatabase() {
 async function commandUp(args) {
   requireDocker();
 
-  const variant = valueOf(args, '--variant') || process.env.APP_VARIANT || defaultVariant;
+  const environment = valueOf(args, '--env') || defaultEnvironment;
+  if (!Object.hasOwn(upstreamBuilds, environment)) {
+    fail(`--env must be one of ${Object.keys(upstreamBuilds).join(', ')} (got "${environment}").`);
+  }
   const timeoutSeconds = Number(valueOf(args, '--timeout') || process.env.APP_TIMEOUT || 600);
   const seed = !args.includes('--no-seed');
 
-  console.log(`Starting the application under test (variant: ${variant}, compose ref: ${composeRef})`);
-  await prepareWorkDir(variant);
+  console.log(`Starting the application under test (environment: ${environment}, compose ref: ${composeRef})`);
+  await prepareWorkDir(environment);
 
   // --pull missing fetches the prebuilt images on first run and reuses them afterwards.
   if (run('docker', compose('up', '--pull', 'missing', '-d')) !== 0) {
@@ -219,7 +223,7 @@ async function commandUp(args) {
 
   console.log('\nApplication is ready.');
   console.log(`  Point the suite at it with:  node scripts/app.mjs test`);
-  console.log(`  or set TEST_ENV=${localEnvironment} for any Playwright invocation.`);
+  console.log(`  or set TEST_ENV=${environment} for any Playwright invocation.`);
 }
 
 function commandDown(args) {
@@ -236,6 +240,7 @@ async function commandStatus() {
   requireDocker();
   const uiReady = await probe(appUrl, true);
   const apiReady = await probe(apiProbe, true);
+  if (existsSync(path.join(workDir, '.env'))) console.log(`Env  ${runningEnvironment()}`);
   console.log(`UI   ${uiReady ? 'ready' : 'not responding'}  ${appUrl}`);
   console.log(`API  ${apiReady ? 'ready' : 'not responding'}  ${apiUrl}`);
 
@@ -262,6 +267,13 @@ function commandLogs(args) {
  */
 function commandTest(args) {
   const passThrough = args[0] === '--' ? args.slice(1) : args;
+  // A TEST_ENV that is not a local stack (a public site) needs no stack: it runs as given.
+  // Otherwise the suite targets the running stack, and a different local TEST_ENV is a mistake.
+  const requested = process.env.TEST_ENV;
+  const environment = requested && !Object.hasOwn(upstreamBuilds, requested) ? requested : runningEnvironment();
+  if (requested && requested !== environment) {
+    fail(`TEST_ENV=${requested}, but the running stack is ${environment}. Unset TEST_ENV or start the other stack.`);
+  }
 
   // Invoke Playwright's CLI entry point with this same Node binary rather than going
   // through `npx`. On Windows `npx` is a .cmd shim, and since the fix for
@@ -272,9 +284,19 @@ function commandTest(args) {
   process.exit(
     run(process.execPath, [cli, 'test', ...passThrough], {
       cwd: projectRoot,
-      env: { ...process.env, TEST_ENV: localEnvironment },
+      env: { ...process.env, TEST_ENV: environment },
     }),
   );
+}
+
+/** The environment of the stack last started with `up`, read back from the build named in .app/.env. */
+function runningEnvironment() {
+  const envFile = path.join(workDir, '.env');
+  if (!existsSync(envFile)) fail('no stack has been started here; run `node scripts/app.mjs up` first.');
+  const build = readFileSync(envFile, 'utf8').match(/^SPRINT=(.*)$/m)?.[1]?.trim();
+  const environment = Object.keys(upstreamBuilds).find((name) => upstreamBuilds[name] === build);
+  if (!environment) fail(`.app/.env names a build no environment uses (${build}); run \`node scripts/app.mjs up\` again.`);
+  return environment;
 }
 
 /** Reads `--flag value` from an argument list. */
@@ -304,7 +326,7 @@ switch (command) {
   default:
     console.error(`Usage: node scripts/app.mjs <up|down|status|logs|test> [options]
 
-  up      [--variant <name>] [--no-seed] [--timeout <seconds>]   start and seed the stack
+  up      [--env local|local-fixed] [--no-seed] [--timeout <s>]  start and seed the stack
   down    [--volumes]                                            stop it (--volumes also drops data)
   status                                                         report readiness and container state
   logs    [service] [--follow]                                   show container logs
