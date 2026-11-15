@@ -4,6 +4,7 @@ import { ApisProducts } from '../../../src/apis/ApisProducts';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { loadTestData } from '../../../src/utils/TestData';
 import { newUuid, searchTokenOf } from '../../../src/utils/UniqueData';
+import { verifyRequiredFieldsReported } from '../../../src/utils/ApiChecks';
 
 let apisProducts: ApisProducts;
 let apisProductCatalog: ApisProductCatalog;
@@ -26,7 +27,7 @@ test.describe('Product API', () => {
     await allure.testCaseId('product-api-2');
 
     const reportedFields = await apisProducts.createProductWithoutRequiredFields();
-    await apisProducts.verifyRequiredProductFieldsReported(reportedFields, testData.productApi2.requiredFields);
+    await verifyRequiredFieldsReported('product', reportedFields, testData.productApi2.requiredFields);
   });
 
   test('A restocked product is stored with its new stock', { tag: ['@regression'] }, async () => {

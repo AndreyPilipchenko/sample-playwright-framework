@@ -3,7 +3,7 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { byBuild } from '../utils/AppEnvironment';
 import { applications } from '../config/applications';
-import { expectToBe, expectToBeAtLeast, expectToBeAtMost, expectToContain, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToBeAtLeast, expectToBeAtMost, expectToContain, expectToEqual } from '../utils/Expects';
 import { postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** One line item of an invoice (Swagger: InvoiceItem). */
@@ -294,12 +294,6 @@ export class ApisInvoices {
   async verifyInvoiceListed(invoiceNumbers: string[], invoiceNumber: string) {
     await allure.step(`Verify the invoice list contains ${invoiceNumber}`, async () => {
       expectToContain('the invoice numbers listed', invoiceNumbers, invoiceNumber);
-    });
-  }
-
-  async verifyRequiredInvoiceFieldsReported(reportedFields: string[], requiredFields: string[]) {
-    await allure.step(`Verify the missing required fields are reported: ${requiredFields.join(', ')}`, async () => {
-      expectToContainAll('the fields the API reported', reportedFields, requiredFields);
     });
   }
 }
