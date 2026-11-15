@@ -307,9 +307,9 @@ because the API sends mail on checkout and the upstream compose file defines no 
 and `cron` images are published for **linux/arm64 only** — Docker Desktop emulates
 them transparently, but a bare amd64 Linux host needs binfmt handlers registered
 (`docker run --privileged --rm tonistiigi/binfmt --install arm64`), which is what the
-CI job's QEMU step does. The emulation makes the newer version's mail queue slow (the `cron` image sends it):
-after a full run it holds hundreds of mails, so the contact-mail test (TC-CONT-8) is reliable on
-`local-fixed` only when run on its own.
+CI job's QEMU step does. The newer version queues its mail, and upstream the emulated `cron` image works that
+queue too slowly to keep up with a full run, so on `local-fixed` the stack adds a `queue-worker` service: the
+same queue command, run natively on the API image, so mail leaves within seconds.
 
 ## CI
 

@@ -40,6 +40,37 @@ const mailCompose = `services:
     ports:
       - 1080:1080
 `;
+/**
+ * Local addition for the fixed build, which queues its mail (docs/app-versions.md, B15). Upstream, the
+ * `cron` container works the queue once a minute (`queue:work --stop-when-empty`), but its image is
+ * arm64-only, and emulated on an amd64 host it gets through about 12 mails a minute: after a full run's
+ * orders and registrations a new mail waits many minutes. This worker runs the same queue command
+ * natively on the API image, without stopping, so mail leaves within seconds, as on the hosted site.
+ * It runs the build's own code and changes no application behaviour; the cron job keeps running too.
+ * The with-bugs build gets no worker, so its recorded mail finding (TC-CONT-8 in docs/test-cases.md)
+ * stays as it is. The file is always written, so `down` and an environment switch always include the
+ * worker when there is one.
+ */
+const queueComposeFile = 'docker-compose.queue.yml';
+const queueCompose = (environment) => (environment === 'local-fixed'
+  ? `services:
+  queue-worker:
+    image: testsmith/practice-software-testing-\${SPRINT}-api
+    restart: always
+    depends_on:
+      - mariadb
+      - laravel-api
+    volumes:
+      - laravel-app-code:/var/www
+    working_dir: /var/www
+    command: php artisan queue:work --sleep=1 --tries=3 --max-time=3600
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=mariadb"
+      - "host=localhost"
+      - DISABLE_LOGGING=\${DISABLE_LOGGING}
+`
+  : 'services: {}\n');
 /** Compose project name — keeps `down` deterministic and avoids clashing with other stacks. */
 const composeProject = 'pst-local';
 
@@ -107,7 +138,12 @@ function requireDocker() {
 }
 
 /** Compose invocation shared by every subcommand. */
-const compose = (...args) => ['compose', '-f', composeFile, '-f', mailComposeFile, '--project-name', composeProject, ...args];
+const compose = (...args) => [
+  'compose', '-f', composeFile, '-f', mailComposeFile,
+  // A work directory from before the worker existed has no queue file yet.
+  ...(existsSync(path.join(workDir, queueComposeFile)) ? ['-f', queueComposeFile] : []),
+  '--project-name', composeProject, ...args,
+];
 
 /**
  * Writes the compose file and its .env into the work directory.
@@ -122,6 +158,7 @@ async function prepareWorkDir(environment) {
   }
   writeFileSync(path.join(workDir, composeFile), await response.text());
   writeFileSync(path.join(workDir, mailComposeFile), mailCompose);
+  writeFileSync(path.join(workDir, queueComposeFile), queueCompose(environment));
 
   // DISABLE_LOGGING is interpolated by the compose file without a default; setting it
   // explicitly keeps compose from warning about an unset variable.
