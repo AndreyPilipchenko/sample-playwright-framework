@@ -53,14 +53,22 @@
         "co2Rating": "D",
         "stock": 10,
         "isLocationOffer": true
+      },
+      {
+        "name": "Cents Offer Product TC-DISC-4 {uuid}",
+        "description": "Seeded for the discount case: an offer price with cents.",
+        "price": 99.99,
+        "co2Rating": "D",
+        "stock": 10,
+        "isLocationOffer": true
       }
     ],
     "position": {
       "latitude": 52.37,
       "longitude": 4.9
     },
-    "expectedLinePrice": "$80.00",
-    "cartItemCount": "1"
+    "expectedLinePrices": ["$80.00", "$79.99"],
+    "cartItemCount": "2"
   },
   "tcDISC5": {
     "brandName": "Discount Brand TC-DISC-5 {uuid}",

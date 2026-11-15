@@ -2,7 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
-import { expectToBeVisible, expectToContainText, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
+import { expectToContainText, expectToHaveCount, expectToHaveText, expectToHaveValue } from '../utils/Expects';
 import { escapeRegExp } from '../utils/TextPatterns';
 
 /**
@@ -27,7 +27,9 @@ export class CartPage {
     this.columnHeaders_list = page.getByRole('columnheader');
     this.cartTotal_txt = page.getByTestId('cart-total');
     this.proceed_button = page.getByTestId('proceed-1');
-    this.emptyCart_msg = page.getByText(/cart is empty/i);
+    // The empty-cart message is a bare paragraph of the cart step, with no id or test attribute. The fixed build
+    // wraps the step in its own cart component (docs/app-versions.md, B17).
+    this.emptyCart_msg = page.locator(byBuild({ fixed: 'app-cart > p', default: 'aw-wizard-step > p' }));
     this.subtotal_txt = page.getByTestId('cart-subtotal');
     this.discount_txt = page.getByTestId('cart-discount');
     // The label sits in the first cell on the with-bugs build and after empty spacer cells on the fixed build: the first cell with text.
@@ -143,7 +145,7 @@ export class CartPage {
 
   async verifyCartEmpty() {
     await step('Verify the cart shows no items', async () => {
-      await expectToBeVisible('the empty cart message', this.emptyCart_msg);
+      await expectToContainText('the empty cart message', this.emptyCart_msg, /cart is empty/i);
       await expectToHaveCount('the cart totals', this.cartTotal_txt, 0, 'total');
       await expectToHaveCount('the Proceed to checkout buttons', this.proceed_button, 0, 'button');
     });

@@ -239,7 +239,7 @@ into three kinds, and the framework treats each differently:
   changed. They never replace a text a story or a bug report specifies, and never pick a value that makes
   a defect pass.
 
-[App versions](docs/app-versions.md) lists every structural change (B1 to B15), the defects each version
+[App versions](docs/app-versions.md) lists every structural change (B1 to B17), the defects each version
 fixes, the findings still red on the newer version, and the results of the four environments. The public
 `hosted` site runs an even newer release than the `local-fixed` images, which that page notes too.
 

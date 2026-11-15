@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
+import { exactText } from '../utils/TextPatterns';
 import {
   expectNotToBeChecked,
   expectNotToHaveTexts,
@@ -55,7 +56,7 @@ export class HomePage {
   /** The product card whose name is exactly `productName`. */
   private productCard_link(productName: string): Locator {
     return this.productCards_list.filter({
-      has: this.page.getByTestId('product-name').and(this.page.getByText(productName, { exact: true })),
+      has: this.page.getByTestId('product-name').filter({ hasText: exactText(productName) }),
     });
   }
 
