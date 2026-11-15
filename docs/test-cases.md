@@ -506,12 +506,17 @@ Expected behaviour comes from the defect-free upstream source: statuses only mov
 | TC-CHAT-7 | Checkout with an empty cart shows "Your cart is empty" | P3 | — | AC5 |
 | TC-CHAT-8 | Support collects subject, 50-char message and optional `.txt` | P2 | — | AC6 |
 
-Automated in `tests/ui/contact/ChatWidgetTests.spec.ts` (`@regression`, TC-CHAT-6a `@smoke`): TC-CHAT-6, one test per route (TC-CHAT-6a signs in, TC-CHAT-6b is the guest route). A customer who signs in
-from the chat passes through cart total, address, payment and the order number. A guest fails on a local finding
+Automated in `tests/ui/contact/ChatWidgetTests.spec.ts` (`@regression`, TC-CHAT-6a `@smoke`): TC-CHAT-6, one test per route.
+TC-CHAT-6a signs in on the login page before the checkout, TC-CHAT-6c signs in from the chat, and TC-CHAT-6b is the guest
+route. Both signed-in routes pass through cart total, address, payment and the order number; a customer already signed in
+is taken straight to the address. TC-CHAT-6c is the only route that shows whether the chat's own sign-in reaches the
+order: on the fixed build it does not (docs/app-versions.md, C). On the local build TC-CHAT-6a fails on defect 32: after
+the sign-in the app knows the customer only as "User Data not found" until a reload, and the chat asks them to sign in
+again ("Please sign in to continue with checkout."). A guest fails on a local finding
 ([bug report](bug-reports/chat-no-guest-checkout.md)): the
 local build only offers "Sign in", while the story and the upstream source also offer "Continue as guest", which asks
 for email, first name and last name. The guest test ends at the street prompt, the first step both routes share; its
-prompts come from the upstream source. The sign-in test follows the local payment questions (account name, then account
+prompts come from the upstream source. The signed-in tests follow the local payment questions (account name, then account
 number), while the upstream source asks for the bank name first; the story only says "details". On this build the chat
 also echoes the typed password as a visible message ([bug report](bug-reports/chat-echoes-password.md)).
 
@@ -640,6 +645,7 @@ lists a related defect that isn't why the test fails today, or belongs to one of
 | TC-DISC-1 | The New York badge does not appear on the local build; the cause is not confirmed |
 | TC-DISC-5 | The local build applies no combination discount |
 | TC-DISC-8 | The local build applies no combination discount, and its invoice page has no Subtotal or Discount amount field |
+| TC-CHAT-6a | Defect 32: after a sign-in on the login page the local build shows "User Data not found" instead of the user until the page is reloaded, and the chat asks the signed-in customer to sign in again |
 | customer-account-api-5 | The local build never locks an account: the login after three failures answers 200, not 423 |
 
 ## Coverage summary
@@ -665,7 +671,7 @@ lists a related defect that isn't why the test fails today, or belongs to one of
 | Messages | 4 | 0 |
 | Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60, TC-CONT-3 also on the story's "Status of order" wording; TC-CONT-8 failing on a local finding, mail not delivered) |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
-| Chat Widget | 8 | 1 (TC-CHAT-6 — sign-in route passes; guest route failing on a local finding) |
+| Chat Widget | 8 | 1 (TC-CHAT-6 — chat sign-in route passes; login-page route failing on defect 32; guest route failing on a local finding) |
 | Discounts | 8 | 5 (TC-DISC-1, 4, 5, 6, 8 — TC-DISC-4 passes; the rest fail locally) |
 | API | 16 | 10 (TC-API-1, 2, 3, 4, 6, 8, 9, 10, 11, 16 — all but TC-API-16 failing on open defects 71 to 74, 76, 78 to 81) |
 | Accessibility | 11 | 0 |

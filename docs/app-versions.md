@@ -33,14 +33,16 @@ The differences between the builds fall into three groups:
 |---|---|---|---|
 | `local` | 74 | 73 | 2 |
 | `hosted-with-bugs` | 72 | 71 | 2 |
-| `local-fixed` | 134 | 15 | 0 |
+| `local-fixed` | 135 | 15 | 0 |
 | `hosted` | 123 | 20 | 2 |
 
 `local` and `local-fixed` run 149 tests, the hosted environments 145 (without `@local`). The hosted counts leave out
 public-instance hiccups that passed on a rerun: three 500s on `hosted-with-bugs` and one connection reset on
 `hosted` (TC-CPAY-1).
 
-The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15), and TC-DISC-4 counted as passing after the owner accepted the offer price display (B16): its 15
+The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15), and TC-DISC-4 counted as passing after the owner accepted the offer price display (B16). It also counts the split of the
+chat sign-in route (2026-11-15): TC-CHAT-6a now signs in on the login page and passes, and the new TC-CHAT-6c keeps the
+chat's own sign-in and fails, so the suite has one more test (150 locally, 146 hosted) than the other rows. Its 15
 failures are exactly the cases in C. The other rows come from runs on 2026-11-14 without admin credentials
 (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved
 session", and the admin setup and TC-LOGIN-3 were skipped. The admin specs were run separately on `local` on
@@ -95,6 +97,7 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 | TC-INV-7 | 78 | An unknown invoice shows "not found" |
 | TC-CONT-8 | — | A valid contact submission sends the mail (on `local-fixed`, where the stack's queue worker sends it within seconds, see B15; the hosted environments have no inbox) |
 | TC-CONT-9 | 60 | The subject dropdown has no Error 101 or Error 202 entries |
+| TC-CHAT-6a | 32 | The chat recognises a customer who signed in on the login page and goes straight to the address |
 | TC-CHAT-6b | — | The chat asks a guest for email and name before the address |
 | TC-ADM-7, 8, 9 | — | An admin can save an edited user, and disabling or re-enabling the account takes effect ([report](bug-reports/admin-user-save-refused-phone.md)) |
 | TC-ADM-12 | 83 | A customer token gets 403 on an admin-only call |
@@ -163,7 +166,7 @@ its three columns; a Case cell may name several cases (`TC-ADM-7, 8, 9`).
 | TC-ADM-2 | both builds | The with-bugs build saves the edit, but the list keeps showing the old price ([report](bug-reports/admin-product-list-stale-after-save.md)). The fixed build's edit form opens with Stock, Brand, Category and Image empty, because `GET /products/{id}` no longer returns them (B5), so saving an edit fails with "Quantity is required". Creating a product works on both |
 | TC-CBA-3 | fixed only | Clearing the street disables Proceed, but no error message names the field |
 | TC-CPAY-13 | fixed only | After an order the cart page shows no "cart is empty" message; it appears only after removing items by hand |
-| TC-CHAT-6a | fixed only | After signing in through the chat, the chat sends the order without the token: `POST /invoices` answers 401 and the chat says "There was an error processing your order:" and "Unauthorized", with a "Back to menu" button (seen locally and in CI, 2026-11-15) |
+| TC-CHAT-6c | fixed only | Signing in through the chat does not sign the customer in for the API: the login answers 200 with a token, the chat says "You're now signed in!", but the token is never stored where the app's requests read it (`auth-token`, B10). `GET /users/me` and `POST /invoices` go out without an `Authorization` header and answer 401, and the chat says "There was an error processing your order:" and "Unauthorized", with a "Back to menu" button (seen locally and in CI, 2026-11-15). A customer who signs in on the login page first places the same order through the chat (TC-CHAT-6a) |
 
 Seen on the fixed build but not covered by a test:
 
