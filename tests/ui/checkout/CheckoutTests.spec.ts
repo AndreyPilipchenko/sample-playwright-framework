@@ -180,7 +180,7 @@ test.describe('Checkout', () => {
   test('Valid payment places the order and shows the invoice number', { tag: ['@smoke'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-12');
-    const { billing, bank, expectedPaymentMessage } = testData.tcCPAY12;
+    const { billing, bank, expectedPaymentMessage, expectedOrderConfirmation } = testData.tcCPAY12;
     const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY12.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY12);
@@ -194,13 +194,13 @@ test.describe('Checkout', () => {
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();
-    await checkoutPaymentPage.verifyOrderPlaced();
+    await checkoutPaymentPage.verifyOrderPlaced(expectedOrderConfirmation);
   });
 
   test('Cart is cleared after a successful order', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-13');
-    const { billing, bank, expectedPaymentMessage } = testData.tcCPAY13;
+    const { billing, bank, expectedPaymentMessage, expectedOrderConfirmation } = testData.tcCPAY13;
     const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY13.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY13);
@@ -214,7 +214,7 @@ test.describe('Checkout', () => {
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();
-    await checkoutPaymentPage.verifyOrderPlaced();
+    await checkoutPaymentPage.verifyOrderPlaced(expectedOrderConfirmation);
     await headerPage.clickHome();
     await cartPage.navigate();
     await cartPage.verifyCartEmpty();

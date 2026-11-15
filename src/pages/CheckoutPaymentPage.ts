@@ -1,7 +1,8 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { byBuild } from '../utils/AppEnvironment';
-import { expectTextsToEqualInAnyOrder, expectToBeVisible, expectToContainText, expectToHaveText } from '../utils/Expects';
+import { expectTextsToEqualInAnyOrder, expectToBeTruthy, expectToBeVisible, expectToContainText, expectToHaveText } from '../utils/Expects';
+import { escapeRegExp } from '../utils/TextPatterns';
 
 /** The credit card values typed on the payment step; the expiration date reads MM/YYYY. */
 export interface CreditCard {
@@ -93,6 +94,17 @@ export class CheckoutPaymentPage {
     });
   }
 
+  /** The invoice number the order confirmation announces (`INV-...`). */
+  async readPlacedInvoiceNumber(): Promise<string> {
+    return await step('Read the invoice number from the order confirmation', async () => {
+      // The confirmation shows before its invoice number arrives, so read it once the number is there.
+      const text = (await this.orderConfirmation_txt.filter({ hasText: /INV-\d+/ }).textContent()) ?? '';
+      const invoiceNumber = /INV-\d+/.exec(text)?.[0] ?? '';
+      expectToBeTruthy('the invoice number in the order confirmation', invoiceNumber);
+      return invoiceNumber;
+    });
+  }
+
   ///// Validations
 
   async verifyPaymentStepShown() {
@@ -128,20 +140,10 @@ export class CheckoutPaymentPage {
     });
   }
 
-  /** The invoice number the order confirmation announces (`INV-...`). */
-  async readPlacedInvoiceNumber(): Promise<string> {
-    return await step('Read the invoice number from the order confirmation', async () => {
-      // The confirmation shows before its invoice number arrives, so read it once the number is there.
-      const text = (await this.orderConfirmation_txt.filter({ hasText: /INV-\d+/ }).textContent()) ?? '';
-      const invoiceNumber = /INV-\d+/.exec(text)?.[0];
-      if (!invoiceNumber) throw new Error(`The order confirmation shows no invoice number: "${text}"`);
-      return invoiceNumber;
-    });
-  }
-
-  async verifyOrderPlaced() {
+  /** `expectedConfirmation` is the text before the invoice number, e.g. "Thanks for your order! Your invoice number is". */
+  async verifyOrderPlaced(expectedConfirmation: string) {
     await step('Verify the order is placed and its invoice number is shown', async () => {
-      await expectToContainText('the order confirmation', this.orderConfirmation_txt, /Thanks for your order! Your invoice number is INV-\d+/);
+      await expectToContainText('the order confirmation', this.orderConfirmation_txt, new RegExp(`${escapeRegExp(expectedConfirmation)} INV-\\d+`));
     });
   }
 }

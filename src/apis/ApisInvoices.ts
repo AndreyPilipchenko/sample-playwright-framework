@@ -124,22 +124,13 @@ export class ApisInvoices {
     });
   }
 
-  /** The first page of the caller's invoice list (`GET /invoices`). */
-  async getInvoiceNumbers(): Promise<string[]> {
+  /** The caller's invoice list (`GET /invoices`): the invoice numbers on its first page, and `total` across every page. */
+  async getInvoiceList(): Promise<{ numbers: string[]; total: number }> {
     return await allure.step('Get the invoice list', async () => {
       const response = await this.apiActions.get(this.invoices_serviceName);
       expectToBe('the invoice list response status', response.status(), 200);
-      const { data } = (await response.json()) as { data: InvoiceRecord[] };
-      return data.map((invoice) => invoice.invoice_number);
-    });
-  }
-
-  /** How many invoices the caller's list reports (`total` of `GET /invoices`), across every page. */
-  async getInvoiceCount(): Promise<number> {
-    return await allure.step('Get the number of invoices listed', async () => {
-      const response = await this.apiActions.get(this.invoices_serviceName);
-      expectToBe('the invoice list response status', response.status(), 200);
-      return ((await response.json()) as { total: number }).total;
+      const { data, total } = (await response.json()) as { data: InvoiceRecord[]; total: number };
+      return { numbers: data.map((invoice) => invoice.invoice_number), total };
     });
   }
 

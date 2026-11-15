@@ -20,9 +20,10 @@ test.describe('Invoice API security', () => {
     await allure.testCaseId('TC-API-8');
 
     const owner = await apisOwnInvoices.createOwnInvoice(testData.tcApi8.owner);
-    await owner.apisInvoices.verifyOwnInvoicesListed(await owner.apisInvoices.getInvoiceCount());
+    const { total: ownCount } = await owner.apisInvoices.getInvoiceList();
+    await owner.apisInvoices.verifyOwnInvoicesListed(ownCount);
     const { apisInvoices } = await apisOwnInvoices.registerInvoiceOwner(testData.tcApi8.other);
-    const count = await apisInvoices.getInvoiceCount();
+    const { total: count } = await apisInvoices.getInvoiceList();
     await apisInvoices.verifyNoInvoicesListed(count);
   });
 
