@@ -28,7 +28,7 @@ export class AdminProductFormPage {
   private readonly co2Rating_dropdown: Locator;
   private readonly image_dropdown: Locator;
   private readonly save_button: Locator;
-  private readonly saved_msg: Locator;
+  private readonly shownAlerts_msg: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -41,7 +41,9 @@ export class AdminProductFormPage {
     this.co2Rating_dropdown = page.getByTestId('co2-rating');
     this.image_dropdown = page.getByTestId('product-image-id');
     this.save_button = page.getByTestId('product-submit');
-    this.saved_msg = page.locator('.alert-success');
+    // Every message the form shows (success, form and field errors) has role="alert"; the success alert stays in the
+    // page, empty, when it has nothing to say, so only alerts with text count.
+    this.shownAlerts_msg = page.getByRole('alert').filter({ hasText: /\S/ });
   }
 
   ///// Actions
@@ -80,9 +82,10 @@ export class AdminProductFormPage {
 
   ///// Validations
 
+  /** `expected` is the only message shown, so a failure lists the messages the form does show (e.g. a field error). */
   async verifySaved(expected: string) {
     await step(`Verify the message "${expected}" is shown`, async () => {
-      await expectToHaveText('the product form message', this.saved_msg, expected);
+      await expectToHaveText('the product form messages', this.shownAlerts_msg, [expected]);
     });
   }
 
