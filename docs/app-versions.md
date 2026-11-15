@@ -33,19 +33,19 @@ The differences between the builds fall into three groups:
 |---|---|---|---|
 | `local` | 74 | 73 | 2 |
 | `hosted-with-bugs` | 72 | 71 | 2 |
-| `local-fixed` | 125 | 22 | 2 |
+| `local-fixed` | 133 | 16 | 0 |
 | `hosted` | 123 | 20 | 2 |
 
 `local` and `local-fixed` run 149 tests, the hosted environments 145 (without `@local`). The hosted counts leave out
 public-instance hiccups that passed on a rerun: three 500s on `hosted-with-bugs` and one connection reset on
-`hosted` (TC-CPAY-1). `local-fixed` includes TC-CONT-8, which fails in a full run there only because of the local
-mail queue (B15).
+`hosted` (TC-CPAY-1).
 
-These counts come from runs without admin credentials (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin
-UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved session", and the admin setup and TC-LOGIN-3 were skipped.
-The admin specs were run separately on 2026-11-15 with the demo admin login (CI has it as secrets), on `local` and
-`local-fixed`. On `local`, TC-ADM-5 and 6 pass and TC-ADM-2, 7, 8, 9 and 12 fail on their recorded causes. On
-`local-fixed`, all pass except TC-ADM-2. The tables below include these results.
+The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15): its 16
+failures are exactly the cases in C. The other rows come from runs on 2026-11-14 without admin credentials
+(`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved
+session", and the admin setup and TC-LOGIN-3 were skipped. The admin specs were run separately on `local` on
+2026-11-15: TC-ADM-5 and 6 pass and TC-ADM-2, 7, 8, 9 and 12 fail on their recorded causes. The tables below include
+these results.
 
 ## A. Fixed defects
 
@@ -93,7 +93,7 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 | TC-INV-4, 10, 11 | 15, 16 | Invoice billing address fields |
 | TC-INV-5 | 14 | Invoice payment details |
 | TC-INV-7 | 78 | An unknown invoice shows "not found" |
-| TC-CONT-8 | — | A valid contact submission sends the mail (local-fixed with a short mail queue, see B15; the hosted environments have no inbox) |
+| TC-CONT-8 | — | A valid contact submission sends the mail (on `local-fixed`, where the stack's queue worker sends it within seconds, see B15; the hosted environments have no inbox) |
 | TC-CONT-9 | 60 | The subject dropdown has no Error 101 or Error 202 entries |
 | TC-CHAT-6b | — | The chat asks a guest for email and name before the address |
 | TC-ADM-7, 8, 9 | — | An admin can save an edited user, and disabling or re-enabling the account takes effect ([report](bug-reports/admin-user-save-refused-phone.md)) |
@@ -117,7 +117,7 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 | B12 | Checkout sign-in | Heading "Customer login" | Heading "Login"; guest checkout fields | `CheckoutSignInPage` |
 | B13 | Pagination | ngx-pagination: `nav[aria-label=Pagination]`, current page `li.current`, links "page N" | An unlabelled `ul.pagination`, buttons named `Page-N`, current page `li.active` | `HomePage`, `CategoryPage` |
 | B14 | Cart lines | One price per line | A location offer shows the list price struck through and the offer price after it, and the offer badge sits inside the product title. The discount row has empty spacer cells before its label | `CartPage` |
-| B15 | Mail | Sent at once | Queued; a cron job works the queue once a minute (with a short queue, a contact mail arrived ~50 s after the submission). On the local stack the cron image runs emulated (arm64) and works about 12 jobs a minute, so after a full run's orders and registrations (200+ jobs) a new mail waits many minutes and TC-CONT-8 times out; run alone, it passes | `ApisMailInbox.deliveryBudgetMs`, `QUEUED_MAIL_MS` |
+| B15 | Mail | Sent at once | Queued; a cron job works the queue once a minute (with a short queue, a contact mail arrived ~50 s after the submission). On the local stack the cron image runs emulated (arm64) and works about 12 jobs a minute, so after a full run's orders and registrations (200+ jobs) a new mail waited many minutes. `scripts/app.mjs` therefore adds a native queue worker to the `local-fixed` stack (environment provisioning, like the mail sink), and mail leaves within seconds | `ApisMailInbox.deliveryBudgetMs`, `QUEUED_MAIL_MS`, the `queue-worker` service of `scripts/app.mjs` |
 
 Observed values that differ are test data, in the `*.fixed.json` overlays under `resources/testData/`. An overlay
 never replaces a text a story or a bug report specifies: those tests stay red where the build shows other text (C).
