@@ -531,8 +531,9 @@ also echoes the typed password as a visible message ([bug report](bug-reports/ch
 Automated in `tests/ui/checkout/DiscountTests.spec.ts` (`@regression`, TC-DISC-4 `@smoke`): TC-DISC-1, 4, 5, 6 and 8. The location cases use the
 browser's own geolocation (the context grants the permission and reports a chosen position; the app is then told to
 read it). TC-DISC-1 checks the product page badge for Mumbai (-10%), Tokyo (-15%), Amsterdam (-20%), London (-25%) and
-New York (-5%), New York last. TC-DISC-4 puts a 100.00 location offer in the cart from Amsterdam and expects "$80.00";
-it passes. On the local build the New York badge does not appear, so TC-DISC-1 fails there (a local finding; the cause
+New York (-5%), New York last. TC-DISC-4 puts two location offers in the cart from Amsterdam, at 100.00 and 99.99, and expects "$80.00" and
+"$79.99"; it passes. On the fixed build the case owner accepted "$80" for a whole-dollar offer price; cents stay for
+other amounts (docs/app-versions.md, B16). On the local build the New York badge does not appear, so TC-DISC-1 fails there (a local finding; the cause
 is not confirmed, the upstream source handles longitude with a sign quirk). TC-DISC-5, 6 and 8 reuse the mixed
 rental and non-rental cart of TC-CART-10 and 11; TC-DISC-8 places the order through checkout and reads the invoice's
 subtotal, discount amount and total. All three fail on the local build: it applies no combination discount, and its

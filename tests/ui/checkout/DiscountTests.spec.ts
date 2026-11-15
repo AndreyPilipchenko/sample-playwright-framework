@@ -67,17 +67,21 @@ test.describe('Discounts', () => {
   test('Cart line carries the location discount', { tag: ['@smoke'] }, async ({ page }) => {
     await allure.feature('Discounts');
     await allure.testCaseId('TC-DISC-4');
-    const { position, expectedLinePrice, cartItemCount } = testData.tcDISC4;
+    const { position, expectedLinePrices, cartItemCount } = testData.tcDISC4;
 
+    // Two offers: a whole-dollar offer price and one with cents, so the check covers how both are shown.
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcDISC4);
-    const [product] = catalog.products;
+    const [wholeDollarOffer, centsOffer] = catalog.products;
     await homePage.navigate();
     await useBrowserLocation(page, position);
-    await productDetailPage.navigate(product.id);
+    await productDetailPage.navigate(wholeDollarOffer.id);
+    await productDetailPage.addToCart();
+    await productDetailPage.navigate(centsOffer.id);
     await productDetailPage.addToCart();
     await headerPage.verifyCartItemCount(cartItemCount);
     await cartPage.navigate();
-    await cartPage.verifyItemPrice(product.name, expectedLinePrice);
+    await cartPage.verifyItemPrice(wholeDollarOffer.name, expectedLinePrices[0]);
+    await cartPage.verifyItemPrice(centsOffer.name, expectedLinePrices[1]);
   });
 
   test('Rental plus non-rental cart gets the 15% combination discount', { tag: ['@regression'] }, async () => {

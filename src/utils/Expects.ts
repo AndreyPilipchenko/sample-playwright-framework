@@ -262,6 +262,26 @@ export async function expectTextsToContainAll(
 }
 
 /**
+ * Auto-retrying membership assertion over the trimmed texts of every matched element, for a list that grows at
+ * its end, such as a conversation — `Expect <subject> (latest first) to include <expected> → …`. One element's
+ * whole text must equal `expected`. The report shows the texts latest first, because it prints only the first ten:
+ * on failure it shows what the list most recently said instead.
+ */
+export async function expectLatestTextsToInclude(
+  subject: string,
+  locator: Locator,
+  expected: string,
+  options?: RetryOptions,
+): Promise<void> {
+  await expect
+    .poll(async () => (await locator.allTextContents()).map((text) => text.trim()).reverse(), {
+      message: `Expect ${subject} (latest first) to include ${fmt(expected)} → ${locator.toString()}`,
+      ...options,
+    })
+    .toContain(expected);
+}
+
+/**
  * Auto-retrying membership assertion over a value re-read on every retry, for effects that arrive later outside the
  * page (a mail in an inbox) — `Expect <subject> to eventually include <expected>`.
  */

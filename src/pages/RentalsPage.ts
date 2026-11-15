@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { expectNotToHaveCount, expectTextsToContainAll, expectToHaveMatchingCount, expectToHaveText, expectToHaveURL } from '../utils/Expects';
+import { exactText } from '../utils/TextPatterns';
 
 /** Rental products (`/rentals`). Its cards have no test id for their parts, only for the card itself. */
 export class RentalsPage {
@@ -26,7 +27,7 @@ export class RentalsPage {
 
   /** The rental card whose name is exactly `rentalName`. */
   private rentalCard_link(rentalName: string): Locator {
-    return this.rentalCards_list.filter({ has: this.page.locator('.card-title').and(this.page.getByText(rentalName, { exact: true })) });
+    return this.rentalCards_list.filter({ has: this.page.locator('.card-title').filter({ hasText: exactText(rentalName) }) });
   }
 
   ///// Actions

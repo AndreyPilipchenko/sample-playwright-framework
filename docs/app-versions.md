@@ -33,14 +33,14 @@ The differences between the builds fall into three groups:
 |---|---|---|---|
 | `local` | 74 | 73 | 2 |
 | `hosted-with-bugs` | 72 | 71 | 2 |
-| `local-fixed` | 133 | 16 | 0 |
+| `local-fixed` | 134 | 15 | 0 |
 | `hosted` | 123 | 20 | 2 |
 
 `local` and `local-fixed` run 149 tests, the hosted environments 145 (without `@local`). The hosted counts leave out
 public-instance hiccups that passed on a rerun: three 500s on `hosted-with-bugs` and one connection reset on
 `hosted` (TC-CPAY-1).
 
-The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15): its 16
+The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15), and TC-DISC-4 counted as passing after the owner accepted the offer price display (B16): its 15
 failures are exactly the cases in C. The other rows come from runs on 2026-11-14 without admin credentials
 (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved
 session", and the admin setup and TC-LOGIN-3 were skipped. The admin specs were run separately on `local` on
@@ -118,6 +118,8 @@ Red on the with-bugs build, green on the fixed build. Defect numbers are from th
 | B13 | Pagination | ngx-pagination: `nav[aria-label=Pagination]`, current page `li.current`, links "page N" | An unlabelled `ul.pagination`, buttons named `Page-N`, current page `li.active` | `HomePage`, `CategoryPage` |
 | B14 | Cart lines | One price per line | A location offer shows the list price struck through and the offer price after it, and the offer badge sits inside the product title. The discount row has empty spacer cells before its label | `CartPage` |
 | B15 | Mail | Sent at once | Queued; a cron job works the queue once a minute (with a short queue, a contact mail arrived ~50 s after the submission). On the local stack the cron image runs emulated (arm64) and works about 12 jobs a minute, so after a full run's orders and registrations (200+ jobs) a new mail waited many minutes. `scripts/app.mjs` therefore adds a native queue worker to the `local-fixed` stack (environment provisioning, like the mail sink), and mail leaves within seconds | `ApisMailInbox.deliveryBudgetMs`, `QUEUED_MAIL_MS`, the `queue-worker` service of `scripts/app.mjs` |
+| B16 | Offer price | Always two decimals ("$80.00") | The offer price of a cart line drops the cents of a whole-dollar amount ("$80") and keeps them otherwise ("$79.99"); totals keep two decimals ("$70.00"). Accepted as the product's display by the case owner on 2026-11-15 | TC-DISC-4 test data (overlay) |
+| B17 | Cart step | The empty-cart message is a paragraph directly in the checkout's cart step | The step holds an `app-cart` component, and the message is its paragraph | `CartPage` |
 
 Observed values that differ are test data, in the `*.fixed.json` overlays under `resources/testData/`. An overlay
 never replaces a text a story or a bug report specifies: those tests stay red where the build shows other text (C).
@@ -133,6 +135,7 @@ Two overlays await the case owner's acceptance, because the case names the with-
 | `NavigationTestJsonFile` | A Hand Tools product on page 1 | "Combination Pliers" | "Claw Hammer" (another product order) |
 | `InvoiceApiTestJsonFile` | Required invoice fields | `user_id`, `billing_address`, `billing_city`, `billing_country`, `total` | `billing_street`, `billing_city`, `billing_country`, `payment_method`, `payment_details`, `cart_id` |
 | `ChatWidgetTestJsonFile` | Bank transfer questions | account name, account number | bank name, account holder name, account number |
+| `DiscountTestJsonFile` | Offer prices in the cart (TC-DISC-4, B16; accepted by the case owner) | "$80.00", "$79.99" | "$80", "$79.99" |
 
 Because the fixed build checks city and state against the postcode (B7), seeded orders and checkout data use
 addresses the lookup returns, which both builds accept: postcode `1234AA` (street "de Bruijnsingel", city "Idaerd",
@@ -160,8 +163,7 @@ its three columns; a Case cell may name several cases (`TC-ADM-7, 8, 9`).
 | TC-ADM-2 | both builds | The with-bugs build saves the edit, but the list keeps showing the old price ([report](bug-reports/admin-product-list-stale-after-save.md)). The fixed build's edit form opens with Stock, Brand, Category and Image empty, because `GET /products/{id}` no longer returns them (B5), so saving an edit fails with "Quantity is required". Creating a product works on both |
 | TC-CBA-3 | fixed only | Clearing the street disables Proceed, but no error message names the field |
 | TC-CPAY-13 | fixed only | After an order the cart page shows no "cart is empty" message; it appears only after removing items by hand |
-| TC-DISC-4 | fixed only | A location offer at 80.00 shows as "$80", without cents (other prices keep them, "$38.73") |
-| TC-CHAT-6a | fixed only | After signing in through the chat, the chat sends the order without the token: `POST /invoices` answers 401 and the chat says "Unauthorized" |
+| TC-CHAT-6a | fixed only | After signing in through the chat, the chat sends the order without the token: `POST /invoices` answers 401 and the chat says "There was an error processing your order:" and "Unauthorized", with a "Back to menu" button (seen locally and in CI, 2026-11-15) |
 
 Seen on the fixed build but not covered by a test:
 

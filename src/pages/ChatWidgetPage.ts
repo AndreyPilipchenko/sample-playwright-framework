@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
-import { expectTextsToContainAll, expectToBeVisible } from '../utils/Expects';
+import { expectTextsToContainAll, expectLatestTextsToInclude, expectToBeVisible, expectToHaveCount } from '../utils/Expects';
+import { exactText } from '../utils/TextPatterns';
 
 /** One question the chat asks and the answer to give it. */
 export interface ChatQuestion {
@@ -15,6 +16,7 @@ export class ChatWidgetPage {
   // Locators
   private readonly toggle_button: Locator;
   private readonly window_txt: Locator;
+  private readonly messages_list: Locator;
   private readonly answer_input: Locator;
   private readonly send_button: Locator;
   private readonly checkout_button: Locator;
@@ -28,6 +30,9 @@ export class ChatWidgetPage {
     this.page = page;
     this.toggle_button = page.getByTestId('chat-toggle');
     this.window_txt = page.getByTestId('chat-window');
+    // The chat's own messages, not the customer's echoed answers (which include the password) nor the typing
+    // indicator. Messages carry no test id; each one's text sits in its .message-content element.
+    this.messages_list = this.window_txt.locator('.bot-message .message-content:not(.loading)');
     this.answer_input = page.getByTestId('chat-input');
     this.send_button = page.getByTestId('chat-send');
     this.checkout_button = page.getByTestId('chat-action-start-checkout');
@@ -38,12 +43,19 @@ export class ChatWidgetPage {
     this.placeOrder_button = page.getByTestId('chat-action-checkout-confirm-order');
   }
 
+  /** The message whose whole text is `text`, or that matches the pattern. */
+  private message_txt(text: string | RegExp): Locator {
+    return this.messages_list.filter({ hasText: typeof text === 'string' ? exactText(text) : text });
+  }
+
   /**
    * The messages shown after a heading message. The conversation stays on screen, so this keeps a check from being
    * satisfied by an earlier message or button. Chat messages have no test id, hence the CSS classes.
    */
   private messagesAfter_list(heading: string): Locator {
-    return this.window_txt.locator(`.chat-message:has(.message-content:text-is("${heading}")) ~ .chat-message .message-content`);
+    // `has` looks inside each message, so its locator starts at the message content, not at the window.
+    const headingMessage = this.window_txt.locator('.chat-message').filter({ has: this.page.locator('.message-content').filter({ hasText: exactText(heading) }) });
+    return headingMessage.locator('xpath=following-sibling::*[contains(concat(" ", @class, " "), " chat-message ")]').locator('.message-content');
   }
 
   ///// Actions
@@ -90,7 +102,7 @@ export class ChatWidgetPage {
   async answerQuestions(questions: ChatQuestion[]) {
     await step(`Answer the chat questions: ${questions.map(({ question }) => question).join(' / ')}`, async () => {
       for (const { question, answer } of questions) {
-        await this.window_txt.getByText(question, { exact: true }).waitFor();
+        await this.message_txt(question).waitFor();
         await this.answer(answer);
       }
     });
@@ -116,10 +128,10 @@ export class ChatWidgetPage {
 
   ///// Validations
 
-  /** For a text the conversation shows once, such as a question. */
+  /** One of the chat's messages is exactly `expected`. On failure the report lists every message the chat showed. */
   async verifyMessage(expected: string) {
     await step(`Verify the chat says "${expected}"`, async () => {
-      await expectToBeVisible(`the chat message "${expected}"`, this.window_txt.getByText(expected, { exact: true }));
+      await expectLatestTextsToInclude('the chat messages', this.messages_list, expected);
     });
   }
 
@@ -143,7 +155,7 @@ export class ChatWidgetPage {
 
   async verifyOrderNumberShown() {
     await step('Verify the chat shows the order number', async () => {
-      await expectToBeVisible('the invoice number in the chat', this.window_txt.getByText(/INV-\d+/));
+      await expectToHaveCount('the chat messages with an invoice number', this.message_txt(/INV-\d+/), 1, 'message');
     });
   }
 }
