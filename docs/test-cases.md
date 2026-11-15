@@ -65,9 +65,10 @@ first sort (the grid stays in ascending name order after Name Z-A). TC-PO-15 mov
 keyboard (range 40 to 70) and expects only the 55 product; it fails on the local build, which keeps all three.
 
 Also automated there (`@regression`): TC-PO-1, 3, 4, 6, 7, 9, 11, 12, 14, 16 and 17. TC-PO-1 checks the image, name and price of
-every card on the first page, and fails on defect 26: the image of Slip Joint Pliers (product 5) is hidden in Chrome. Defect 92 (alt text) is a product detail defect, checked by TC-PD-17. TC-PO-6 activates the category, brand,
-price and sort filters; the first three reset, and it fails on the sort dropdown, which keeps its option
-([report](bug-reports/search-leaves-sort-selected.md)). It counts sorting as a filter because the category story's AC2 does.
+every card on the first page, and fails on defect 26: the image of Slip Joint Pliers (product 5) is hidden in Chrome. Defect 92 (alt text) is a product detail defect, checked by TC-PD-17. TC-PO-6 activates the category, brand
+and price filters, searches, and checks that all three reset. By owner decision of 2026-11-15 the sort order is not a
+filter, so a search may keep it: the case no longer sorts, and the report on the kept sort is closed as not a defect
+([report](bug-reports/search-leaves-sort-selected.md)).
 TC-PO-9 fails on the local build, where a parent category has no checkbox
 ([report](bug-reports/category-parent-no-checkbox.md)). TC-PO-16 runs at an Amsterdam position, like the discount cases.
 
@@ -137,7 +138,8 @@ after appearing.
 Also automated there (`@regression`): TC-PD-2, 6, 7, 9, 10, 11, 12, 14, 16 and 17. TC-PD-12, 16 and 17 fail on defects 41, 91
 and 92. On TC-PD-8 and 12 the red toast reads "Oeps, something went wrong."; the register's wording for defect 41 is
 "Upsss... something wrong". TC-PD-7 passes typed entry and the lower limit, then fails on the story's upper limit, because the page stops at 99
-([report](bug-reports/product-quantity-capped-at-99.md)). TC-PD-9 passes on the local build, with 12 units reaching the cart.
+([report](bug-reports/product-quantity-capped-at-99.md)). Both builds' source sets this cap (`MAX_QUANTITY = 99`); by owner
+decision of 2026-11-15 the story's limit of 999,999,999 stays the expected one, so the case stays red. TC-PD-9 passes on the local build, with 12 units reaching the cart.
 TC-PD-6 passes, but proves nothing while defect 40 is open: the minus button does nothing at any quantity.
 
 ## 5. Rentals
@@ -260,7 +262,7 @@ Route: `#/auth/register`
 | TC-REG-4 | Focusing password shows the four requirements | P2 | — | AC2 |
 | TC-REG-5 | Requirements update in real time as the password is typed | P2 | — | AC3 |
 | TC-REG-6 | Strength indicator shows the five levels at 20–100% | P2 | — | AC4 |
-| TC-REG-7 | Duplicate email shows "Email is already in use." | P1 | 50 | AC5 |
+| TC-REG-7 | Duplicate email shows "A customer with this email address already exists." | P1 | 50 | AC5 |
 | TC-REG-8 | Duplicate-email error does not reveal a password hint | P1 | 50 | — |
 | TC-REG-9 | Valid submission creates the account and redirects to login | P1 | — | AC6 |
 | TC-REG-10 | Names containing valid special characters are accepted | P2 | 51 | AC1 |
@@ -271,7 +273,8 @@ Route: `#/auth/register`
 
 Automated in `tests/ui/accounts/RegistrationTests.spec.ts` (`@regression`, TC-REG-9 `@smoke`): TC-REG-1, 7, 8 and 9. TC-REG-1 fails while defect 52
 is open (the State and Country labels are swapped). TC-REG-7 and 8 fail while defect 50 is open (the error reads "User
-already registered - Your password hint is: …").
+already registered - Your password hint is: …"). TC-REG-7 expects the fixed build's wording, "A customer with this email
+address already exists.", by owner decision of 2026-11-15; the story's AC5 says "Email is already in use."
 
 ## 11. User Login
 
@@ -288,7 +291,7 @@ Route: `#/auth/login`
 | TC-LOGIN-7 | Account locks only after 3 consecutive failures | P1 | 21 | AC4 |
 | TC-LOGIN-8 | Locked account shows the lock message and API returns HTTP 423 | P1 | 21 | AC4 |
 | TC-LOGIN-9 | Admin account is never locked by failed attempts | P2 | — | AC5 |
-| TC-LOGIN-10 | Disabled account shows "Account disabled." and is not authenticated | P1 | — | AC6 |
+| TC-LOGIN-10 | Disabled account shows "Account disabled" and is not authenticated | P1 | — | AC6 |
 | TC-LOGIN-11 | Login inputs have accessible labels | P2 | 87 | — |
 | TC-LOGIN-12 | Tab order follows visual order | P3 | 18 | — |
 | TC-LOGIN-13 | Input padding and button width render correctly per browser | P3 | 19, 20 | — |
@@ -311,7 +314,9 @@ live instance:
   administrator." and HTTP 423, threshold 3 per the upstream source) fails locally because nothing locks. The API
   test `customer-account-api-5` (`tests/api/accounts/CustomerAccountApiTests.spec.ts`) fails for the same reason: the
   login after three failures answers 200, not 423.
-- **TC-LOGIN-10** passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
+- **TC-LOGIN-10** checks that the error contains "Account disabled", by owner decision of 2026-11-15: the story's AC6 quotes
+  "Account disabled.", the with-bugs build shows that, and the fixed build drops the full stop; both are accepted. It
+  passes, but needs the database: this build's admin API drops `enabled` from a user update, so the
   test disables its account with `UPDATE users SET enabled = 0` (`src/dbs/DbsUserAccount.ts`). It runs only where
   `APP_DB_LOCAL` is set (local stack; the nightly `regression` jobs read the secret of that name) and fails with
   a database connection error without it ("Access denied" on the local stack).
@@ -442,8 +447,8 @@ Route: `#/contact`
 > upstream attachment rule and defect #70 contradict each other.
 
 Automated in `tests/ui/contact/ContactTests.spec.ts` (`@regression`, TC-CONT-8 `@local`): TC-CONT-3, 8 and 9. TC-CONT-3 and 9 fail while defect 60
-is open. TC-CONT-3 asserts the story's text "Status of order", while the local build and the upstream source both show
-"Status of my order", so it stays red after defect 60 is fixed unless the story or the product changes. TC-CONT-8 shows its confirmation and then fails on a local
+is open. TC-CONT-3 expects "Status of my order", the text both builds show, by owner decision of 2026-11-15; the story's AC3 says
+"Status of order". It passes on the fixed build. TC-CONT-8 shows its confirmation and then fails on a local
 finding, with two causes: the API queues this mail but the local stack runs no queue worker, and the with-bugs build
 leaves `BusServiceProvider` out of `config/app.php`, so a worker could not run the job anyway. The mail never reaches the
 inbox ([bug report](bug-reports/contact-mail-not-delivered.md)). It reads the mailcatcher inbox, so that check needs the
@@ -652,7 +657,7 @@ lists a related defect that isn't why the test fails today, or belongs to one of
 
 | Area | Cases | Automated |
 |---|---|---|
-| Product Overview | 22 | 16 (TC-PO-2, 5, 8 — smoke; TC-PO-1 failing on defect 26; TC-PO-3, 4, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-6, 9 failing on local findings) |
+| Product Overview | 22 | 16 (TC-PO-2, 5, 8 — smoke; TC-PO-1 failing on defect 26; TC-PO-3, 4, 6, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-9 failing on a local finding) |
 | Navigation & Header | 5 | 4 (TC-NAV-5, smoke; TC-NAV-1, 3, 4 failing on defects 29, 3, 32) |
 | Product Category | 6 | 3 (TC-CAT-1 passes; TC-CAT-3 failing on a local finding, TC-CAT-4 on defect 3) |
 | Product Detail | 18 | 15 (TC-PD-3 — smoke; TC-PD-1, 2, 6, 9, 10, 11, 14 pass; TC-PD-4, 5, 8, 12, 16, 17 failing on defects 40, 43, 41, 91, 92; TC-PD-7 on a local finding) |
@@ -669,7 +674,7 @@ lists a related defect that isn't why the test fails today, or belongs to one of
 | Favorites | 3 | 0 |
 | Invoices | 11 | 7 (TC-INV-3, 6 pass; TC-INV-4, 5, 10, 11 failing on defects 14, 15, 16; TC-INV-7 on a local finding) |
 | Messages | 4 | 0 |
-| Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60, TC-CONT-3 also on the story's "Status of order" wording; TC-CONT-8 failing on a local finding, mail not delivered) |
+| Contact Form | 12 | 3 (TC-CONT-3, 9 failing on defect 60; TC-CONT-8 failing on a local finding, mail not delivered) |
 | Admin | 12 | 7 (TC-ADM-2, 5, 6, 7, 8, 9, 12 — TC-ADM-5, 6 pass; the rest fail on defect 83 and on local findings) |
 | Chat Widget | 8 | 1 (TC-CHAT-6 — chat sign-in route passes; login-page route failing on defect 32; guest route failing on a local finding) |
 | Discounts | 8 | 5 (TC-DISC-1, 4, 5, 6, 8 — TC-DISC-4 passes; the rest fail locally) |

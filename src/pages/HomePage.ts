@@ -10,7 +10,6 @@ import {
   expectToBeHidden,
   expectToHaveAttribute,
   expectToHaveCSS,
-  expectToHaveValue,
   expectToHaveTitle,
   expectToHaveText,
   expectToHaveURL,
@@ -255,12 +254,6 @@ export class HomePage {
   async verifyBrandNotChecked(brandName: string) {
     await step(`Verify the brand filter is not checked: ${brandName}`, async () => {
       await expectNotToBeChecked(`the brand filter ${brandName}`, this.filter_checkbox(brandName));
-    });
-  }
-
-  async verifySortNotSelected() {
-    await step('Verify no sort option is selected', async () => {
-      await expectToHaveValue('the sort dropdown', this.sort_dropdown, '');
     });
   }
 

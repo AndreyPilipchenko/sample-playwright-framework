@@ -145,7 +145,7 @@ test.describe('Product Overview', () => {
   test('Search resets all active filters', { tag: ['@regression'] }, async () => {
     await allure.feature('Product Overview');
     await allure.testCaseId('TC-PO-6');
-    const { minimumPrice, maximumPrice, activeRange, defaultRange, sortOption } = testData.tcPO6Range;
+    const { minimumPrice, maximumPrice, activeRange, defaultRange } = testData.tcPO6Range;
 
     const searchedUuid = newUuid();
     const filtered = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPO6Filtered);
@@ -155,14 +155,12 @@ test.describe('Product Overview', () => {
     await homePage.filterByBrand(filtered.brandName);
     await homePage.setPriceRange(minimumPrice, maximumPrice);
     await homePage.verifyPriceRange(activeRange);
-    await homePage.sortBy(sortOption);
     await homePage.verifyProductNamesShown([filtered.products[0].name]);
     await homePage.searchFor(searchTokenOf(searchedUuid));
     await homePage.verifyProductNamesShown([searched.products[0].name]);
     await homePage.verifyCategoryNotChecked(filtered.categoryName);
     await homePage.verifyBrandNotChecked(filtered.brandName);
     await homePage.verifyPriceRange(defaultRange);
-    await homePage.verifySortNotSelected();
   });
 
   test('Search query below 3 or above 40 characters is rejected', { tag: ['@regression'] }, async () => {

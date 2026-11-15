@@ -112,7 +112,7 @@ test.describe('User Login', () => {
     await apisUserAccount.verifyLoginLocked(user.email, user.password);
   });
 
-  test('Disabled account shows "Account disabled." and is not authenticated', { tag: ['@local'] }, async () => {
+  test('Disabled account shows "Account disabled" and is not authenticated', { tag: ['@local'] }, async () => {
     await allure.feature('User Login');
     await allure.testCaseId('TC-LOGIN-10');
 
@@ -120,7 +120,7 @@ test.describe('User Login', () => {
     await dbsUserAccount.disableUser(user.email);
     await loginPage.navigate();
     await loginPage.login(user.email, user.password);
-    await loginPage.verifyLoginError(testData.tcLogin10.expectedError);
+    await loginPage.verifyLoginErrorContains(testData.tcLogin10.expectedErrorPart);
     await loginPage.verifyPageOpened();
   });
 
