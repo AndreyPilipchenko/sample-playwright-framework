@@ -14,10 +14,10 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * `Expect <subject> to <verb phrase> <formatted expected>`. Business layers pass a
  * business subject phrase ("the login response status") and the same values the
  * matcher receives — the facade knows verbs, never domain nouns (practice 1 litmus).
- * Direct locator wrappers end the message with " →"; AllureReport appends the public
- * Playwright locator parameter, yielding `<business clause> → <selector tail>`.
- * Polling comparisons include both locator strings themselves. Value/page receivers
- * get no locator tail, hence no delimiter.
+ * Locator wrappers end the message with " → <locator>", yielding
+ * `<business clause> → <selector tail>` in the error header as well as the step title,
+ * so a failure names the element it looked for (AllureReport adds no second copy).
+ * Value/page receivers get no locator tail, hence no delimiter.
  * Callers must keep secrets out of subjects/titles and use secret variants as needed;
  * expected values
  * arrive as the caller's parameters, so a message can never smuggle a literal the
@@ -26,7 +26,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * Contract (playbook §18): no extra `test.step` — the message-titled expect step IS
  * the step, so nesting is identical to a bare expect; locator/page wrappers delegate
  * the `Locator`/`Page` straight to native `expect` (web-first auto-retry and options
- * untouched; AllureReport appends Playwright's locator metadata after the message);
+ * untouched; the message itself carries the locator);
  * one wrapper per matcher actually used in the repo — extend by need (iron law 11).
  * Which call sites MUST use these wrappers is validation-methods §13's territory.
  */
@@ -104,9 +104,13 @@ export function expectToContainAll<T>(subject: string, actual: T[], expected: T[
   expect(actual, `Expect ${subject} to include all of ${fmt(expected)}`).toEqual(expect.arrayContaining(expected));
 }
 
-/** Inverted membership — the element is the business subject, the allowed set the oracle: `Expect <subject> to be one of <allowed>`. */
-export function expectToBeOneOf<T>(subject: string, element: T, allowed: T[]): void {
-  expect(allowed, `Expect ${subject} to be one of ${fmt(allowed)}`).toContain(element);
+/**
+ * Membership — the element is the business subject, the allowed set the oracle: `Expect <subject> to be one of <allowed>`.
+ * Compared with `toBe`, so a failure reads `Expected: [401, 403]` / `Received: 204` rather than toContain's inverted
+ * "Expected value: 204, Received array: [401, 403]".
+ */
+export function expectToBeOneOf<T extends string | number>(subject: string, element: T, allowed: T[]): void {
+  expect(element as unknown, `Expect ${subject} to be one of ${fmt(allowed)}`).toBe(allowed.includes(element) ? element : allowed);
 }
 
 ///// Web-first assertions (auto-retrying — subject is a live Locator/Page, passed straight through)
@@ -118,7 +122,7 @@ export async function expectToHaveText(
   expected: string | RegExp | (string | RegExp)[],
   options?: TextOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to have text ${fmt(expected)} →`).toHaveText(expected, options);
+  await expect(locator, `Expect ${subject} to have text ${fmt(expected)} → ${locator.toString()}`).toHaveText(expected, options);
 }
 
 /** Auto-retrying contains-text assertion (composite elements only — validation-methods §5) — `Expect <subject> to contain text <expected> → …`. */
@@ -128,7 +132,7 @@ export async function expectToContainText(
   expected: string | RegExp | (string | RegExp)[],
   options?: TextOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to contain text ${fmt(expected)} →`).toContainText(expected, options);
+  await expect(locator, `Expect ${subject} to contain text ${fmt(expected)} → ${locator.toString()}`).toContainText(expected, options);
 }
 
 /** Auto-retrying negated contains-text assertion — `Expect <subject> not to contain text <unexpected> → …`. */
@@ -138,7 +142,7 @@ export async function expectNotToContainText(
   unexpected: string | RegExp,
   options?: TextOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} not to contain text ${fmt(unexpected)} →`).not.toContainText(unexpected, options);
+  await expect(locator, `Expect ${subject} not to contain text ${fmt(unexpected)} → ${locator.toString()}`).not.toContainText(unexpected, options);
 }
 
 /** Auto-retrying negated input-value assertion — `Expect <subject> not to have value <unexpected> → …`. */
@@ -148,7 +152,7 @@ export async function expectNotToHaveValue(
   unexpected: string | RegExp,
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} not to have value ${fmt(unexpected)} →`).not.toHaveValue(unexpected, options);
+  await expect(locator, `Expect ${subject} not to have value ${fmt(unexpected)} → ${locator.toString()}`).not.toHaveValue(unexpected, options);
 }
 
 /** Auto-retrying input-value assertion — `Expect <subject> to have value <expected> → …`. */
@@ -158,12 +162,12 @@ export async function expectToHaveValue(
   expected: string | RegExp,
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to have value ${fmt(expected)} →`).toHaveValue(expected, options);
+  await expect(locator, `Expect ${subject} to have value ${fmt(expected)} → ${locator.toString()}`).toHaveValue(expected, options);
 }
 
 /** Auto-retrying negated list-text assertion: the locator's texts have moved away from the `unexpected` list. */
 export async function expectNotToHaveTexts(subject: string, locator: Locator, unexpected: string[], options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} not to read ${fmt(unexpected)} →`).not.toHaveText(unexpected, options);
+  await expect(locator, `Expect ${subject} not to read ${fmt(unexpected)} → ${locator.toString()}`).not.toHaveText(unexpected, options);
 }
 
 /** Auto-retrying count assertion — `Expect <subject> to show <expected> <unit>(s) → …`; `unit` defaults to "item". */
@@ -174,7 +178,7 @@ export async function expectToHaveCount(
   unit: string = 'item',
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to show ${expected} ${unit}(s) →`).toHaveCount(expected, options);
+  await expect(locator, `Expect ${subject} to show ${expected} ${unit}(s) → ${locator.toString()}`).toHaveCount(expected, options);
 }
 
 /**
@@ -265,12 +269,14 @@ export async function expectTextsToEqualInAnyOrder(
   expected: string[],
   options?: RetryOptions,
 ): Promise<void> {
+  // Both sides are sorted, and the title prints the sorted list, so it matches the diff of a failure.
+  const sortedExpected = [...expected].sort();
   await expect
     .poll(async () => (await locator.allTextContents()).map((text) => text.trim()).sort(), {
-      message: `Expect ${subject} to be exactly ${fmt(expected)} in any order → ${locator.toString()}`,
+      message: `Expect ${subject} to be exactly ${fmt(sortedExpected)} in any order (both sorted) → ${locator.toString()}`,
       ...options,
     })
-    .toEqual([...expected].sort());
+    .toEqual(sortedExpected);
 }
 
 /** Auto-retrying negated count assertion — `Expect <subject> not to show <unexpected> <unit>(s) → …`. */
@@ -281,7 +287,7 @@ export async function expectNotToHaveCount(
   unit: string = 'item',
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} not to show ${unexpected} ${unit}(s) →`).not.toHaveCount(unexpected, options);
+  await expect(locator, `Expect ${subject} not to show ${unexpected} ${unit}(s) → ${locator.toString()}`).not.toHaveCount(unexpected, options);
 }
 
 /** Auto-retrying attribute assertion — `Expect <subject> to have <name> = <value> → …`. */
@@ -292,7 +298,7 @@ export async function expectToHaveAttribute(
   value: string | RegExp,
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to have ${name} = ${fmt(value)} →`).toHaveAttribute(name, value, options);
+  await expect(locator, `Expect ${subject} to have ${name} = ${fmt(value)} → ${locator.toString()}`).toHaveAttribute(name, value, options);
 }
 
 /** Auto-retrying CSS-property assertion — `Expect <subject> to have css <property> = <value> → …`. */
@@ -303,37 +309,37 @@ export async function expectToHaveCSS(
   value: string | RegExp,
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to have css ${property} = ${fmt(value)} →`).toHaveCSS(property, value, options);
+  await expect(locator, `Expect ${subject} to have css ${property} = ${fmt(value)} → ${locator.toString()}`).toHaveCSS(property, value, options);
 }
 
 /** Auto-retrying visibility assertion — `Expect <subject> to be visible → …`. */
 export async function expectToBeVisible(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} to be visible →`).toBeVisible(options);
+  await expect(locator, `Expect ${subject} to be visible → ${locator.toString()}`).toBeVisible(options);
 }
 
 /** Auto-retrying hidden-state assertion — `Expect <subject> to be hidden → …`. */
 export async function expectToBeHidden(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} to be hidden →`).toBeHidden(options);
+  await expect(locator, `Expect ${subject} to be hidden → ${locator.toString()}`).toBeHidden(options);
 }
 
 /** Auto-retrying enabled-state assertion — `Expect <subject> to be enabled → …`. */
 export async function expectToBeEnabled(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} to be enabled →`).toBeEnabled(options);
+  await expect(locator, `Expect ${subject} to be enabled → ${locator.toString()}`).toBeEnabled(options);
 }
 
 /** Auto-retrying disabled-state assertion — `Expect <subject> to be disabled → …`. */
 export async function expectToBeDisabled(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} to be disabled →`).toBeDisabled(options);
+  await expect(locator, `Expect ${subject} to be disabled → ${locator.toString()}`).toBeDisabled(options);
 }
 
 /** Auto-retrying checked-state assertion — `Expect <subject> to be checked → …`. */
 export async function expectToBeChecked(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} to be checked →`).toBeChecked(options);
+  await expect(locator, `Expect ${subject} to be checked → ${locator.toString()}`).toBeChecked(options);
 }
 
 /** Auto-retrying negated checked-state assertion — `Expect <subject> not to be checked → …` (negation stated here: the message discards Playwright's `not` marker). */
 export async function expectNotToBeChecked(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} not to be checked →`).not.toBeChecked(options);
+  await expect(locator, `Expect ${subject} not to be checked → ${locator.toString()}`).not.toBeChecked(options);
 }
 
 ///// Secret-valued assertions (the expected value is a credential — asserted for real, never rendered in any title; iron law 7)
@@ -345,7 +351,7 @@ export async function expectToContainSecretText(
   secretValue: string | RegExp,
   options?: TextOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to contain the confidential expected text →`).toContainText(secretValue, options);
+  await expect(locator, `Expect ${subject} to contain the confidential expected text → ${locator.toString()}`).toContainText(secretValue, options);
 }
 
 /** Auto-retrying input-value assertion whose expected value is confidential — titled `Expect <subject> to have the confidential expected value → …`; the matcher still receives and asserts the real value. */
@@ -355,7 +361,7 @@ export async function expectToHaveSecretValue(
   secretValue: string | RegExp,
   options?: RetryOptions,
 ): Promise<void> {
-  await expect(locator, `Expect ${subject} to have the confidential expected value →`).toHaveValue(secretValue, options);
+  await expect(locator, `Expect ${subject} to have the confidential expected value → ${locator.toString()}`).toHaveValue(secretValue, options);
 }
 
 /** Auto-retrying page-URL assertion (arrival checks pass the page class's own `url` field) — `Expect the page URL to be <expected>`. */

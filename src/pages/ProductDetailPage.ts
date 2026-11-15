@@ -162,8 +162,9 @@ export class ProductDetailPage {
     });
   }
 
-  async verifyDiscountBadge(expectedText: string) {
-    await step(`Verify the discount badge reads ${expectedText}`, async () => {
+  /** `location` names where the browser reports itself, so a failure says which location's badge was wrong. */
+  async verifyDiscountBadge(expectedText: string, location: string) {
+    await step(`Verify the discount badge reads ${expectedText} in ${location}`, async () => {
       await expectToHaveText('the discount badge', this.discount_txt, expectedText);
     });
   }

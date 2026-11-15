@@ -48,20 +48,20 @@ test.describe('Discounts', () => {
     await homePage.navigate();
     await useBrowserLocation(page, cities.mumbai);
     await productDetailPage.navigate(catalog.products[0].id);
-    await productDetailPage.verifyDiscountBadge(badges.mumbai);
+    await productDetailPage.verifyDiscountBadge(badges.mumbai, cities.mumbai.name);
     await useBrowserLocation(page, cities.tokyo);
     await productDetailPage.navigate(catalog.products[0].id);
-    await productDetailPage.verifyDiscountBadge(badges.tokyo);
+    await productDetailPage.verifyDiscountBadge(badges.tokyo, cities.tokyo.name);
     await useBrowserLocation(page, cities.amsterdam);
     await productDetailPage.navigate(catalog.products[0].id);
-    await productDetailPage.verifyDiscountBadge(badges.amsterdam);
+    await productDetailPage.verifyDiscountBadge(badges.amsterdam, cities.amsterdam.name);
     await useBrowserLocation(page, cities.london);
     await productDetailPage.navigate(catalog.products[0].id);
-    await productDetailPage.verifyDiscountBadge(badges.london);
+    await productDetailPage.verifyDiscountBadge(badges.london, cities.london.name);
     // New York last: its longitude is the one the app handles differently, so a failure there hides nothing.
     await useBrowserLocation(page, cities.newYork);
     await productDetailPage.navigate(catalog.products[0].id);
-    await productDetailPage.verifyDiscountBadge(badges.newYork);
+    await productDetailPage.verifyDiscountBadge(badges.newYork, cities.newYork.name);
   });
 
   test('Cart line carries the location discount', { tag: ['@smoke'] }, async ({ page }) => {

@@ -15,7 +15,8 @@ export interface GeoPosition {
  * page class owns.
  */
 export async function useBrowserLocation(page: Page, position: GeoPosition): Promise<void> {
-  await page.context().setGeolocation(position);
+  // Only the coordinates: test data may name the place too, and Playwright rejects unknown fields.
+  await page.context().setGeolocation({ latitude: position.latitude, longitude: position.longitude });
   await page.evaluate(({ request, answer, storage }) => {
     window[storage].removeItem(answer);
     window[storage].setItem(request, '1');
