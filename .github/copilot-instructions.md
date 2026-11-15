@@ -17,7 +17,7 @@ requests run no Playwright tests. When reviewing, flag these in particular:
   loops or conditionals in test bodies.
 - `src/pages/` page classes hold locators and business-named actions wrapped in Allure steps;
   checks are `verify*` methods in a `///// Validations` section.
-- `src/apis/` and `src/dbs/` service classes go through the `ApiActions` / `DBActions`
+- `src/apis/` and `src/dbs/` service classes go through the `ApiActions` / `MySqlActions`
   facades in `src/utils/`, never the raw driver.
 - Technical complexity (retries, try/catch, parsing) belongs in `src/utils/` only.
 

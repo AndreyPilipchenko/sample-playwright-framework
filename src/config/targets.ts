@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
-import type { DBConnectionConfig } from '../utils/DBActions';
+import type { MySqlConnectionConfig } from '../utils/MySqlActions';
 
 /**
  * Destinations are entered once, in `.harness/targets.json` — the file written when
@@ -82,7 +82,7 @@ export const apiUrl = (name: string): string => {
 };
 
 /** A database's coordinates from the environment's target, its credentials from the variable the target names. */
-export function databaseTarget(name: string): DBConnectionConfig {
+export function databaseTarget(name: string): MySqlConnectionConfig {
   const id = environmentTargetId('databaseTargets', name);
   const target = id ? targets.databases?.[id] : undefined, prefix = variablePrefix(name);
   const credentials = target ? JSON.parse(process.env[target.connectionRef.slice('env:'.length)] || '{}') : { user: process.env.DB_USER, password: process.env.DB_PASSWORD };
@@ -93,7 +93,5 @@ export function databaseTarget(name: string): DBConnectionConfig {
     database: process.env[`${prefix}_NAME`] || target?.database || '',
     user: credentials.user ?? '',
     password: credentials.password ?? '',
-    encrypt: target?.encrypt,
-    trustServerCertificate: target?.trustServerCertificate,
   };
 }

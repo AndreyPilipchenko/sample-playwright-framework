@@ -142,7 +142,7 @@ src/pages/    GUI business layer — page classes (locators + actions + validati
 src/apis/     API business layer — service classes per domain (accounts, catalog, invoices, users, logs, GraphQL)
 src/dbs/      DB business layer — DbsUserAccount (local stack only, see Running the app locally)
 src/helpers/  Flows across the API and several pages, shared by specs (CustomerFlows)
-src/utils/    Reusable core: technical layer — ApiActions/DBActions facades, Allure/report plumbing
+src/utils/    Reusable core: technical layer — ApiActions/MySqlActions facades, Allure/report plumbing
 src/config/   App settings: environment & target coordinates (reads .harness/targets.json / .env), the version each environment runs (builds.ts)
 src/fixtures/ Reusable core: the suite's `test` with the `role` option (signed-in sessions)
 tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only

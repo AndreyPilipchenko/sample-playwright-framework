@@ -6,8 +6,8 @@ import { REDACTED_KEYS } from './RedactedKeys';
 type QueryValue = QueryOptions['values'];
 
 /**
- * Connection settings for one MySQL / MariaDB database. Field names match
- * DBConnectionConfig, so `databaseTarget()` in src/config/targets.ts feeds either facade.
+ * Connection settings for one MySQL / MariaDB database, as `databaseTarget()` in
+ * src/config/targets.ts builds them.
  * The password never appears in any log or attachment.
  */
 export interface MySqlConnectionConfig {
@@ -68,8 +68,8 @@ interface MySqlQueryLog {
 }
 
 /**
- * Logging facade over a mysql2 Pool — the MySQL / MariaDB sibling of DBActions,
- * with the same report surface: `DB QUERY` / `DB CONNECT` / `DB CLOSE` steps and
+ * Logging facade over a mysql2 Pool — the database sibling of ApiActions,
+ * with this report surface: `DB QUERY` / `DB CONNECT` / `DB CLOSE` steps and
  * `Query details` / `Query results` (or `Query error`), `Connection details` and
  * `Close details` attachments nested inside them, in the Allure and HTML reports alike.
  *
@@ -320,7 +320,7 @@ export class MySqlActions {
 
   /**
    * Recursively masks secret-like keys (password, token, ...) in objects/arrays, up to
-   * 6 levels deep. Unlike DBActions it also walks class instances, because mysql2 rows
+   * 6 levels deep. It also walks class instances, because mysql2 rows
    * are RowDataPacket objects rather than plain ones; Dates and Buffers are kept as values.
    */
   private redactDeep(value: unknown, depth = 0): unknown {
