@@ -12,7 +12,9 @@ reports, updated every night.
 
 [![The results dashboard: 149 tests, 78 passed, 71 failed, then results by job and why the tests failed](docs/images/dashboard.png)](https://andreypilipchenko.github.io/sample-playwright-framework/)
 
-*The dashboard after the run of 6 November 2026. The link above shows the latest run.*
+*The dashboard after the run of 6 November 2026, before it showed both versions of the shop. The link above
+shows the latest run: each version's counts side by side, which tests the newer version fixes, which are red on
+both and which are red only on the newer one, then the reasons per version.*
 
 **The tests run against a local copy of the shop in Docker.** The public site is too unstable to test
 against: many people use it at once, and it sometimes breaks completely.
@@ -128,7 +130,7 @@ one job's failure doesn't stop the others.
 |---|---|---|
 | **Allure** | `reports/allure-report/index.html`; CI artifact `allure-report-<job>` | Main report, with business-titled steps. Opens after a local run (`AUTO_ALLURE_OPEN=false` turns that off) |
 | **Traces** | `test-results/`; CI artifact `traces-<job>`, kept for 7 days | One per failed test. Open with `npx playwright show-trace trace.zip` |
-| **Results dashboard** | [Live site](https://andreypilipchenko.github.io/sample-playwright-framework/), or locally `reports/quality-dashboard/index.html`: run `node scripts/quality-dashboard.mjs local=reports/json-report/test-results.json` after a run | Pass and fail counts by area, and the recorded reason for each failure |
+| **Results dashboard** | [Live site](https://andreypilipchenko.github.io/sample-playwright-framework/), or locally `reports/quality-dashboard/index.html`: run `node scripts/quality-dashboard.mjs local=reports/json-report/test-results.json` after a run | Pass and fail counts by area, and the recorded reason for each failure. With inputs named `<environment>/<job>` (as on the live site), one section per version and a comparison of the two |
 | **CI summary** | The run's Summary page | Counts, failures with their assertion, and what changed since the last run |
 | **Playwright HTML** | `reports/playwright-report/`; CI only when `PUBLISH_REPORTS` is `true` | Open with `npx playwright show-report reports/playwright-report` |
 | **JSON, JUnit, CTRF** | `reports/json-report/`, `reports/junit/`, `ctrf/` | For other tools |

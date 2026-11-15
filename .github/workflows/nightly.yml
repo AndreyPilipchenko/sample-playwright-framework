@@ -241,13 +241,13 @@ jobs:
         run: node scripts/app.mjs down --volumes || true
 
   # Publishes the latest full run to GitHub Pages: the results dashboard and each job's Allure report.
-  # A failing test doesn't stop it, since failures are what the site shows, but a filtered run
-  # would replace the full results, so it doesn't publish. It needs Settings > Pages > Source set to
-  # GitHub Actions. For now the site shows the `local` build only (scripts/build-site.mjs picks the
-  # local-* reports), so a run that left `local` out doesn't publish.
+  # The dashboard shows both builds side by side and compares them (scripts/quality-dashboard.mjs).
+  # A failing test doesn't stop it, since failures are what the site shows, but a filtered run, or
+  # one that tested a single build, would replace the full results, so it doesn't publish. It needs
+  # Settings > Pages > Source set to GitHub Actions.
   publish-site:
     needs: [api, smoke, regression]
-    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.environment != 'local-fixed' }}
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.environment != 'local' && inputs.environment != 'local-fixed' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -264,17 +264,16 @@ jobs:
         with:
           node-version: '24'
 
-      # The patterns also match the local-fixed artifacts; build-site.mjs reads only the names it knows.
       - name: Download the Allure reports
         uses: actions/download-artifact@v8
         with:
-          pattern: allure-report-local-*
+          pattern: allure-report-*
           path: artifacts
 
       - name: Download the results
         uses: actions/download-artifact@v8
         with:
-          pattern: results-local-*
+          pattern: results-*
           path: artifacts
 
       - name: Build the site

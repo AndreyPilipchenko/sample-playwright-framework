@@ -51,7 +51,7 @@ tests its own private Docker instance on its runner:
 | `api` | The browserless API specs (`tests/api`): `@regression` and `@local` |
 | `smoke` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
 | `regression` | The `@regression` and `@local` specs on chromium |
-| `publish-site` | Runs after them: publishes the dashboard and the `local` Allure reports to GitHub Pages, unless the run was filtered, left `local` out, or the secret check fails |
+| `publish-site` | Runs after them: publishes the dashboard and the Allure reports of both environments to GitHub Pages (`<environment>/<job>/`), unless the run was filtered, tested one environment only, or the secret check fails |
 
 Artifacts carry the environment in their name: `allure-report-local-api`, `allure-report-local-fixed-api`,
 `traces-local-fixed-regression`, and so on.

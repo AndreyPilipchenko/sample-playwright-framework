@@ -141,6 +141,9 @@ state "Limburg") and `3511AB` (city "Einighausen", state "Groningen"). The looku
 
 ## C. Still red on the fixed build
 
+`scripts/quality-dashboard.mjs` reads this table as the recorded reason for a failure on the fixed build, so keep
+its three columns; a Case cell may name several cases (`TC-ADM-7, 8, 9`).
+
 | Case | Red on | Observation |
 |---|---|---|
 | TC-CAT-3 | both builds | The fixed category page has no price-range filter, so its filters differ from the product overview's |
