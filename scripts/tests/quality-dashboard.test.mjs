@@ -44,6 +44,27 @@ const BUG_REPORTS = `
 | [Fake report](fake-report.md) | new | TC-A-5 | Open |
 | [Fake sighting](fake-sighting.md) | new | seen in TC-A-6 | Open |
 `;
+const BUILDS = `export const environmentBuilds = {
+  local: 'withBugs',
+  'local-fixed': 'fixed',
+};
+`;
+const APP_VERSIONS = `
+## B. Real changes
+
+| TC-A-11 | Fake row outside section C |
+
+## C. Still red on the fixed build
+
+| Case | Red on | Observation |
+|---|---|---|
+| TC-A-1 | fixed only | Fake [observation](fake.md) with \`code\` |
+| TC-A-2, 3 | both builds | Fake shared observation |
+
+## Hosted and local
+
+| TC-A-5 | Fake row after section C |
+`;
 const SPEC_FILE = 'api/x/Fake.spec.ts';
 const CASE_IDS = ['TC-A-1', 'TC-A-2', 'TC-A-3', 'TC-A-4', 'TC-A-5', 'TC-A-6', 'TC-A-7', 'TC-A-8a', 'TC-A-9', 'TC-A-10', 'TC-A-11'];
 /** Each test takes three lines; one test declares no case ID, and must not take the next test's. */
@@ -65,6 +86,8 @@ function build(t, jobs, { reports = [] } = {}) {
   writeFile(root, 'docs/known-defects.md', KNOWN_DEFECTS);
   writeFile(root, 'docs/test-cases.md', TEST_CASES);
   writeFile(root, 'docs/bug-reports/README.md', BUG_REPORTS);
+  writeFile(root, 'docs/app-versions.md', APP_VERSIONS);
+  writeFile(root, 'src/config/builds.ts', BUILDS);
   writeFile(root, `tests/${SPEC_FILE}`, SPEC_SOURCE);
   const inputs = Object.entries(jobs).map(([job, content], index) => `${job}=${content === undefined ? path.join(root, 'absent.json') : writeFile(root, `input-${index}.json`, content)}`);
   for (const report of reports) writeFile(root, `site/${report}/index.html`, '<html></html>');
@@ -240,6 +263,80 @@ test('the page asks search engines to stay away and cannot run scripts', (t) => 
   assert.match(html, /<meta name="robots" content="noindex">/);
   assert.match(html, /Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"/);
   assert.doesNotMatch(html, /<script/);
+});
+
+/** A test in the fake spec that declares this case ID, with the given outcome. */
+const caseTest = (id, status) => spec(id, status, { file: SPEC_FILE, line: lineOf(id) });
+const comparisonCounts = (text) => text.match(/(\d+) fixed in the newer build (\d+) red on both builds (\d+) red only on the newer build/).slice(1).map(Number);
+
+test('each environment gets its own counts, and both builds are compared', (t) => {
+  const { text } = build(t, {
+    'local/api': results(fileSuite([
+      caseTest('TC-A-1', 'unexpected'), caseTest('TC-A-2', 'unexpected'), caseTest('TC-A-4', 'expected'),
+      caseTest('TC-A-11', 'expected'), caseTest('TC-A-5', 'skipped'),
+    ])),
+    'local-fixed/api': results(fileSuite([
+      caseTest('TC-A-1', 'expected'), caseTest('TC-A-2', 'unexpected'), caseTest('TC-A-4', 'unexpected'),
+      caseTest('TC-A-11', 'unexpected'), caseTest('TC-A-5', 'unexpected'),
+    ])),
+  });
+  assert.match(text, /local: the build with the deliberate defects 5 tests 2 passed 2 failed 1 skipped/);
+  assert.match(text, /local-fixed: the newer build without them 5 tests 1 passed 4 failed/);
+  assert.match(text, /The 4 tests that ran on both/);
+  assert.deepEqual(comparisonCounts(text), [1, 1, 2]);
+  assert.match(text, /2 with no recorded reason/);
+  assert.match(text, /On local: the build with the deliberate defects/);
+  assert.match(text, /On local-fixed: the newer build without them/);
+});
+
+test('a test fixed in the newer build shows the reason recorded for the older one', (t) => {
+  const { text } = build(t, {
+    'local/api': results(fileSuite([caseTest('TC-A-1', 'unexpected')])),
+    'local-fixed/api': results(fileSuite([caseTest('TC-A-1', 'expected')])),
+  });
+  assert.match(text, /Fixed in the newer build: 1 .*TC-A-1 Defect 71: Fake defect about users/);
+});
+
+test('on the fixed build the reason comes from section C of App versions, as plain text', (t) => {
+  const { html, text } = build(t, { 'local-fixed/api': results(fileSuite([caseTest('TC-A-1', 'unexpected')])) });
+  assert.match(text, /1 with an observation recorded for this build 0 with no recorded reason/);
+  assert.match(text, /Fake observation with code/);
+  assert.doesNotMatch(text, /Defect 71/);
+  assert.doesNotMatch(html, /fake\.md|`/);
+});
+
+test('a C row naming several cases applies to each of them', (t) => {
+  const { text } = build(t, { 'local-fixed/api': results(fileSuite([caseTest('TC-A-3', 'unexpected')])) });
+  assert.match(text, /TC-A-3 Fake shared observation/);
+});
+
+test('rows outside section C are not fixed-build reasons', (t) => {
+  for (const id of ['TC-A-5', 'TC-A-11']) {
+    const { text } = build(t, { 'local-fixed/api': results(fileSuite([caseTest(id, 'unexpected')])) });
+    assert.match(text, /0 with an observation recorded for this build 1 with no recorded reason/, id);
+  }
+});
+
+test('the build with the deliberate defects keeps the reasons of the test cases', (t) => {
+  const { text } = build(t, { 'local/api': results(fileSuite([caseTest('TC-A-1', 'unexpected')])) });
+  assert.match(text, /1 on a defect in the shop's published list/);
+  assert.match(text, /Defect 71: Fake defect about users/);
+  assert.doesNotMatch(text, /Fake observation/);
+});
+
+test('one environment alone gets no comparison', (t) => {
+  const { text } = build(t, { 'local/api': results(fileSuite([caseTest('TC-A-1', 'unexpected')])) });
+  assert.doesNotMatch(text, /compared|fixed in the newer build/);
+});
+
+test('with environments, the job table has an environment column and links each report', (t) => {
+  const { html } = build(t, {
+    'local/api': results(fileSuite([spec('A', 'expected')])),
+    'local-fixed/api': results(fileSuite([spec('A', 'expected')])),
+  }, { reports: ['local-fixed/api'] });
+  assert.match(html, /<th>Environment<\/th><th>Job<\/th>/);
+  assert.match(html, /<tr><td>local-fixed<\/td><td>api<\/td>.*?href="local-fixed\/api\/index\.html"/);
+  assert.doesNotMatch(html, /href="local\/api\/index\.html"/);
 });
 
 test('no results at all is an error rather than an empty page', (t) => {

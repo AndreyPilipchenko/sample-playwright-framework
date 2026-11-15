@@ -52,7 +52,7 @@ Replace the page classes, API and database services, helpers, specs and test dat
 | Local app stack | `scripts/app.mjs`, `.github/actions/start-local-app` |
 | Jobs, secrets and the product repository's trigger | `.github/workflows/nightly.yml`, `.github/workflows/smoke-on-commit.yml` |
 | Report names on the live site | `REPORT_NAMES` in `scripts/build-site.mjs` |
-| Reasons on the dashboard | `docs/test-cases.md`, `docs/known-defects.md` and `docs/bug-reports/README.md`, which `scripts/quality-dashboard.mjs` needs, and the Toolshop sentence on its page |
+| Reasons on the dashboard | `docs/test-cases.md`, `docs/known-defects.md` and `docs/bug-reports/README.md`, which `scripts/quality-dashboard.mjs` needs, and the Toolshop sentences on its page. For two builds side by side, also `src/config/builds.ts` and the "C. Still red on the fixed build" table of `docs/app-versions.md`, and the environment list in `scripts/build-site.mjs` |
 | App words that core must not name | `APP_TERMS` in `scripts/check-core-boundary.mjs`, and the matching cases in `scripts/tests/` |
 | Toolshop documents and their license notice | `docs/`, `NOTICE.md` |
 | The gitignored local copy of the app, and the agent instructions | `.app/`, `.github/copilot-instructions.md` |

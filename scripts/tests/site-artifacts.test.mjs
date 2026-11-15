@@ -64,18 +64,29 @@ function artifacts(root, names, reportHtml = '<html><head><title>Report</title><
   return folder;
 }
 
-test('the site holds the dashboard and each report, marked noindex', (t) => {
+test('the site holds the dashboard and each report under its environment, marked noindex', (t) => {
   const root = tempFolder(t);
   const site = path.join(root, 'site');
-  const { status, output } = runScript('build-site.mjs', [artifacts(root, ['local-api', 'local-regression']), site]);
+  const { status, output } = runScript('build-site.mjs', [artifacts(root, ['local-api', 'local-regression', 'local-fixed-api']), site]);
   assert.equal(status, 0, output);
 
   assert.equal(existsSync(path.join(site, 'robots.txt')), false);
-  const report = readFileSync(path.join(site, 'local-api/index.html'), 'utf8');
+  const report = readFileSync(path.join(site, 'local/api/index.html'), 'utf8');
   assert.match(report, /<head><meta name="robots" content="noindex">/);
+  assert.equal(existsSync(path.join(site, 'local-fixed/api/index.html')), true);
   const dashboard = readFileSync(path.join(site, 'index.html'), 'utf8');
-  assert.match(dashboard, /href="local-regression\/index\.html"/);
-  assert.match(dashboard, /No results from: local-smoke-chromium/);
+  assert.match(dashboard, /href="local\/regression\/index\.html"/);
+  assert.match(dashboard, /href="local-fixed\/api\/index\.html"/);
+  assert.match(dashboard, /No results from: local\/smoke-chromium/);
+  assert.match(dashboard, /local-fixed\/regression/);
+});
+
+test('an artifact of another environment is not put on the site', (t) => {
+  const root = tempFolder(t);
+  const site = path.join(root, 'site');
+  assert.equal(runScript('build-site.mjs', [artifacts(root, ['local-api', 'hosted-api']), site]).status, 0);
+  assert.equal(existsSync(path.join(site, 'hosted')), false);
+  assert.equal(existsSync(path.join(site, 'hosted-api')), false);
 });
 
 test('a report without a head stops the build rather than going unmarked', (t) => {
