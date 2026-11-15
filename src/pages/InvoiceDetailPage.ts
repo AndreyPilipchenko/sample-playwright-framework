@@ -38,7 +38,9 @@ export class InvoiceDetailPage {
     this.page = page;
     this.invoiceNumber_input = page.getByTestId('invoice-number');
     this.invoiceDate_input = page.getByTestId('invoice-date');
-    this.total_input = page.getByTestId('total');
+    // On a discounted invoice the fixed build gives the subtotal, discount and total fields the same test id `total`
+    // and points every label at the total field (docs/app-versions.md, C), so only the element ids tell them apart.
+    this.total_input = page.locator('#total');
     // The fixed build names the address fields street / postal_code (docs/app-versions.md, B3); its payment fields
     // carry no test id, only a label (B7).
     this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
@@ -49,8 +51,8 @@ export class InvoiceDetailPage {
     this.paymentMethod_input = page.getByTestId('payment-method');
     this.accountName_input = byBuild({ fixed: page.getByLabel('Account Name', { exact: true }), default: page.getByTestId('account-name') });
     this.accountNumber_input = byBuild({ fixed: page.getByLabel('Account Number', { exact: true }), default: page.getByTestId('account-number') });
-    this.subtotal_input = page.getByLabel('Subtotal', { exact: true });
-    this.discount_input = page.getByLabel('Discount amount', { exact: true });
+    this.subtotal_input = page.locator('#subtotal');
+    this.discount_input = page.locator('#additional_discount_percentage');
     this.notExist_txt = page.locator('p', { hasText: /This invoice doesn't exist/ });
   }
 

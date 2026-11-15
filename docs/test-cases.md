@@ -547,8 +547,10 @@ other amounts (docs/app-versions.md, B16). On the local build the New York badge
 is not confirmed, the upstream source handles longitude with a sign quirk). TC-DISC-5, 6 and 8 reuse the mixed
 rental and non-rental cart of TC-CART-10 and 11; TC-DISC-8 places the order through checkout and reads the invoice's
 subtotal, discount amount and total. All three fail on the local build: it applies no combination discount, and its
-invoice page has no Subtotal or Discount amount field. The Subtotal and Discount amount labels come from the
-defect-free upstream source.
+invoice page has no Subtotal or Discount amount field. TC-DISC-8 reads the three amounts by element id (`#subtotal`,
+`#additional_discount_percentage`, `#total`): on a discounted invoice the fixed build gives all three the test id
+`total`, labels the discount "Discount (15%)" and points every label at the total field, so neither the test id nor
+the label tells them apart.
 
 Geo rates: New York 5%, Mumbai 10%, Tokyo 15%, Amsterdam 20%, London 25%.
 Geo-location testing requires browser-context geolocation override plus the

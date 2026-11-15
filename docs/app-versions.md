@@ -43,9 +43,10 @@ public-instance hiccups that passed on a rerun: three 500s on `hosted-with-bugs`
 The `local-fixed` row is from 2026-11-15, with the demo admin login and the stack's queue worker (B15), and TC-DISC-4 counted as passing after the owner accepted the offer price display (B16). It also counts the split of the
 chat sign-in route (2026-11-15): TC-CHAT-6a now signs in on the login page and passes, and the new TC-CHAT-6c keeps the
 chat's own sign-in and fails, so the suite has one more test (150 locally, 146 hosted) than the other rows. Its 15
-failures were exactly the cases in C at the time. Four of them have since left C by owner decision of 2026-11-15:
+failures were exactly the cases in C at the time. Five of them have since left C: by owner decision of 2026-11-15,
 TC-REG-7, TC-LOGIN-10, TC-CONT-3 and TC-PO-6 now expect what the fixed build shows (see
-[test cases](test-cases.md)), so the next fixed run should fail 11, not yet measured. The other rows come from runs on 2026-11-14 without admin credentials
+[test cases](test-cases.md)), and TC-DISC-8 reads the invoice amounts by element id instead of by label. The next
+fixed run should fail 10; this is not yet measured. The other rows come from runs on 2026-11-14 without admin credentials
 (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved
 session", and the admin setup and TC-LOGIN-3 were skipped. The admin specs were run separately on `local` on
 2026-11-15: TC-ADM-5 and 6 pass and TC-ADM-2, 7, 8, 9 and 12 fail on their recorded causes. The tables below include
@@ -160,7 +161,6 @@ its three columns; a Case cell may name several cases (`TC-ADM-7, 8, 9`).
 | TC-CART-1 | both builds | The last column of the cart table has no "Actions" header |
 | TC-DISC-1 | both builds | No New York badge |
 | TC-CPW-3 | both builds | The page shows the server's "The new password field confirmation does not match." instead of "Passwords do not match." ([report](bug-reports/change-password-mismatch-message.md)) |
-| TC-DISC-8 | both builds | The with-bugs build applies no combination discount. On a discounted invoice the fixed build gives the subtotal, discount and total fields the same test id `total`, labels the discount "Discount (15%)" instead of "Discount amount", and points all three labels at the total field, so no field is named Subtotal |
 | TC-ADM-2 | both builds | The with-bugs build saves the edit, but the list keeps showing the old price ([report](bug-reports/admin-product-list-stale-after-save.md)). The fixed build's edit form opens with Stock, Brand, Category and Image empty, because `GET /products/{id}` no longer returns them (B5), so saving an edit fails with "Quantity is required". Creating a product works on both |
 | TC-CBA-3 | fixed only | Clearing the street disables Proceed, but no error message names the field |
 | TC-CPAY-13 | fixed only | After an order the cart page shows no "cart is empty" message; it appears only after removing items by hand |
