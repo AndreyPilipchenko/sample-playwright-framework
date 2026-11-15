@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToHaveText, expectToHaveValue } from '../utils/Expects';
+import { expectTextsToContainAll, expectToHaveValue } from '../utils/Expects';
 
 /** The values typed into the product form. */
 export interface AdminProductSeed {
@@ -82,10 +82,14 @@ export class AdminProductFormPage {
 
   ///// Validations
 
-  /** `expected` is the only message shown, so a failure lists the messages the form does show (e.g. a field error). */
+  /**
+   * `expected` is among the messages shown; a failure lists the ones the form does show. Other messages may show beside
+   * it: after a successful create the fixed build clears the form, which flags the now empty Stock field ("Quantity is
+   * required") next to "Product saved!". The success message fades after about 5 seconds.
+   */
   async verifySaved(expected: string) {
     await step(`Verify the message "${expected}" is shown`, async () => {
-      await expectToHaveText('the product form messages', this.shownAlerts_msg, [expected]);
+      await expectTextsToContainAll('the product form messages', this.shownAlerts_msg, [expected]);
     });
   }
 
