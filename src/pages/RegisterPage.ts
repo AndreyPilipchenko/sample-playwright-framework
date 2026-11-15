@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
+import { addressFieldLocators } from './AddressFields';
 import { expectNotToContainText, expectToBeVisible, expectToHaveText } from '../utils/Expects';
 import { waitUntilFilled } from '../utils/Waits';
 
@@ -83,12 +84,9 @@ export class RegisterPage {
     this.firstName_input = page.getByTestId('first-name');
     this.lastName_input = page.getByTestId('last-name');
     this.dateOfBirth_input = page.getByTestId('dob');
-    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
-    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
+    ({ address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_dropdown } =
+      addressFieldLocators(page));
     this.houseNumber_input = page.getByTestId('house_number');
-    this.city_input = page.getByTestId('city');
-    this.state_input = page.getByTestId('state');
-    this.country_dropdown = page.getByTestId('country');
     this.phone_input = page.getByTestId('phone');
     this.email_input = page.getByTestId('email');
     this.password_input = page.getByTestId('password');

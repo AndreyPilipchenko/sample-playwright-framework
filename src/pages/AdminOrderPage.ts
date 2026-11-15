@@ -2,6 +2,7 @@ import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
+import { addressFieldLocators } from './AddressFields';
 import { expectToHaveText, expectToHaveValue } from '../utils/Expects';
 import { rowWithCell } from '../utils/TableRows';
 
@@ -39,9 +40,8 @@ export class AdminOrderPage {
     this.status_dropdown = page.getByTestId('order-status');
     this.updateStatus_button = page.getByTestId('update-status-submit');
     this.statusMessage_input = page.getByTestId('status-message');
-    // As on the invoice page, the fixed build names the address field street (docs/app-versions.md, B3) and its
-    // payment fields carry no test id, only a label (B7).
-    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
+    this.address_input = addressFieldLocators(page).address;
+    // As on the invoice page, the fixed build's payment fields carry no test id, only a label (docs/app-versions.md, B7).
     this.paymentMethod_input = page.getByTestId('payment-method');
     this.accountName_input = byBuild({ fixed: page.getByLabel('Account Name', { exact: true }), default: page.getByTestId('account-name') });
     this.accountNumber_input = byBuild({ fixed: page.getByLabel('Account Number', { exact: true }), default: page.getByTestId('account-number') });

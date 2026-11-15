@@ -1,6 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { byBuild } from '../utils/AppEnvironment';
+import { addressFieldLocators } from './AddressFields';
 import { expectToBeDisabled, expectToBeVisible, expectToHaveText, expectToHaveValue } from '../utils/Expects';
 import { waitUntilFilled } from '../utils/Waits';
 
@@ -37,11 +38,8 @@ export class CheckoutAddressPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
-    this.city_input = page.getByTestId('city');
-    this.state_input = page.getByTestId('state');
-    this.country_input = page.getByTestId('country');
-    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
+    ({ address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_input } =
+      addressFieldLocators(page));
     this.houseNumber_input = page.getByTestId('house_number');
     this.proceed_button = page.getByTestId('proceed-3');
     this.fieldError_txt = page.locator('.alert-danger');

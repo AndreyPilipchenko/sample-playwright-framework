@@ -3,7 +3,7 @@ import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
 import { expectNotToHaveValue, expectToBeVisible, expectToHaveValue, expectToHaveText } from '../utils/Expects';
-import { expectAddressFieldsToShow, type AddressValues } from './AddressFields';
+import { addressFieldLocators, expectAddressFieldsToShow, type AddressValues } from './AddressFields';
 import { rowWithCell } from '../utils/TableRows';
 
 /** The payment values the invoice detail shows. */
@@ -41,13 +41,9 @@ export class InvoiceDetailPage {
     // On a discounted invoice the fixed build gives the subtotal, discount and total fields the same test id `total`
     // and points every label at the total field (docs/app-versions.md, C), so only the element ids tell them apart.
     this.total_input = page.locator('#total');
-    // The fixed build names the address fields street / postal_code (docs/app-versions.md, B3); its payment fields
-    // carry no test id, only a label (B7).
-    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
-    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
-    this.city_input = page.getByTestId('city');
-    this.state_input = page.getByTestId('state');
-    this.country_input = page.getByTestId('country');
+    ({ address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_input } =
+      addressFieldLocators(page));
+    // The fixed build's payment fields carry no test id, only a label (docs/app-versions.md, B7).
     this.paymentMethod_input = page.getByTestId('payment-method');
     this.accountName_input = byBuild({ fixed: page.getByLabel('Account Name', { exact: true }), default: page.getByTestId('account-name') });
     this.accountNumber_input = byBuild({ fixed: page.getByLabel('Account Number', { exact: true }), default: page.getByTestId('account-number') });
