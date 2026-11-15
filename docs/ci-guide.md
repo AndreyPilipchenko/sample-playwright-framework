@@ -43,15 +43,16 @@ gh workflow run hosted.yml -f site=hosted -f tag=@smoke
 
 ## Nightly jobs
 
-The nightly jobs start together. Each runs once per environment (`local` and `local-fixed`), and each
-tests its own private Docker instance on its runner:
+The `tests` job is a matrix: one job per suite and environment (`local` and `local-fixed`). They start
+together, and each tests its own private Docker instance on its runner:
 
-| Job | What it does |
+| Suite | What it does |
 |---|---|
 | `api` | The browserless API specs (`tests/api`): `@regression` and `@local` |
-| `smoke` | The `@smoke` subset on chromium, firefox and webkit, one job per browser |
+| `smoke-chromium`, `smoke-firefox`, `smoke-webkit` | The `@smoke` subset, one job per browser |
 | `regression` | The `@regression` and `@local` specs on chromium |
-| `publish-site` | Runs after them: publishes the dashboard and the Allure reports of both environments to GitHub Pages (`<environment>/<job>/`), unless the run was filtered, tested one environment only, or the secret check fails |
+
+`publish-site` runs after them and publishes the dashboard and the Allure reports of both environments to GitHub Pages (`<environment>/<suite>/`), unless the run was filtered, tested one environment only, or the secret check fails.
 
 Artifacts carry the environment in their name: `allure-report-local-api`, `allure-report-local-fixed-api`,
 `traces-local-fixed-regression`, and so on.

@@ -6,11 +6,11 @@ runs:
   steps:
     - name: Check POM conventions
       shell: bash
-      run: npx --no pom-harness check-conventions
+      run: npm run check:conventions
 
     - name: Check the core boundary and case IDs
       shell: bash
-      run: node scripts/check-core-boundary.mjs
+      run: npm run check:boundary
 
     - name: Test the scripts
       shell: bash

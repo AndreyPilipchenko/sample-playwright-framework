@@ -5,11 +5,8 @@ description: >-
   then fails the step if the specs failed. Run after the setup action.
 
 inputs:
-  command:
-    description: The command that runs the specs.
-    default: npx playwright test
   args:
-    description: Arguments appended to the command (projects, --grep, ...).
+    description: Arguments appended to `node scripts/app.mjs test` (projects, --grep, ...).
     default: ''
   report-name:
     description: Suffix of the artifact names (playwright-report-<name>, allure-report-<name>); must be unique within the run.
@@ -60,7 +57,6 @@ runs:
         CI: 'true'
         AUTO_ALLURE_OPEN: 'false'
         PW_TEST_HTML_REPORT_OPEN: never
-        COMMAND: ${{ inputs.command }}
         ARGS: ${{ inputs.args }}
         STAGE_TAG: ${{ inputs.stage-tag }}
         TAGS: ${{ inputs.tag }}
@@ -76,16 +72,6 @@ runs:
         prefix="ci-results-$WORKFLOW-"
         [ -n "${TEST_ENV:-}" ] && [ "$TEST_ENV" != local ] && prefix+="on-$TEST_ENV-"
         echo "baseline-prefix=$prefix$REPORT_NAME-" >> "$GITHUB_OUTPUT"
-        # Another deployment needs both addresses, or the UI and API would be different systems.
-        if [ -n "${APP_URL:-}${APP_API_URL:-}" ]; then
-          address='^https?://[^[:space:]]+$'
-          if ! [[ ${APP_URL:-} =~ $address && ${APP_API_URL:-} =~ $address ]]; then
-            echo "::error::A run against another site needs both APP_URL and APP_API_URL, each starting with http:// or https://."
-            echo "exit-code=2" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          export APP_URL="${APP_URL%/}" APP_API_URL="${APP_API_URL%/}"
-        fi
         # A job can call this action more than once. Without this, a call that writes no report would be
         # summarized, and saved for the next comparison, with the previous call's results, and
         # a call whose Allure report fails would publish the previous call's report as its own.
@@ -105,8 +91,8 @@ runs:
         lookaheads="$(tag_lookahead "$STAGE_TAG")$(tag_lookahead "$TAGS")"
         [ -n "$NAME" ] && lookaheads+="(?=.*$(escape "$NAME"))"
         selection=()
-        # That deployment may be a shared site, so stay modest.
-        if [ -n "${APP_URL:-}" ] || [ "$SHARED_SITE" = true ]; then selection+=(--workers=2); fi
+        # A shared site serves others too, so stay modest.
+        [ "$SHARED_SITE" = true ] && selection+=(--workers=2)
         [ -n "$lookaheads" ] && selection+=(--grep "^$lookaheads")
 
         read -ra paths <<< "$PATHS"
@@ -126,9 +112,9 @@ runs:
           echo "Manual selection: tag='$TAGS' name='$NAME' path='$PATHS'"
         fi
 
-        # Word splitting is intended: COMMAND and ARGS are space-separated argument lists.
+        # Word splitting is intended: ARGS is a space-separated argument list.
         # shellcheck disable=SC2086
-        $COMMAND $ARGS "${selection[@]}"
+        node scripts/app.mjs test $ARGS "${selection[@]}"
         code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         exit 0
@@ -158,21 +144,17 @@ runs:
         PUBLISH_HTML_REPORT: ${{ inputs.publish-html-report }}
         SHARED_SITE: ${{ inputs.shared-site }}
       run: |
-        # TEST_ENV comes from the workflow; APP_URL / APP_API_URL only from an ad-hoc override.
         note="Environment \`${TEST_ENV:-default}\`. "
         if [ -n "$TAGS$NAME$PATHS" ]; then
           note="Manual selection: tag \`${TAGS:-any}\`, name \`${NAME:-any}\`, path \`${PATHS:-any}\`. "
         fi
-        [ -n "${APP_URL:-}" ] && note+="App URL \`$APP_URL\`. "
-        [ -n "${APP_API_URL:-}" ] && note+="API URL \`$APP_API_URL\`. "
-        [ -n "${APP_API_URL:-}" ] || [ "$SHARED_SITE" = true ] && note+="Traces not uploaded: they could hold a live token. "
+        [ "$SHARED_SITE" = true ] && note+="Traces not uploaded: they could hold a live token. "
         if [ "$PUBLISH_HTML_REPORT" != "true" ]; then
           note+="HTML report not published: its failure pages and step titles can contain shared credentials and this repository's artifacts are public (repository variable PUBLISH_REPORTS). The Allure report and the traces of failed tests are attached."
         fi
-        # A filtered run, or one against a shared site or another URL, is not a fair comparison for the next run.
+        # A filtered run, or one against a shared site, is not a fair comparison for the next run.
         update=true
-        [ -n "$TAGS$NAME$PATHS${APP_URL:-}${APP_API_URL:-}" ] && update=false
-        [ "$SHARED_SITE" = true ] && update=false
+        [ -n "$TAGS$NAME$PATHS" ] || [ "$SHARED_SITE" = true ] && update=false
         CI_BASELINE_UPDATE="$update" CI_SUMMARY_NOTE="$note" node scripts/ci-summary.mjs "$REPORT_NAME"
 
     - name: Save this run's results for the next comparison
@@ -220,8 +202,8 @@ runs:
     # Too large for the Allure report (src/utils/AllureReport.ts). `setup` and LoginTests, which
     # type the admin password, record none. Open one with `npx playwright show-trace trace.zip`.
     - name: Publish traces of failed tests
-      # A trace from another deployment could hold a token that still works, and this repository is public.
-      if: always() && env.APP_URL == '' && env.APP_API_URL == '' && inputs.shared-site != 'true'
+      # A trace from a shared site could hold a token that still works, and this repository is public.
+      if: always() && inputs.shared-site != 'true'
       uses: actions/upload-artifact@v7
       with:
         name: traces-${{ inputs.report-name }}

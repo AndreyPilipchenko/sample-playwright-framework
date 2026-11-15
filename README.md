@@ -155,7 +155,8 @@ Run Playwright from the repository root. Specs load their test data from
 repo-root-relative paths (`./resources/testData/...`), so launching from a subfolder with
 `-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
 
-Run the conventions check locally with `npm run check:conventions`.
+Run every static check CI runs on a pull request with `npm run check` (conventions, core boundary, script
+tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.
 
 ## Test documentation
 

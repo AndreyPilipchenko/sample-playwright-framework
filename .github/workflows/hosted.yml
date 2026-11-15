@@ -90,7 +90,6 @@ jobs:
       - name: Run the specs
         uses: ./.github/actions/run-specs
         with:
-          command: node scripts/app.mjs test
           args: -- --project=api --project=${{ inputs.browser }}
           stage-tag: '@smoke,@regression'
           report-name: ${{ inputs.site }}-${{ inputs.browser }}
