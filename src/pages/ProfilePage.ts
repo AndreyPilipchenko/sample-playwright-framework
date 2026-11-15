@@ -1,13 +1,12 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { byBuild } from '../utils/AppEnvironment';
 import { PASSWORD_CHANGE_ANSWER_MS } from '../config/timeouts';
 import {
   expectToBeAtLeast, expectToBeAtMost, expectToBeHidden, expectToBeVisible, expectToHaveText, expectToHaveURL,
   expectToHaveValue,
 } from '../utils/Expects';
-import { expectAddressFieldsToShow, type AddressValues } from './AddressFields';
+import { addressFieldLocators, expectAddressFieldsToShow, type AddressValues } from './AddressFields';
 
 /** The profile fields a customer can change. */
 export interface ProfileEdit extends AddressValues {
@@ -51,12 +50,8 @@ export class ProfilePage {
     this.lastName_input = page.getByTestId('last-name');
     this.email_input = page.getByTestId('email');
     this.phone_input = page.getByTestId('phone');
-    // The fixed build names them Street and Postal code (docs/app-versions.md, B3).
-    this.address_input = page.getByTestId(byBuild({ fixed: 'street', default: 'address' }));
-    this.postcode_input = page.getByTestId(byBuild({ fixed: 'postal_code', default: 'postcode' }));
-    this.city_input = page.getByTestId('city');
-    this.state_input = page.getByTestId('state');
-    this.country_input = page.getByTestId('country');
+    ({ address: this.address_input, postcode: this.postcode_input, city: this.city_input, state: this.state_input, country: this.country_input } =
+      addressFieldLocators(page));
     this.updateProfile_button = page.getByTestId('update-profile-submit');
     // The page has two forms, each with its own messages, so a message is found through its form's button.
     const profileForm = page.locator('form', { has: this.updateProfile_button });
