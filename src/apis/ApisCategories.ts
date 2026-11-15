@@ -4,7 +4,7 @@ import { ApiActions } from '../utils/ApiActions';
 import { byBuild } from '../utils/AppEnvironment';
 import { slugOf } from '../utils/UniqueData';
 import { applications } from '../config/applications';
-import { expectToBe, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToEqual } from '../utils/Expects';
 import { postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** A category as `GET /categories/{id}` returned it. */
@@ -63,12 +63,6 @@ export class ApisCategories {
         { id: category.id, name: category.name, slug: category.slug, parent_id: category.parent_id },
         { id: expectedId, name: expectedName, slug: slugOf(expectedName), parent_id: null },
       );
-    });
-  }
-
-  async verifyRequiredFieldsReported(reportedFields: string[], requiredFields: string[]) {
-    await allure.step(`Verify the missing required category fields are reported: ${requiredFields.join(', ')}`, async () => {
-      expectToContainAll('the category fields the API reported', reportedFields, requiredFields);
     });
   }
 }

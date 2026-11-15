@@ -4,6 +4,7 @@ import { ApisBrands } from '../../../src/apis/ApisBrands';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { loadTestData } from '../../../src/utils/TestData';
 import { newUuid } from '../../../src/utils/UniqueData';
+import { verifyRequiredFieldsReported } from '../../../src/utils/ApiChecks';
 
 let apisBrands: ApisBrands;
 let apisProductCatalog: ApisProductCatalog;
@@ -27,7 +28,7 @@ test.describe('Brand API', () => {
     await allure.testCaseId('brand-api-2');
 
     const reportedFields = await apisBrands.createBrandWithoutRequiredFields();
-    await apisBrands.verifyRequiredFieldsReported(reportedFields, testData.brandApi2.requiredFields);
+    await verifyRequiredFieldsReported('brand', reportedFields, testData.brandApi2.requiredFields);
   });
 
   test.beforeAll(async () => {

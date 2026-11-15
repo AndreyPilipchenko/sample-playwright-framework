@@ -228,12 +228,6 @@ export class ApisProducts {
     });
   }
 
-  async verifyRequiredProductFieldsReported(reportedFields: string[], requiredFields: string[]) {
-    await allure.step(`Verify the missing required fields are reported: ${requiredFields.join(', ')}`, async () => {
-      expectToContainAll('the fields the API reported', reportedFields, requiredFields);
-    });
-  }
-
   async verifyProductStock(product: ProductRecord, expectedStock: number) {
     await allure.step(`Verify the product ${product.name} has the stock ${expectedStock}`, async () => {
       expectToBe('the stored stock', this.publishedStock(product), this.expectedPublishedStock(expectedStock));

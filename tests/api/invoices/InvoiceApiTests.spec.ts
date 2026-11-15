@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 import { ApisOwnInvoices } from '../../../src/apis/ApisOwnInvoices';
 import { loadTestData } from '../../../src/utils/TestData';
+import { verifyRequiredFieldsReported } from '../../../src/utils/ApiChecks';
 
 let apisOwnInvoices: ApisOwnInvoices;
 
@@ -59,7 +60,7 @@ test.describe('Invoice API', () => {
 
     const { apisInvoices } = await apisOwnInvoices.registerInvoiceOwner(seed.user);
     const reportedFields = await apisInvoices.createInvoiceWithoutRequiredFields();
-    await apisInvoices.verifyRequiredInvoiceFieldsReported(reportedFields, seed.requiredFields);
+    await verifyRequiredFieldsReported('invoice', reportedFields, seed.requiredFields);
   });
 
   test.beforeAll(async () => {

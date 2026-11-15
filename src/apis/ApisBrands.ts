@@ -3,7 +3,7 @@ import * as allure from 'allure-js-commons';
 import { ApiActions } from '../utils/ApiActions';
 import { slugOf } from '../utils/UniqueData';
 import { applications } from '../config/applications';
-import { expectToBe, expectToContainAll, expectToEqual } from '../utils/Expects';
+import { expectToBe, expectToEqual } from '../utils/Expects';
 import { expectRefusedWithoutToken, postEmptyAndGetReportedFields } from '../utils/ApiChecks';
 
 /** A brand as `GET /brands/{id}` returned it. */
@@ -67,12 +67,6 @@ export class ApisBrands {
   async verifyBrand(brand: BrandRecord, expectedId: number, expectedName: string) {
     await allure.step(`Verify the brand is stored as: ${expectedName}`, async () => {
       expectToEqual('the stored brand', { id: brand.id, name: brand.name, slug: brand.slug }, { id: expectedId, name: expectedName, slug: slugOf(expectedName) });
-    });
-  }
-
-  async verifyRequiredFieldsReported(reportedFields: string[], requiredFields: string[]) {
-    await allure.step(`Verify the missing required brand fields are reported: ${requiredFields.join(', ')}`, async () => {
-      expectToContainAll('the brand fields the API reported', reportedFields, requiredFields);
     });
   }
 }

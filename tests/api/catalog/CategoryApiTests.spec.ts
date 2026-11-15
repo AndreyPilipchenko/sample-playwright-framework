@@ -4,6 +4,7 @@ import { ApisCategories } from '../../../src/apis/ApisCategories';
 import { ApisProductCatalog } from '../../../src/apis/ApisProductCatalog';
 import { loadTestData } from '../../../src/utils/TestData';
 import { newUuid } from '../../../src/utils/UniqueData';
+import { verifyRequiredFieldsReported } from '../../../src/utils/ApiChecks';
 
 let apisCategories: ApisCategories;
 let apisProductCatalog: ApisProductCatalog;
@@ -36,7 +37,7 @@ test.describe('Category API', () => {
     await allure.testCaseId('category-api-3');
 
     const reportedFields = await apisCategories.createCategoryWithoutRequiredFields();
-    await apisCategories.verifyRequiredFieldsReported(reportedFields, testData.categoryApi3.requiredFields);
+    await verifyRequiredFieldsReported('category', reportedFields, testData.categoryApi3.requiredFields);
   });
 
   test.beforeAll(async () => {
