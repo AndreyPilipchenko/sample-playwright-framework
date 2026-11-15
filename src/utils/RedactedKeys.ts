@@ -1,6 +1,6 @@
 /**
  * Credential names every reporting facade masks with `***` before a payload reaches a
- * step attachment or the console — the single list ApiActions, DBActions and
+ * step attachment or the console — the single list ApiActions and
  * MySqlActions share, so a new secret name is added once and the facades cannot drift.
  * Matching is case-insensitive: callers compare `name.toLowerCase()`.
  *

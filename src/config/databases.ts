@@ -1,4 +1,3 @@
-import type { DBConnectionConfig } from '../utils/DBActions';
 import type { MySqlConnectionConfig } from '../utils/MySqlActions';
 import { databaseTarget } from './targets';
 
@@ -9,8 +8,8 @@ import { databaseTarget } from './targets';
  *
  * Coordinates come from the database target the selected environment lists for the
  * name in .harness/targets.json, shared with the harness runtime (see targets.ts for the
- * environment rule and the per-machine overrides). The facade follows the target's
- * engine: `mysql` → MySqlActions, `sqlserver` → DBActions.
+ * environment rule and the per-machine overrides). The application's database is MariaDB,
+ * so every target is reached through MySqlActions.
  * Credentials are secrets and come only from environment variables — the variable the
  * target names, set in the gitignored .env (copy .env.example to .env and fill it in).
  * Never commit a literal credential anywhere.
@@ -22,4 +21,4 @@ export const databases = {
    * `hosted-with-bugs` and `hosted` instances expose no database, so DB-backed specs need a local environment.
    */
   appDb: databaseTarget('appDb'),
-} satisfies Record<string, DBConnectionConfig | MySqlConnectionConfig>;
+} satisfies Record<string, MySqlConnectionConfig>;
