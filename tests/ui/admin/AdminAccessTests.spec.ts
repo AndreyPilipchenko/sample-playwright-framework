@@ -8,7 +8,6 @@ import { AdminProductsPage } from '../../../src/pages/AdminProductsPage';
 import { AdminUsersPage } from '../../../src/pages/AdminUsersPage';
 import { LoginPage } from '../../../src/pages/LoginPage';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let adminDashboardPage: AdminDashboardPage;
 let adminProductsPage: AdminProductsPage;
@@ -32,7 +31,6 @@ test.describe('Admin access', () => {
   test('A non-admin cannot reach admin routes', { tag: ['@regression'] }, async ({ request }) => {
     await allure.feature('Admin access');
     await allure.testCaseId('TC-ADM-12');
-    const user = withUniqueEmail(testData.tcADM12.user, newUuid());
 
     await adminDashboardPage.navigate();
     await loginPage.verifyPageOpened();
@@ -43,7 +41,7 @@ test.describe('Admin access', () => {
     await adminUsersPage.navigate();
     await loginPage.verifyPageOpened();
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcADM12.user);
     const apisUsers = new ApisUsers(request, () => apisUserAccount.getAccessToken(user.email, user.password));
     const status = await apisUsers.getUserListStatus();
     await apisUsers.verifyWrongRoleForbidden(status);

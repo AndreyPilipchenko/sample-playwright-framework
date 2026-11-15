@@ -30,9 +30,8 @@ test.describe('Contact API', () => {
     await allure.feature('Contact API');
     await allure.testCaseId('contact-api-2');
     const { message, expectedStatus } = testData.contactApi2;
-    const user = withUniqueEmail(testData.contactApi2.user, newUuid());
     const apisUserAccount = new ApisUserAccount(request);
-    const userId = await apisUserAccount.registerUser(user);
+    const { user, userId } = await apisUserAccount.registerNewCustomer(testData.contactApi2.user);
     const apisContact = new ApisContact(request, () => apisUserAccount.getAccessToken(user.email, user.password));
 
     const sent = await apisContact.sendMessage(message);

@@ -7,7 +7,7 @@ import { HeaderPage } from '../../../src/pages/HeaderPage';
 import { LoginPage } from '../../../src/pages/LoginPage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, withUniqueEmail, withUuid } from '../../../src/utils/UniqueData';
+import { newUuid, withUuid } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
@@ -35,9 +35,8 @@ test.describe('Chat widget', () => {
     const data = testData.tcCHAT6SignIn;
     const { prompts, address } = data;
     const uuid = newUuid();
-    const customer = withUniqueEmail(data.customer, uuid);
 
-    await apisUserAccount.registerUser(customer);
+    const { user: customer } = await apisUserAccount.registerNewCustomer(data.customer, uuid);
     const catalog = await apisProductCatalog.seedCatalog(uuid, data);
     await loginPage.navigate();
     await loginPage.login(customer.email, customer.password);
@@ -76,9 +75,8 @@ test.describe('Chat widget', () => {
     const data = testData.tcCHAT6SignIn;
     const { prompts, address } = data;
     const uuid = newUuid();
-    const customer = withUniqueEmail(data.customer, uuid);
 
-    await apisUserAccount.registerUser(customer);
+    const { user: customer } = await apisUserAccount.registerNewCustomer(data.customer, uuid);
     const catalog = await apisProductCatalog.seedCatalog(uuid, data);
     await productDetailPage.navigate(catalog.products[0].id);
     await productDetailPage.addToCart();

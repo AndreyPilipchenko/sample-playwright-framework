@@ -7,8 +7,8 @@ import { CheckoutSignInPage } from '../../../src/pages/CheckoutSignInPage';
 import { CheckoutAddressPage } from '../../../src/pages/CheckoutAddressPage';
 import { CheckoutPaymentPage } from '../../../src/pages/CheckoutPaymentPage';
 import { ApisProductCatalog, type CatalogSeed } from '../../../src/apis/ApisProductCatalog';
-import { ApisUserAccount, type UserSeed } from '../../../src/apis/ApisUserAccount';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
+import { newUuid } from '../../../src/utils/UniqueData';
 import { loadTestData } from '../../../src/utils/TestData';
 
 let headerPage: HeaderPage;
@@ -36,13 +36,6 @@ async function addSeededProductToCartAndOpenIt(seed: CatalogSeed & { cartItemCou
   await cartPage.navigate();
 }
 
-/** A fresh customer for the case: unique email per run, left behind on purpose (deleting it needs an admin token). */
-async function registerCustomer(seed: UserSeed): Promise<UserSeed> {
-  const user = withUniqueEmail(seed, newUuid());
-  await apisUserAccount.registerUser(user);
-  return user;
-}
-
 test.describe('Checkout', () => {
   test.describe.configure({ retries: 0 });
 
@@ -67,7 +60,7 @@ test.describe('Checkout', () => {
   test('Valid credentials authenticate and allow proceeding', { tag: ['@smoke'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CSI-3');
-    const user = await registerCustomer(testData.tcCSI3.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCSI3.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCSI3);
     await cartPage.proceed();
@@ -80,7 +73,7 @@ test.describe('Checkout', () => {
   test('Empty required field is flagged and Proceed is disabled', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CBA-3');
-    const user = await registerCustomer(testData.tcCBA3.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCBA3.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA3);
     await cartPage.proceed();
@@ -95,7 +88,7 @@ test.describe('Checkout', () => {
   test('All required address fields are displayed', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CBA-1');
-    const user = await registerCustomer(testData.tcCBA1.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCBA1.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA1);
     await cartPage.proceed();
@@ -109,7 +102,7 @@ test.describe('Checkout', () => {
   test('The billing address step names its Proceed button', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CBA-4b');
-    const user = await registerCustomer(testData.tcCBA4.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCBA4.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA4);
     await cartPage.proceed();
@@ -122,7 +115,7 @@ test.describe('Checkout', () => {
   test('Completing all fields allows proceeding to payment', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CBA-4a');
-    const user = await registerCustomer(testData.tcCBA4.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCBA4.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCBA4);
     await cartPage.proceed();
@@ -137,7 +130,7 @@ test.describe('Checkout', () => {
   test('Dropdown lists all five payment methods', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-1');
-    const user = await registerCustomer(testData.tcCPAY1.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY1.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY1);
     await cartPage.proceed();
@@ -152,7 +145,7 @@ test.describe('Checkout', () => {
   test('Credit Card shows number, expiry, CVV, holder name', { tag: ['@regression'] }, async () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-4');
-    const user = await registerCustomer(testData.tcCPAY4.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY4.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY4);
     await cartPage.proceed();
@@ -169,7 +162,7 @@ test.describe('Checkout', () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-7');
     const { billing, paymentMethod, card, expectedError } = testData.tcCPAY7;
-    const user = await registerCustomer(testData.tcCPAY7.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY7.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY7);
     await cartPage.proceed();
@@ -188,7 +181,7 @@ test.describe('Checkout', () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-12');
     const { billing, bank, expectedPaymentMessage } = testData.tcCPAY12;
-    const user = await registerCustomer(testData.tcCPAY12.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY12.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY12);
     await cartPage.proceed();
@@ -208,7 +201,7 @@ test.describe('Checkout', () => {
     await allure.feature('Checkout');
     await allure.testCaseId('TC-CPAY-13');
     const { billing, bank, expectedPaymentMessage } = testData.tcCPAY13;
-    const user = await registerCustomer(testData.tcCPAY13.user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcCPAY13.user);
 
     await addSeededProductToCartAndOpenIt(testData.tcCPAY13);
     await cartPage.proceed();

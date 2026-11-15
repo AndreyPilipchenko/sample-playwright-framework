@@ -5,7 +5,6 @@ import { LoginPage } from '../src/pages/LoginPage';
 import { HeaderPage } from '../src/pages/HeaderPage';
 import { ApisUserAccount } from '../src/apis/ApisUserAccount';
 import { discardSession, saveSession } from '../src/utils/AuthSession';
-import { newUuid, withUniqueEmail } from '../src/utils/UniqueData';
 import { loadTestData } from '../src/utils/TestData';
 
 let setupData: typeof import('../resources/testData/AuthSetupJsonFile.json');
@@ -28,12 +27,11 @@ setup.beforeAll(() => {
 });
 
 setup('authenticate as customer', async ({ page, request }) => {
-  const user = withUniqueEmail(setupData.customer.user, newUuid());
   const apisUserAccount = new ApisUserAccount(request);
   const loginPage = new LoginPage(page);
   const headerPage = new HeaderPage(page);
 
-  await apisUserAccount.registerUser(user);
+  const { user } = await apisUserAccount.registerNewCustomer(setupData.customer.user);
   await loginPage.navigate();
   await loginPage.login(user.email, user.password);
   await headerPage.verifySignedIn();

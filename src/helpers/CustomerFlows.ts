@@ -4,7 +4,6 @@ import { ApisUserAccount, type UserSeed } from '../apis/ApisUserAccount';
 import { AccountPage } from '../pages/AccountPage';
 import { LoginPage } from '../pages/LoginPage';
 import { ProfilePage } from '../pages/ProfilePage';
-import { newUuid, withUniqueEmail } from '../utils/UniqueData';
 
 /** Customer flows that span the API and several pages, shared by more than one spec. */
 export class CustomerFlows {
@@ -26,8 +25,7 @@ export class CustomerFlows {
    */
   async signInAsNewCustomer(seed: UserSeed): Promise<UserSeed> {
     return await allure.step('Sign in as a new customer', async () => {
-      const user = withUniqueEmail(seed, newUuid());
-      await this.apisUserAccount.registerUser(user);
+      const { user } = await this.apisUserAccount.registerNewCustomer(seed);
       await this.loginPage.navigate();
       await this.loginPage.login(user.email, user.password);
       await this.accountPage.verifyPageOpened(); // the sign-in must finish before navigating away from it

@@ -1,6 +1,6 @@
 import { type APIRequestContext } from '@playwright/test';
 import * as allure from 'allure-js-commons';
-import { newUuid, withUniqueEmail } from '../utils/UniqueData';
+import { newUuid } from '../utils/UniqueData';
 import { ApisInvoices, type CreatedInvoice, type InvoiceLineSeed, type InvoiceSeed } from './ApisInvoices';
 import { ApisProductCatalog, type CatalogSeed } from './ApisProductCatalog';
 import { ApisUserAccount, type UserSeed } from './ApisUserAccount';
@@ -32,8 +32,7 @@ export class ApisOwnInvoices {
   async registerInvoiceOwner(user: UserSeed, uuid = newUuid()) {
     return await allure.step('Register a customer to own invoices', async () => {
       const apisUserAccount = new ApisUserAccount(this.request);
-      const owner = withUniqueEmail(user, uuid);
-      const userId = await apisUserAccount.registerUser(owner);
+      const { user: owner, userId } = await apisUserAccount.registerNewCustomer(user, uuid);
       const apisInvoices = new ApisInvoices(this.request, () => apisUserAccount.getAccessToken(owner.email, owner.password));
       return { apisInvoices, owner, userId, uuid };
     });
