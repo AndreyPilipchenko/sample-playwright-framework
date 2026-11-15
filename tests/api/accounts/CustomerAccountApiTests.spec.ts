@@ -4,7 +4,6 @@ import { ApisUserAccount } from '../../../src/apis/ApisUserAccount';
 import { databases } from '../../../src/config/databases';
 import { DbsUserAccount } from '../../../src/dbs/DbsUserAccount';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
 
 let apisUserAccount: ApisUserAccount;
 let dbsUserAccount: DbsUserAccount;
@@ -24,8 +23,7 @@ test.describe('Customer account API', () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-1');
 
-    const user = withUniqueEmail(testData.customerAccountApi1.user, newUuid());
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi1.user);
     await apisUserAccount.getAccessToken(user.email, user.password);
   });
 
@@ -33,17 +31,15 @@ test.describe('Customer account API', () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-2');
 
-    const user = withUniqueEmail(testData.customerAccountApi2.user, newUuid());
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi2.user);
     await apisUserAccount.verifyRegisteringExistingEmailIsRejected(user);
   });
 
   test('A wrong password is rejected through the API', { tag: ['@regression'] }, async () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-3');
-    const user = withUniqueEmail(testData.customerAccountApi3.user, newUuid());
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi3.user);
     await apisUserAccount.verifyLoginRejected(user.email, testData.customerAccountApi3.wrongPassword);
   });
 
@@ -51,9 +47,8 @@ test.describe('Customer account API', () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-4');
     const { wrongPassword } = testData.customerAccountApi4;
-    const user = withUniqueEmail(testData.customerAccountApi4.user, newUuid());
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi4.user);
     await apisUserAccount.verifyLoginRejected(user.email, wrongPassword);
     await apisUserAccount.verifyLoginRejected(user.email, wrongPassword);
     await apisUserAccount.verifyCanLogIn(user.email, user.password);
@@ -63,9 +58,8 @@ test.describe('Customer account API', () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-5');
     const { wrongPassword } = testData.customerAccountApi5;
-    const user = withUniqueEmail(testData.customerAccountApi5.user, newUuid());
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi5.user);
     await apisUserAccount.verifyLoginRejected(user.email, wrongPassword);
     await apisUserAccount.verifyLoginRejected(user.email, wrongPassword);
     await apisUserAccount.verifyLoginRejected(user.email, wrongPassword);
@@ -75,9 +69,8 @@ test.describe('Customer account API', () => {
   test('A disabled account is refused with HTTP 403', { tag: ['@local'] }, async () => {
     await allure.feature('Customer account API');
     await allure.testCaseId('customer-account-api-6');
-    const user = withUniqueEmail(testData.customerAccountApi6.user, newUuid());
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.customerAccountApi6.user);
     await dbsUserAccount.disableUser(user.email);
     await apisUserAccount.verifyLoginDisabled(user.email, user.password);
   });

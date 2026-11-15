@@ -6,7 +6,7 @@ import { test } from '../../../src/fixtures/test'; // conventions-ok: session an
 import { AdminUserFormPage } from '../../../src/pages/AdminUserFormPage';
 import { AdminUsersPage } from '../../../src/pages/AdminUsersPage';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, searchTokenOf, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { newUuid, searchTokenOf } from '../../../src/utils/UniqueData';
 
 let adminUsersPage: AdminUsersPage;
 let adminUserFormPage: AdminUserFormPage;
@@ -31,9 +31,8 @@ test.describe('Admin users', () => {
     await allure.testCaseId('TC-ADM-7');
     const { editedFirstName } = testData.tcADM7;
     const uuid = newUuid();
-    const user = withUniqueEmail(testData.tcADM7.user, uuid);
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcADM7.user, uuid);
     await adminUsersPage.navigate();
     await adminUsersPage.searchUser(searchTokenOf(uuid));
     await adminUsersPage.verifyUserListed(user.email, `${user.firstName} ${user.lastName}`);
@@ -54,9 +53,8 @@ test.describe('Admin users', () => {
     await allure.feature('Admin users');
     await allure.testCaseId('TC-ADM-8');
     const uuid = newUuid();
-    const user = withUniqueEmail(testData.tcADM8.user, uuid);
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcADM8.user, uuid);
     await adminUsersPage.navigate();
     await adminUsersPage.searchUser(searchTokenOf(uuid));
     await adminUsersPage.openUser(user.email);
@@ -71,9 +69,8 @@ test.describe('Admin users', () => {
     await allure.feature('Admin users');
     await allure.testCaseId('TC-ADM-9');
     const uuid = newUuid();
-    const user = withUniqueEmail(testData.tcADM9.user, uuid);
 
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcADM9.user, uuid);
     await dbsUserAccount.disableUser(user.email);
     await adminUsersPage.navigate();
     await adminUsersPage.searchUser(searchTokenOf(uuid));

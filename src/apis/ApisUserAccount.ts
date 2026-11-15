@@ -4,6 +4,7 @@ import { ApiActions } from '../utils/ApiActions';
 import { applications } from '../config/applications';
 import { byBuild } from '../utils/AppEnvironment';
 import { expectToBe, expectToBeAtMost, expectToBeTruthy } from '../utils/Expects';
+import { newUuid, withUniqueEmail } from '../utils/UniqueData';
 
 /** Body of a successful `POST /users/login` (Swagger: TokenResponse). */
 interface LoginTokenResponse {
@@ -55,6 +56,16 @@ export class ApisUserAccount {
       expectToBe('the register response status', response.status(), 201);
       return ((await response.json()) as { id: number }).id;
     });
+  }
+
+  /**
+   * Registers a customer unique to this attempt: the seed's `{uuid}` email placeholder is filled first.
+   * Resolves to the customer as registered and its id. Pass `uuid` when other records of the test share it.
+   */
+  async registerNewCustomer(seed: UserSeed, uuid: string = newUuid()): Promise<{ user: UserSeed; userId: number }> {
+    const user = withUniqueEmail(seed, uuid);
+    const userId = await this.registerUser(user);
+    return { user, userId };
   }
 
   /** Registering an email that is already registered is refused with 409. */

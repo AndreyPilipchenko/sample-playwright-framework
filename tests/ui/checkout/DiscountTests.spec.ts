@@ -13,7 +13,7 @@ import { InvoicesPage } from '../../../src/pages/InvoicesPage';
 import { ProductDetailPage } from '../../../src/pages/ProductDetailPage';
 import { useBrowserLocation } from '../../../src/utils/BrowserGeolocation';
 import { loadTestData } from '../../../src/utils/TestData';
-import { newUuid, withUniqueEmail } from '../../../src/utils/UniqueData';
+import { newUuid } from '../../../src/utils/UniqueData';
 
 let apisProductCatalog: ApisProductCatalog;
 let apisUserAccount: ApisUserAccount;
@@ -123,8 +123,7 @@ test.describe('Discounts', () => {
     await allure.testCaseId('TC-DISC-8');
     const { cartItemCount, billing, bank, expectedPaymentMessage, expectedTotals } = testData.tcDISC8;
 
-    const user = withUniqueEmail(testData.tcDISC8.user, newUuid());
-    await apisUserAccount.registerUser(user);
+    const { user } = await apisUserAccount.registerNewCustomer(testData.tcDISC8.user);
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcDISC8);
     const [rental, tool] = catalog.products;
     await productDetailPage.navigate(rental.id);
