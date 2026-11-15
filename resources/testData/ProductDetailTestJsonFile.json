@@ -123,8 +123,9 @@
     "typedQuantity": "5",
     "belowMinimum": "0",
     "expectedMinimum": "1",
-    "aboveMaximum": "1000000000",
-    "expectedMaximum": "999999999"
+    "aboveMaximum": "999999999",
+    "expectedMaximum": "99",
+    "expectedMaximumMessage": "You can order at most 99 of this product."
   },
   "tcPD9": {
     "brandName": "Detail Brand TC-PD-9 {uuid}",

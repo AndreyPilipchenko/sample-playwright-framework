@@ -45,8 +45,9 @@ chat sign-in route (2026-11-15): TC-CHAT-6a now signs in on the login page and p
 chat's own sign-in and fails, so the suite has one more test (150 locally, 146 hosted) than the other rows. Its 15
 failures were exactly the cases in C at the time. Five of them have since left C: by owner decision of 2026-11-15,
 TC-REG-7, TC-LOGIN-10, TC-CONT-3 and TC-PO-6 now expect what the fixed build shows (see
-[test cases](test-cases.md)), and TC-DISC-8 reads the invoice amounts by element id instead of by label. The next
-fixed run should fail 10; this is not yet measured. The other rows come from runs on 2026-11-14 without admin credentials
+[test cases](test-cases.md)), and TC-DISC-8 reads the invoice amounts by element id instead of by label. Nightly
+43750137897 then failed exactly 10. TC-PD-7 has left C since, expecting the shop's limit of 99 by owner decision of
+2026-11-15, so the next fixed run should fail 9. The other rows come from runs on 2026-11-14 without admin credentials
 (`APP_ADMIN_USERNAME`, `APP_ADMIN_PASSWORD`): the six admin UI tests (TC-ADM-2, 5, 6, 7, 8, 9) failed with "No saved
 session", and the admin setup and TC-LOGIN-3 were skipped. The admin specs were run separately on `local` on
 2026-11-15: TC-ADM-5 and 6 pass and TC-ADM-2, 7, 8, 9 and 12 fail on their recorded causes. The tables below include
@@ -156,7 +157,6 @@ its three columns; a Case cell may name several cases (`TC-ADM-7, 8, 9`).
 | Case | Red on | Observation |
 |---|---|---|
 | TC-CAT-3 | both builds | The fixed category page has no price-range filter, so its filters differ from the product overview's |
-| TC-PD-7 | both builds | The quantity input caps manual entry at 99 (`MAX_QUANTITY = 99` in both builds' source); the story's 999,999,999 stays the expected limit by owner decision of 2026-11-15 |
 | TC-RENT-1 | both builds | The rentals page shows 9 rentals and has no pagination, so the 10 the case seeds are not all listed (AC1, "a list of all rental products"; [report](bug-reports/rentals-page-no-pagination.md)) |
 | TC-CART-1 | both builds | The last column of the cart table has no "Actions" header |
 | TC-DISC-1 | both builds | No New York badge, and the full price: the shop's city table puts New York at longitude +74 instead of -74, so the real position (40.71, -74.0) matches no city. Mumbai, Tokyo, Amsterdam and London get their badges |

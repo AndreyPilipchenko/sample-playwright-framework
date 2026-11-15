@@ -96,7 +96,7 @@ test.describe('Product Detail', () => {
   test('Quantity accepts manual numeric entry', { tag: ['@regression'] }, async () => {
     await allure.feature('Product Detail');
     await allure.testCaseId('TC-PD-7');
-    const { typedQuantity, belowMinimum, expectedMinimum, aboveMaximum, expectedMaximum } = testData.tcPD7;
+    const { typedQuantity, belowMinimum, expectedMinimum, aboveMaximum, expectedMaximum, expectedMaximumMessage } = testData.tcPD7;
 
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcPD7);
     await productDetailPage.navigate(catalog.products[0].id);
@@ -105,6 +105,7 @@ test.describe('Product Detail', () => {
     await productDetailPage.enterQuantity(belowMinimum);
     await productDetailPage.verifyQuantity(expectedMinimum);
     await productDetailPage.enterQuantity(aboveMaximum);
+    await productDetailPage.verifyMessage(expectedMaximumMessage); // the warning fades, so it is checked first
     await productDetailPage.verifyQuantity(expectedMaximum);
   });
 
