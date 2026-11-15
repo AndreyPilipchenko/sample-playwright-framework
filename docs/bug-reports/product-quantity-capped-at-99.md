@@ -2,9 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
+| Status | Closed, not a defect (owner decision of 2026-11-15: 99 is the accepted limit). Never filed. |
 | Test cases | TC-PD-7 (quantity accepts manual numeric entry) in [test cases](../test-cases.md). |
-| Automation | `tests/ui/catalog/ProductDetailTests.spec.ts` passes typed entry and the lower limit, then fails on the upper limit. |
+| Automation | `tests/ui/catalog/ProductDetailTests.spec.ts`: since the decision, TC-PD-7 types 999,999,999 and expects the warning "You can order at most 99 of this product." and the value 99. |
 | Area | Product detail, quantity input |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |
@@ -42,5 +42,5 @@ AC7: the value is clamped to 999,999,999.
 
 ## Open points before filing
 
-- The defect-free upstream build has the same limit and a message written for it, so this looks deliberate. The story may be what needs correcting.
+- Settled on 2026-11-15: the case owner accepted 99 as the limit. Both builds cap a typed value on every keystroke and show the warning; the story's 999,999,999 is not followed.
 - Severity and priority need the project's scale; none is invented here.

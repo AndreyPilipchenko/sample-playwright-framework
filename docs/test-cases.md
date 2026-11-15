@@ -137,9 +137,10 @@ after appearing.
 
 Also automated there (`@regression`): TC-PD-2, 6, 7, 9, 10, 11, 12, 14, 16 and 17. TC-PD-12, 16 and 17 fail on defects 41, 91
 and 92. On TC-PD-8 and 12 the red toast reads "Oeps, something went wrong."; the register's wording for defect 41 is
-"Upsss... something wrong". TC-PD-7 passes typed entry and the lower limit, then fails on the story's upper limit, because the page stops at 99
-([report](bug-reports/product-quantity-capped-at-99.md)). Both builds' source sets this cap (`MAX_QUANTITY = 99`); by owner
-decision of 2026-11-15 the story's limit of 999,999,999 stays the expected one, so the case stays red. TC-PD-9 passes on the local build, with 12 units reaching the cart.
+"Upsss... something wrong". TC-PD-7 checks typed entry (5), the lower limit (0 becomes 1) and the upper limit: typing 999,999,999 shows
+"You can order at most 99 of this product." and leaves 99 in the field. Both builds' source sets this cap
+(`MAX_QUANTITY = 99`); the story's AC7 says 999,999,999, and 99 is the expected limit by owner decision of 2026-11-15
+([report](bug-reports/product-quantity-capped-at-99.md), closed as not a defect). TC-PD-9 passes on the local build, with 12 units reaching the cart.
 TC-PD-6 passes, but proves nothing while defect 40 is open: the minus button does nothing at any quantity.
 
 ## 5. Rentals
@@ -662,7 +663,7 @@ lists a related defect that isn't why the test fails today, or belongs to one of
 | Product Overview | 22 | 16 (TC-PO-2, 5, 8 — smoke; TC-PO-1 failing on defect 26; TC-PO-3, 4, 6, 7, 11, 12, 14, 16, 17 pass; TC-PO-13, 15 failing on defects 2, 27, 33; TC-PO-9 failing on a local finding) |
 | Navigation & Header | 5 | 4 (TC-NAV-5, smoke; TC-NAV-1, 3, 4 failing on defects 29, 3, 32) |
 | Product Category | 6 | 3 (TC-CAT-1 passes; TC-CAT-3 failing on a local finding, TC-CAT-4 on defect 3) |
-| Product Detail | 18 | 15 (TC-PD-3 — smoke; TC-PD-1, 2, 6, 9, 10, 11, 14 pass; TC-PD-4, 5, 8, 12, 16, 17 failing on defects 40, 43, 41, 91, 92; TC-PD-7 on a local finding) |
+| Product Detail | 18 | 15 (TC-PD-3 — smoke; TC-PD-1, 2, 6, 7, 9, 10, 11, 14 pass; TC-PD-4, 5, 8, 12, 16, 17 failing on defects 40, 43, 41, 91, 92) |
 | Rentals | 7 | 5 (TC-RENT-2, 3, 4 pass; TC-RENT-1, 5 failing on local findings) |
 | Checkout — Cart | 12 | 8 (TC-CART-1, 2, 4, 5, 7 — failing on open defects L1, 7, 8; TC-CART-8 passes; TC-CART-10, 11 failing, no combination discount locally) |
 | Checkout — Sign In | 4 | 3 (TC-CSI-1, 2, 3) |
