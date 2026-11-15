@@ -172,12 +172,7 @@ compiled from the upstream Practice Software Testing docs:
 - [Automated tests](docs/automated-tests.md): every spec, the cases it covers and which are red
 - [App versions](docs/app-versions.md): how the two versions of the shop differ, and the results on each
 
-### Not automated yet
-
-The per-area count of automated cases is the Coverage summary in
-`docs/test-cases.md`. Not automated yet, among others: admin (TC-ADM-1, 3, 4, 10, 11), contact (TC-CONT-1, 2, 4 to 7, 10 to 12), chat (all but TC-CHAT-6), discounts
-(TC-DISC-2, 3, 7), the remaining API cases (TC-API-5, 7, 12 to 15) and accessibility. Every P1 case of the checkout sign-in,
-address and payment steps, login and registration is automated; the catalog, cart and discount P1 cases are automated too.
+What is automated, and what is not yet, per area: the [Coverage summary](docs/test-cases.md#coverage-summary).
 
 ## Signed-in tests
 
@@ -323,19 +318,10 @@ Three workflows run the tests. This repository is the test project, not the prod
 | `nightly.yml` | all tests on `local` and `local-fixed`, in separate jobs per version, then publishes the results to GitHub Pages | Nightly, scheduled for 02:00 UTC. GitHub can start it hours later, and runs schedules on the default branch only |
 | `hosted.yml` | the API and one browser's specs, without `@local`, on `hosted-with-bugs` or `hosted`, with 2 workers and no traces | By hand only: the public sites are shared and sometimes unstable |
 
-All three can be started by hand and narrowed by tag, test title or path; the nightly and smoke runs can
-be limited to one version.
 Every job writes its results to the run's Summary page, with failures split into newly failing, fixed
-and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs, the jobs and the shared
-composite actions.
-
-### Connecting the product repository
-
-The trigger that the product repository needs, and its instructions, are in
-[`docs/ci/`](docs/ci/README.md): a workflow to copy into the product repository
-([`product-repo-trigger.yml`](docs/ci/product-repo-trigger.yml)) and a README for that
-repository covering the token, the secret, how to check it works and troubleshooting. Both
-live under `docs/` so they never run here.
+and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs and filters, the jobs, the shared
+composite actions, secrets and reports. The trigger the product repository needs is in
+[`docs/ci/`](docs/ci/README.md), kept under `docs/` so it never runs here.
 
 ## Using it on another app
 

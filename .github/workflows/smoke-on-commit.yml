@@ -1,37 +1,6 @@
-# Smoke tests on every commit to the PRODUCT repository's main branch. That repository's
-# workflow sends a `repository_dispatch` of type `product-main-push` here (a sample to copy is
-# docs/ci/product-repo-trigger.yml; README "CI" explains the token it needs). The full suite
-# runs nightly (nightly.yml); the public sites are tested by hand (hosted.yml). This repository
-# is the test project, not the product, so its own commits and pull requests run nothing but the
-# static checks (`lint.yml`).
-#
-# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
-# (the Docker stack), run-specs (run Playwright, publish the reports, reflect the outcome) and
-# publish-app-logs.
-#
-# Run it by hand: Actions → Smoke on product commit → Run workflow, or
-# `gh workflow run smoke-on-commit.yml`.
-#
-# Manual-run inputs (all optional; blank means "as configured"):
-#   environment       local (default) or local-fixed (the newer build without the deliberate defects),
-#                     each in a private Docker stack on the runner. It names the run and the job.
-#   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
-#                     containing the text, in the given spec files/folders (:line allowed).
-#                     They narrow the @smoke selection; nothing outside @smoke runs here.
-#   e.g. gh workflow run smoke-on-commit.yml -f name="admin credentials" -f environment=local-fixed
-#
-# RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
-# the shop's images need.
-#
-# SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
-# §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
-# registers a disposable one every run. With an empty admin secret, the admin specs fail with "No saved session". Mind
-# defect #21: one failed login locks the account, so check a value before saving it.
-#
-# REPORTS: native report detail (Playwright step titles, failure pages, traces) can contain the
-# admin credentials. They are the published demo account, so the Allure report and the traces of
-# failed tests (`traces-*`, 7 days) are always attached; this repository is public, so the jobs that
-# sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
+# The @smoke tests on chromium for every commit to the PRODUCT repository's main, sent here as a
+# repository_dispatch of type product-main-push (sample trigger: docs/ci/product-repo-trigger.yml).
+# Inputs, secrets and reports: docs/ci-guide.md. Run by hand: gh workflow run smoke-on-commit.yml
 
 name: Smoke on product commit
 
