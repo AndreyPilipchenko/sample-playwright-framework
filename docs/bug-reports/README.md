@@ -17,7 +17,7 @@ separate, explicitly approved preview. Reports are written even when the defect 
 | [Contact form and `POST /messages` accept an invalid email address](contact-api-accepts-invalid-email.md) | new | `contact-api-5` | Open, not filed |
 | [`POST /messages` returns 500 for a guest without both a name and an email](contact-api-500-without-identity.md) | new | none | Open, not filed |
 | [A parent category with children has no checkbox in the sidebar](category-parent-no-checkbox.md) | new | TC-PO-9 | Open, not filed |
-| [A search leaves the sort dropdown showing the previous option](search-leaves-sort-selected.md) | new | TC-PO-6 | Open, not filed |
+| [A search leaves the sort dropdown showing the previous option](search-leaves-sort-selected.md) | new | TC-PO-6 | Closed, not a defect (owner decision 2026-11-15) |
 | [The category page has no price range slider](category-page-no-price-slider.md) | new | TC-CAT-3 | Open, not filed |
 | [The category page title comes from the URL slug, not the category name](category-title-from-slug.md) | new | TC-CAT-2 (not automated) | Open, not filed |
 | [The Categories menu has an entry labelled "UNDEFINED" that opens an empty page](nav-undefined-category-entry.md) | new | none | Open, not filed |

@@ -2,9 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | Open, not yet filed in any tracker. New: not in the [known-defects register](../known-defects.md). |
+| Status | Closed, not a defect (owner decision of 2026-11-15: the sort order is not a filter, so a search may keep it). Never filed. |
 | Test cases | TC-PO-6 (search resets all active filters) in [test cases](../test-cases.md). |
-| Automation | `tests/ui/catalog/ProductOverviewTests.spec.ts` passes on the category, brand and price reset, then fails on the sort dropdown. |
+| Automation | `tests/ui/catalog/ProductOverviewTests.spec.ts`: since the decision, TC-PO-6 no longer sorts and checks only the category, brand and price reset. |
 | Area | Product overview, search and sort |
 | Environment | Local Docker stack (`sprint5-with-bugs`), Chromium (Playwright). |
 | Observed | 2026-11-06 |
@@ -43,5 +43,5 @@ AC4: all active filters are reset. Whether sorting counts as a filter is not sta
 ## Open points before filing
 
 - Whether the search results are really unsorted was not checked.
-- If the team rules that sorting is not a filter, the last check of TC-PO-6 should go.
+- Settled on 2026-11-15: the case owner ruled that sorting is not a filter, and the sort check was removed from TC-PO-6.
 - Severity and priority need the project's scale; none is invented here.

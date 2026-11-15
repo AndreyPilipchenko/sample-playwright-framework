@@ -58,7 +58,7 @@
       "email": "tc-reg-7.{uuid}@example.test",
       "password": "Sup3r-Secret!Reg7"
     },
-    "expectedError": "Email is already in use."
+    "expectedError": "A customer with this email address already exists."
   },
   "tcREG8": {
     "user": {

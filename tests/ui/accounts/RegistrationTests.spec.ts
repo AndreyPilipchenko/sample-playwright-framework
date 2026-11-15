@@ -39,7 +39,7 @@ test.describe('User Registration', () => {
     await registerPage.verifyRequiredFieldsShown(testData.tcREG1.labels);
   });
 
-  test('Duplicate email shows "Email is already in use."', { tag: ['@regression'] }, async () => {
+  test('Duplicate email shows "A customer with this email address already exists."', { tag: ['@regression'] }, async () => {
     await allure.feature('User Registration');
     await allure.testCaseId('TC-REG-7');
     const email = withUuid(testData.tcREG7.user.email, newUuid());

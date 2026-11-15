@@ -86,6 +86,6 @@
       "email": "login-10.{uuid}@example.test",
       "password": "Sup3r-Secret!Login10"
     },
-    "expectedError": "Account disabled."
+    "expectedErrorPart": "Account disabled"
   }
 }

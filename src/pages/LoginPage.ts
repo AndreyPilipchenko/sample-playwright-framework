@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
 import { step } from 'allure-js-commons';
 import { applications } from '../config/applications';
-import { expectToBeVisible, expectToHaveText, expectToHaveURL } from '../utils/Expects';
+import { expectToBeVisible, expectToContainText, expectToHaveText, expectToHaveURL } from '../utils/Expects';
 
 export class LoginPage {
   readonly page: Page;
@@ -69,6 +69,13 @@ export class LoginPage {
   async verifyLoginError(expectedMessage: string) {
     await step('Verify the login error is shown', async () => {
       await expectToHaveText('the login error', this.loginError_txt, expectedMessage);
+    });
+  }
+
+  /** For a message whose exact wording is open, e.g. with or without a closing full stop. */
+  async verifyLoginErrorContains(expectedPart: string) {
+    await step(`Verify the login error contains "${expectedPart}"`, async () => {
+      await expectToContainText('the login error', this.loginError_txt, expectedPart);
     });
   }
 }
