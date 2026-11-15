@@ -14,22 +14,27 @@
     ],
     "cities": {
       "newYork": {
+        "name": "New York",
         "latitude": 40.71,
         "longitude": -74.0
       },
       "mumbai": {
+        "name": "Mumbai",
         "latitude": 19.07,
         "longitude": 72.88
       },
       "tokyo": {
+        "name": "Tokyo",
         "latitude": 35.68,
         "longitude": 139.69
       },
       "amsterdam": {
+        "name": "Amsterdam",
         "latitude": 52.37,
         "longitude": 4.9
       },
       "london": {
+        "name": "London",
         "latitude": 51.5,
         "longitude": -0.12
       }

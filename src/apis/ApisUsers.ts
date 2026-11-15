@@ -61,7 +61,7 @@ export class ApisUsers {
   /** None of the admin-only fields appear in a non-admin's user record. */
   async verifyAdminOnlyFieldsHidden(record: Record<string, unknown>, adminOnlyFields: string[]) {
     await allure.step(`Verify the user record hides: ${adminOnlyFields.join(', ')}`, async () => {
-      expectToEqual('the admin-only fields in the user record', adminOnlyFields.filter((field) => field in record), []);
+      expectToEqual('the admin-only fields the customer\'s own record exposes',adminOnlyFields.filter((field) => field in record), []);
     });
   }
 }

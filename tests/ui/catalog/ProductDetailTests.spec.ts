@@ -187,7 +187,7 @@ test.describe('Product Detail', () => {
       await useBrowserLocation(page, position);
       await productDetailPage.navigate(catalog.products[0].id);
       await productDetailPage.verifyDiscountedPrice({ originalPrice, discountedPrice });
-      await productDetailPage.verifyDiscountBadge(expectedBadge);
+      await productDetailPage.verifyDiscountBadge(expectedBadge, position.name);
     });
   });
 
