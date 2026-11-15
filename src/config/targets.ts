@@ -49,8 +49,6 @@ const project = readHarnessFile<HarnessProject>('project.json');
 /** The environment this run targets: TEST_ENV, else the project's default. */
 export const environmentName: string = process.env.TEST_ENV || project.defaultEnvironment || '';
 const environment: HarnessEnvironment | undefined = project.environments?.[environmentName];
-/** Every environment .harness/project.json defines. */
-export const environmentNames: readonly string[] = Object.keys(project.environments ?? {});
 if (process.env.TEST_ENV && !environment) {
   const known = Object.keys(project.environments ?? {}).join(', ');
   throw new Error(`TEST_ENV="${process.env.TEST_ENV}" is not an environment in .harness/project.json (known: ${known}).`);

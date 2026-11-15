@@ -68,40 +68,15 @@ export function expectToBe<T>(subject: string, actual: T, expected: T): void {
   expect(actual, `Expect ${subject} to be ${fmt(expected)}`).toBe(expected);
 }
 
-/** Asserts strict inequality, titling the step `Expect <subject> not to be <unexpected>`. */
-export function expectNotToBe<T>(subject: string, actual: T, unexpected: T): void {
-  expect(actual, `Expect ${subject} not to be ${fmt(unexpected)}`).not.toBe(unexpected);
-}
-
 /** Asserts deep equality, titling the step `Expect <subject> to equal <expected>`. */
 export function expectToEqual<T>(subject: string, actual: T, expected: T): void {
   // cast: Playwright's conditional matcher types can't resolve toEqual on an unconstrained generic receiver
   expect(actual as unknown, `Expect ${subject} to equal ${fmt(expected)}`).toEqual(expected);
 }
 
-/** Asserts the collection holds an entry deep-equal to the expected one — `Expect <subject> to contain an entry equal to <expected>`. */
-export function expectToContainEqual<T>(subject: string, actual: T[], expectedEntry: T): void {
-  expect(actual, `Expect ${subject} to contain an entry equal to ${fmt(expectedEntry)}`).toContainEqual(expectedEntry);
-}
-
 /** Asserts truthiness, titling the step `Expect <subject> to be present`. */
 export function expectToBeTruthy(subject: string, actual: unknown): void {
   expect(actual, `Expect ${subject} to be present`).toBeTruthy();
-}
-
-/** Asserts the value is not undefined — `Expect <subject> to be defined`. */
-export function expectToBeDefined(subject: string, actual: unknown): void {
-  expect(actual, `Expect ${subject} to be defined`).toBeDefined();
-}
-
-/** Asserts the value is null — `Expect <subject> to be null`. */
-export function expectToBeNull(subject: string, actual: unknown): void {
-  expect(actual, `Expect ${subject} to be null`).toBeNull();
-}
-
-/** Asserts the value is not null — `Expect <subject> not to be null` (negation stated here: the message discards Playwright's `not` marker). */
-export function expectNotToBeNull(subject: string, actual: unknown): void {
-  expect(actual, `Expect ${subject} not to be null`).not.toBeNull();
 }
 
 /** Asserts actual > threshold — `Expect <subject> to be greater than <threshold>`. */
@@ -119,19 +94,9 @@ export function expectToBeAtMost(subject: string, actual: number, max: number): 
   expect(actual, `Expect ${subject} to be at most ${fmt(max)}`).toBeLessThanOrEqual(max);
 }
 
-/** Asserts numeric closeness — `Expect <subject> to be close to <expected>`; `numDigits` passes through to the matcher. */
-export function expectToBeCloseTo(subject: string, actual: number, expected: number, numDigits?: number): void {
-  expect(actual, `Expect ${subject} to be close to ${fmt(expected)}`).toBeCloseTo(expected, numDigits);
-}
-
 /** Asserts membership (array element or substring) — `Expect <subject> to contain <expected>`. */
 export function expectToContain<T>(subject: string, actual: string | T[], expected: T): void {
   expect(actual, `Expect ${subject} to contain ${fmt(expected)}`).toContain(expected);
-}
-
-/** Asserts non-membership — `Expect <subject> not to contain <unexpected>`. */
-export function expectNotToContain<T>(subject: string, actual: string | T[], unexpected: T): void {
-  expect(actual, `Expect ${subject} not to contain ${fmt(unexpected)}`).not.toContain(unexpected);
 }
 
 /** Asserts the collection includes every expected entry, in any order, extra entries allowed — `Expect <subject> to include all of <expected>`. */
@@ -142,11 +107,6 @@ export function expectToContainAll<T>(subject: string, actual: T[], expected: T[
 /** Inverted membership — the element is the business subject, the allowed set the oracle: `Expect <subject> to be one of <allowed>`. */
 export function expectToBeOneOf<T>(subject: string, element: T, allowed: T[]): void {
   expect(allowed, `Expect ${subject} to be one of ${fmt(allowed)}`).toContain(element);
-}
-
-/** Asserts collection/string length — `Expect <subject> to have <expected> <unit>(s)`; `unit` defaults to "item" (DB validations pass "row"). */
-export function expectToHaveLength(subject: string, actual: string | unknown[], expected: number, unit: string = 'item'): void {
-  expect(actual, `Expect ${subject} to have ${expected} ${unit}(s)`).toHaveLength(expected);
 }
 
 ///// Web-first assertions (auto-retrying — subject is a live Locator/Page, passed straight through)
@@ -374,11 +334,6 @@ export async function expectToBeChecked(subject: string, locator: Locator, optio
 /** Auto-retrying negated checked-state assertion — `Expect <subject> not to be checked → …` (negation stated here: the message discards Playwright's `not` marker). */
 export async function expectNotToBeChecked(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
   await expect(locator, `Expect ${subject} not to be checked →`).not.toBeChecked(options);
-}
-
-/** Auto-retrying negated editable-state assertion — `Expect <subject> not to be editable → …` (negation stated here: the message discards Playwright's `not` marker). Fails for either a `disabled` or a `readonly` element, so it proves "read-only/non-editable" without assuming which attribute the app uses. */
-export async function expectNotToBeEditable(subject: string, locator: Locator, options?: RetryOptions): Promise<void> {
-  await expect(locator, `Expect ${subject} not to be editable →`).not.toBeEditable(options);
 }
 
 ///// Secret-valued assertions (the expected value is a credential — asserted for real, never rendered in any title; iron law 7)

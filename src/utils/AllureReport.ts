@@ -16,8 +16,7 @@ export default class AllureReport extends AllureReporter {
   constructor(options: ConstructorParameters<typeof AllureReporter>[0] & { attachVideo?: boolean } = {}) {
     const { attachVideo, ...nativeOptions } = options;
     super(nativeOptions);
-    this.attachVideo = attachVideo ?? (process.env.ALLURE_ATTACH_VIDEO === undefined
-      ? allureConfig.attachVideo : process.env.ALLURE_ATTACH_VIDEO === 'true');
+    this.attachVideo = attachVideo ?? allureConfig.attachVideo;
   }
 
   /**

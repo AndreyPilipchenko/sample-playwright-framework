@@ -24,18 +24,12 @@ interface ApiRequestLog {
 }
 
 export interface ApiActionsOptions {
-  /** Mirror each call to the console. Defaults to API_CONSOLE_LOGS=true env var, then project metadata `apiConsoleLogs`. */
+  /** Mirror each call to the console. Defaults to the API_CONSOLE_LOGS=true env var. */
   consoleLogs?: boolean;
   /** Max characters of any attached body before truncation. Default 50000. */
   maxBodyLength?: number;
   /** Set false to disable redaction of credential headers/body keys in reports and console output. Default true. */
   redact?: boolean;
-  /**
-   * Replace the ENTIRE response body with '***' in attachments and console output.
-   * For endpoints whose raw body IS a secret (e.g. a token endpoint returning a bare
-   * JWT) — key-based redaction cannot see inside a raw string. Default false.
-   */
-  redactResponseBody?: boolean;
   /**
    * Supplies the bearer token injected as the Authorization header on every call
    * (a call that sets its own Authorization header wins over the provider). The
@@ -100,24 +94,9 @@ export class ApiActions {
     return this.dispatch('PUT', url, options);
   }
 
-  /** Sends a PATCH request and logs it as a report step with attachments. */
-  async patch(url: string, options?: ApiRequestOptions): Promise<APIResponse> {
-    return this.dispatch('PATCH', url, options);
-  }
-
   /** Sends a DELETE request and logs it as a report step with attachments. */
   async delete(url: string, options?: ApiRequestOptions): Promise<APIResponse> {
     return this.dispatch('DELETE', url, options);
-  }
-
-  /** Sends a HEAD request and logs it as a report step with attachments. */
-  async head(url: string, options?: ApiRequestOptions): Promise<APIResponse> {
-    return this.dispatch('HEAD', url, options);
-  }
-
-  /** Sends a request with an arbitrary method (defaults to GET, like APIRequestContext.fetch) and logs it. */
-  async fetch(url: string, options?: FetchOptions): Promise<APIResponse> {
-    return this.dispatch(options?.method?.toUpperCase() ?? 'GET', url, options);
   }
 
   /**
@@ -192,11 +171,7 @@ export class ApiActions {
       responseHeaders: response ? this.redactHeaders(response.headers()) : {},
       durationMs,
     };
-    if (response) {
-      entry.responseBody = this.options.redactResponseBody
-        ? '***'
-        : this.redactDeep(await this.readBodySafely(response));
-    }
+    if (response) entry.responseBody = this.redactDeep(await this.readBodySafely(response));
     if (failure) {
       entry.error = {
         // oxlint-disable-next-line typescript/no-base-to-string -- non-Error throwables are stringified as-is
@@ -329,11 +304,9 @@ export class ApiActions {
     };
   }
 
-  /** Resolves the console-echo flag: constructor option, then API_CONSOLE_LOGS env var, then project metadata. */
+  /** Resolves the console-echo flag: constructor option, then the API_CONSOLE_LOGS env var. */
   private shouldConsoleLog(): boolean {
-    if (this.options.consoleLogs !== undefined) return this.options.consoleLogs;
-    if (process.env.API_CONSOLE_LOGS) return process.env.API_CONSOLE_LOGS === 'true';
-    return Boolean(this.currentTestInfo()?.project.metadata?.apiConsoleLogs);
+    return this.options.consoleLogs ?? process.env.API_CONSOLE_LOGS === 'true';
   }
 
   /** Prints a compact, redacted summary of the call to the console. */
