@@ -5,10 +5,11 @@
 # hand (hosted.yml). Tests of broken functionality assert the documented behaviour, so they fail
 # (and the run is red) until the product fixes them (docs/test-plan.md §4.1).
 #
-# JOBS start together and gate nothing; each runs once per environment and tests its own stack:
-#   api         the browserless API specs (tests/api), @regression and @local
-#   smoke       the @smoke subset, one job per browser (chromium, firefox, webkit)
-#   regression  the @regression and @local specs on chromium
+# The `tests` job is a matrix of environment x suite; every cell starts together, gates nothing and
+# tests its own stack:
+#   api                 the browserless API specs (tests/api), @regression and @local
+#   smoke-<browser>     the @smoke subset on chromium, firefox and webkit
+#   regression          the @regression and @local specs on chromium
 # publish-site then puts the results on GitHub Pages.
 #
 # Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
@@ -82,163 +83,66 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Each job brings the application under test up on its own runner and tests that private
-  # instance, once per environment. Each has its own stack, report and summary. They start
-  # together and have no `needs`, so one job's failure hides no other job's results.
-  api:
-    name: API specs on ${{ matrix.environment }}
+  # One job per suite and environment, each bringing the application under test up on its own
+  # runner and testing that private instance, with its own stack, report and summary. They start
+  # together, fail-fast is off and nothing `needs` them but publish-site, so one job's failure
+  # hides no other job's results. `suite` is also the report name's suffix (scripts/build-site.mjs).
+  tests:
+    name: ${{ matrix.title }} on ${{ matrix.environment }}
     runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
-    timeout-minutes: 30
+    timeout-minutes: ${{ matrix.timeout }}
     strategy:
       fail-fast: false
       matrix:
         # A scheduled run and the manual default (both) test both builds.
         environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
+        suite: [api, smoke-chromium, smoke-firefox, smoke-webkit, regression]
+        # database: the disabled-account cases (TC-LOGIN-10, TC-ADM-9, customer-account-api-6) disable
+        # their account in the local MariaDB, so those suites get APP_DB_LOCAL
+        # (JSON {"user":…,"password":…}).
+        include:
+          - { suite: api, title: API specs, browsers: none, project: api, stage-tag: '@regression,@local', timeout: 30, database: true }
+          - { suite: smoke-chromium, title: Smoke on chromium, browsers: chromium, project: chromium, stage-tag: '@smoke', timeout: 30, database: false }
+          - { suite: smoke-firefox, title: Smoke on firefox, browsers: firefox, project: firefox, stage-tag: '@smoke', timeout: 30, database: false }
+          - { suite: smoke-webkit, title: Smoke on webkit, browsers: webkit, project: webkit, stage-tag: '@smoke', timeout: 30, database: false }
+          - { suite: regression, title: Regression, browsers: chromium, project: chromium, stage-tag: '@regression,@local', timeout: 60, database: true }
     # The environment under test (.harness/project.json).
     env:
       TEST_ENV: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Node and dependencies (no browsers)
+      - name: Set up Node, dependencies and browsers (${{ matrix.browsers }})
         uses: ./.github/actions/setup
         with:
-          browsers: none
+          browsers: ${{ matrix.browsers }}
 
       - name: Start the application under test
         uses: ./.github/actions/start-local-app
         with:
           environment: ${{ matrix.environment }}
 
-      - name: Run the API specs
+      - name: Run the ${{ matrix.stage-tag }} specs on ${{ matrix.project }}
         uses: ./.github/actions/run-specs
         with:
-          command: node scripts/app.mjs test
-          args: -- --project=api
-          stage-tag: '@regression,@local'
-          report-name: ${{ matrix.environment }}-api
+          args: -- --project=${{ matrix.project }}
+          stage-tag: ${{ matrix.stage-tag }}
+          report-name: ${{ matrix.environment }}-${{ matrix.suite }}
           tag: ${{ inputs.tag }}
           name: ${{ inputs.name }}
           paths: ${{ inputs.path }}
           publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the public sites. APP_DB_LOCAL: the
-        # disabled-account case (customer-account-api-6) disables its account in the database.
+        # The local stack seeds the same demo accounts as the public sites.
         env:
           APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
           APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-          APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
+          APP_DB_LOCAL: ${{ matrix.database && secrets.APP_DB_LOCAL || '' }}
 
       - name: Publish application logs
         if: failure()
         uses: ./.github/actions/publish-app-logs
         with:
-          artifact-name: app-logs-${{ matrix.environment }}-api
-
-      - name: Stop the application under test
-        if: always()
-        run: node scripts/app.mjs down --volumes || true
-
-  # One job per browser and environment; fail-fast is off so one job's failure cancels no other.
-  smoke:
-    name: Smoke on ${{ matrix.browser }}, ${{ matrix.environment }}
-    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
-        browser: [chromium, firefox, webkit]
-    env:
-      TEST_ENV: ${{ matrix.environment }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node, dependencies and ${{ matrix.browser }}
-        uses: ./.github/actions/setup
-        with:
-          browsers: ${{ matrix.browser }}
-
-      - name: Start the application under test
-        uses: ./.github/actions/start-local-app
-        with:
-          environment: ${{ matrix.environment }}
-
-      - name: Run the @smoke specs on ${{ matrix.browser }}
-        uses: ./.github/actions/run-specs
-        with:
-          command: node scripts/app.mjs test
-          args: -- --project=${{ matrix.browser }}
-          stage-tag: '@smoke'
-          report-name: ${{ matrix.environment }}-smoke-${{ matrix.browser }}
-          tag: ${{ inputs.tag }}
-          name: ${{ inputs.name }}
-          paths: ${{ inputs.path }}
-          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        env:
-          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-
-      - name: Publish application logs
-        if: failure()
-        uses: ./.github/actions/publish-app-logs
-        with:
-          artifact-name: app-logs-${{ matrix.environment }}-smoke-${{ matrix.browser }}
-
-      - name: Stop the application under test
-        if: always()
-        run: node scripts/app.mjs down --volumes || true
-
-  regression:
-    name: Regression on ${{ matrix.environment }}
-    runs-on: ubuntu-latest # Docker and compose are preinstalled on GitHub-hosted runners
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: ${{ fromJSON((inputs.environment == 'local' || inputs.environment == 'local-fixed') && format('["{0}"]', inputs.environment) || '["local","local-fixed"]') }}
-    env:
-      TEST_ENV: ${{ matrix.environment }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node, dependencies and chromium
-        uses: ./.github/actions/setup
-        with:
-          browsers: chromium
-
-      - name: Start the application under test
-        uses: ./.github/actions/start-local-app
-        with:
-          environment: ${{ matrix.environment }}
-
-      - name: Run the regression specs
-        uses: ./.github/actions/run-specs
-        with:
-          command: node scripts/app.mjs test
-          args: -- --project=chromium
-          stage-tag: '@regression,@local'
-          report-name: ${{ matrix.environment }}-regression
-          tag: ${{ inputs.tag }}
-          name: ${{ inputs.name }}
-          paths: ${{ inputs.path }}
-          publish-html-report: ${{ vars.PUBLISH_REPORTS == 'true' }}
-        # The local stack seeds the same demo accounts as the public sites. APP_DB_LOCAL holds the
-        # local MariaDB credentials as JSON ({"user":…,"password":…}); TC-LOGIN-10 disables its
-        # account in the database, the only route this build offers.
-        env:
-          APP_ADMIN_USERNAME: ${{ secrets.APP_ADMIN_USERNAME }}
-          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
-          APP_DB_LOCAL: ${{ secrets.APP_DB_LOCAL }}
-
-      - name: Publish application logs
-        if: failure()
-        uses: ./.github/actions/publish-app-logs
-        with:
-          artifact-name: app-logs-${{ matrix.environment }}-regression
-
-      - name: Stop the application under test
-        if: always()
-        run: node scripts/app.mjs down --volumes || true
+          artifact-name: app-logs-${{ matrix.environment }}-${{ matrix.suite }}
 
   # Publishes the latest full run to GitHub Pages: the results dashboard and each job's Allure report.
   # The dashboard shows both builds side by side and compares them (scripts/quality-dashboard.mjs).
@@ -246,7 +150,7 @@ jobs:
   # one that tested a single build, would replace the full results, so it doesn't publish. It needs
   # Settings > Pages > Source set to GitHub Actions.
   publish-site:
-    needs: [api, smoke, regression]
+    needs: [tests]
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' && inputs.tag == '' && inputs.name == '' && inputs.path == '' && inputs.environment != 'local' && inputs.environment != 'local-fixed' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

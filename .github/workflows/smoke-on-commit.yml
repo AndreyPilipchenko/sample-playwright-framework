@@ -85,8 +85,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Node, dependencies and browsers
+      - name: Set up Node, dependencies and chromium
         uses: ./.github/actions/setup
+        with:
+          browsers: chromium
 
       - name: Start the application under test
         uses: ./.github/actions/start-local-app
@@ -96,8 +98,7 @@ jobs:
       - name: Run the @smoke specs
         uses: ./.github/actions/run-specs
         with:
-          command: node scripts/app.mjs test
-          args: --project=chromium
+          args: -- --project=chromium
           stage-tag: '@smoke'
           report-name: smoke-${{ env.TEST_ENV }}
           tag: ${{ inputs.tag }}
@@ -113,7 +114,3 @@ jobs:
         uses: ./.github/actions/publish-app-logs
         with:
           artifact-name: app-logs-smoke-${{ env.TEST_ENV }}
-
-      - name: Stop the application under test
-        if: always()
-        run: node scripts/app.mjs down --volumes || true

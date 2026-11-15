@@ -18,9 +18,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
     "check:conventions": "pom-harness check-conventions",
+    "check:boundary": "node scripts/check-core-boundary.mjs",
     "test:scripts": "node --test \"scripts/tests/*.test.mjs\"",
-    "test:smoke": "playwright test --grep @smoke",
-    "test:api": "playwright test --project=api"
+    "check": "npm run check:conventions && npm run check:boundary && npm run test:scripts && npm run typecheck && npm run lint"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
