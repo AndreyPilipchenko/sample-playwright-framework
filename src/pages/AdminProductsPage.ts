@@ -12,14 +12,12 @@ export class AdminProductsPage {
   // Locators
   private readonly search_input: Locator;
   private readonly search_button: Locator;
-  private readonly add_link: Locator;
   private readonly flash_msg: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.search_input = page.getByTestId('product-search-query');
     this.search_button = page.getByTestId('product-search-submit');
-    this.add_link = page.getByTestId('product-add');
     this.flash_msg = page.locator('.alert-success');
   }
 
@@ -40,12 +38,6 @@ export class AdminProductsPage {
     await step(`Search the admin product list for ${name}`, async () => {
       await this.search_input.fill(name);
       await this.search_button.click();
-    });
-  }
-
-  async openAddProduct() {
-    await step('Click Add Product', async () => {
-      await this.add_link.click();
     });
   }
 

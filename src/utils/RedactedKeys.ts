@@ -5,8 +5,8 @@
  * Matching is case-insensitive: callers compare `name.toLowerCase()`.
  *
  * Each facade keeps its own redaction mechanics (utility-classes practice 13); only the
- * deny-lists live here. Key-based masking cannot see inside an opaque string — see
- * ApiActionsOptions.redactResponseBody for endpoints whose whole body is a secret.
+ * deny-lists live here. Key-based masking cannot see inside an opaque string, so an
+ * endpoint whose whole body is a secret needs its own masking before it is added.
  */
 
 /** HTTP header names whose values are masked in request/response logs. */
