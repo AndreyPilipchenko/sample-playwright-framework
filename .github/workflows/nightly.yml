@@ -1,47 +1,7 @@
-# The FULL suite every night on the default branch (GitHub runs `schedule` triggers only
-# there), against both builds of the shop, each in its own private Docker stack: `local` (with
-# the deliberate defects) and `local-fixed` (the newer build without them; docs/app-versions.md).
-# Product commits run only the smoke tests (smoke-on-commit.yml); the public sites are tested by
-# hand (hosted.yml). Tests of broken functionality assert the documented behaviour, so they fail
-# (and the run is red) until the product fixes them (docs/test-plan.md §4.1).
-#
-# The `tests` job is a matrix of environment x suite; every cell starts together, gates nothing and
-# tests its own stack:
-#   api                 the browserless API specs (tests/api), @regression and @local
-#   smoke-<browser>     the @smoke subset on chromium, firefox and webkit
-#   regression          the @regression and @local specs on chromium
-# publish-site then puts the results on GitHub Pages.
-#
-# Reusable steps live in .github/actions/: setup (Node, dependencies, browsers), start-local-app
-# (the Docker stack), run-specs (run Playwright, publish the reports, reflect the outcome) and
-# publish-app-logs. Static checks run on pull requests (lint.yml).
-#
-# Run it by hand: Actions → Nightly tests → Run workflow, or `gh workflow run nightly.yml`.
-#
-# Manual-run inputs (all optional; blank means "as configured"):
-#   environment       both (default), local or local-fixed. It names the run.
-#   tag, name, path   narrow what runs: tests with any of the tags (comma-separated), a title
-#                     containing the text, in the given spec files/folders (:line allowed).
-#                     They narrow each job's own selection, so a job can end up empty;
-#                     an empty job passes and its summary says no tests matched.
-#   e.g. gh workflow run nightly.yml -f environment=local-fixed -f tag=@regression
-#
-# RUNNER: ubuntu-latest has Docker and compose preinstalled; start-local-app adds the arm64 emulation
-# the shop's images need.
-#
-# SECRETS: APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD (the shared demo admin, docs/test-plan.md
-# §1.2) are mapped onto the spec-running steps only. The customer needs no secret: the setup
-# registers a disposable one every run. With an empty admin secret, the admin specs fail with "No saved session". Mind
-# defect #21: one failed login locks the account, so check a value before saving it.
-#
-# REPORTS: native report detail (Playwright step titles, failure pages, traces) can contain the
-# admin credentials. They are the published demo account, so the Allure report and the traces of
-# failed tests (`traces-*`, 7 days) are always attached; this repository is public, so the jobs that
-# sign in attach the Playwright HTML report only when the repository variable PUBLISH_REPORTS is 'true'.
-# Artifact names carry the environment: `allure-report-local-api`, `allure-report-local-fixed-api`, …
-# publish-site puts the Allure reports on a public page, so it checks them for secrets first.
-#
-# WORKERS: 3 (playwright.config.ts), since each job tests its own private Docker stack.
+# The full suite every night (default branch only), on both local builds, each in its own Docker stack:
+# a matrix of environment x suite (api, smoke per browser, regression), then the results go to GitHub Pages.
+# Tests of broken functionality fail until the product is fixed (docs/test-plan.md §4.1).
+# Inputs, jobs, secrets and reports: docs/ci-guide.md. Run by hand: gh workflow run nightly.yml
 
 name: Nightly tests
 

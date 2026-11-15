@@ -61,4 +61,4 @@ They are `@regression`, except the disabled-account test (`customer-account-api-
 
 ## Not automated yet
 
-See [Not automated yet](../README.md#not-automated-yet) in the README.
+See the [Coverage summary](test-cases.md#coverage-summary) in the test cases.

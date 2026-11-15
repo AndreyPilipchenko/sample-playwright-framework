@@ -67,7 +67,26 @@ The steps the workflows share are composite actions in `.github/actions/`:
 | `static-checks` | For `lint.yml`: conventions check, core boundary check, script tests, typecheck and lint |
 | `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
 | `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
-| `run-specs` | Runs Playwright headless (`command` + `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed. `shared-site: true` (hosted.yml) means 2 workers, no traces and no saved comparison results |
+| `run-specs` | Runs Playwright headless (`node scripts/app.mjs test` with the job's `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed. `shared-site: true` (hosted.yml) means 2 workers, no traces and no saved comparison results |
+
+## Runners, secrets and reports
+
+- **Runners:** `ubuntu-latest` has Docker and compose preinstalled; `start-local-app` adds the arm64 emulation the
+  shop's images need. The local jobs use 3 workers (`playwright.config.ts`), since each tests its own private stack;
+  `hosted.yml` uses 2.
+- **Secrets:** `APP_ADMIN_USERNAME` and `APP_ADMIN_PASSWORD` (the shared demo admin,
+  [test plan §1.2](test-plan.md)) are mapped onto the spec-running steps only. The customer needs no secret: the
+  setup registers a disposable one every run. With an empty admin secret the admin specs fail with "No saved
+  session". Mind defect #21: one failed login locks the account, so check a value before saving it. `hosted.yml`
+  sends the admin login to the chosen public site, which publishes the same demo login. The nightly `regression`
+  and `api` jobs also read `APP_DB_LOCAL`: the disabled-account cases disable their account in the local MariaDB.
+- **Reports:** native report detail (Playwright step titles, failure pages, traces) can contain the admin
+  credentials. They are the published demo account, so the Allure report and the traces of failed tests
+  (`traces-*`, kept 7 days) are always attached. This repository is public, so the jobs that sign in attach the
+  Playwright HTML report only when the repository variable `PUBLISH_REPORTS` is `'true'`. `publish-site` checks
+  the Allure reports for secrets before putting them on a public page.
+- **Public sites:** they answer an occasional 500 under load; a rerun of the failed test tells a hiccup from a
+  finding.
 
 ## Red runs
 
