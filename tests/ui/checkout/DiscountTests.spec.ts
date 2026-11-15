@@ -121,7 +121,7 @@ test.describe('Discounts', () => {
   test('Invoice records the discounted total', { tag: ['@regression'] }, async () => {
     await allure.feature('Discounts');
     await allure.testCaseId('TC-DISC-8');
-    const { cartItemCount, billing, bank, expectedPaymentMessage, expectedTotals } = testData.tcDISC8;
+    const { cartItemCount, billing, bank, expectedPaymentMessage, expectedOrderConfirmation, expectedTotals } = testData.tcDISC8;
 
     const { user } = await apisUserAccount.registerNewCustomer(testData.tcDISC8.user);
     const catalog = await apisProductCatalog.seedCatalog(newUuid(), testData.tcDISC8);
@@ -141,7 +141,7 @@ test.describe('Discounts', () => {
     await checkoutPaymentPage.confirm();
     await checkoutPaymentPage.verifyPaymentSuccessful(expectedPaymentMessage);
     await checkoutPaymentPage.confirm();
-    await checkoutPaymentPage.verifyOrderPlaced();
+    await checkoutPaymentPage.verifyOrderPlaced(expectedOrderConfirmation);
     const invoiceNumber = await checkoutPaymentPage.readPlacedInvoiceNumber();
     await invoicesPage.navigate();
     await invoicesPage.openInvoiceDetails(invoiceNumber);

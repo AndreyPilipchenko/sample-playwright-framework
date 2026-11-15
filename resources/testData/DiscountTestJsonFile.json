@@ -169,6 +169,7 @@
       "accountNumber": "12345678"
     },
     "expectedPaymentMessage": "Payment was successful",
+    "expectedOrderConfirmation": "Thanks for your order! Your invoice number is",
     "expectedTotals": {
       "subtotal": "70.00",
       "discount": "10.50",

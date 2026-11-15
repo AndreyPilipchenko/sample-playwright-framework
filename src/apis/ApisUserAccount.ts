@@ -68,24 +68,6 @@ export class ApisUserAccount {
     return { user, userId };
   }
 
-  /** Registering an email that is already registered is refused with 409. */
-  async verifyRegisteringExistingEmailIsRejected(user: UserSeed) {
-    await allure.step('Verify registering an already registered email is rejected', async () => {
-      const response = await this.apiActions.post(this.register_serviceName, {
-        data: this.registerPayload(user),
-      });
-      expectToBe('the duplicate register response status', response.status(), 409);
-    });
-  }
-
-  /** A registered account can sign in through the API. One login only: this target locks an account after ONE failed login (defect #21). */
-  async verifyCanLogIn(email: string, password: string) {
-    await allure.step('Verify the account can sign in through the API', async () => {
-      const response = await this.login(email, password);
-      expectToBe('the login response status', response.status(), 200);
-    });
-  }
-
   /**
    * The lifetime, in minutes, of the token a login hands out and of the token a refresh hands out
    * (`expires_in` is in seconds). Never retry: a failed login counts against the account.
@@ -101,6 +83,49 @@ export class ApisUserAccount {
       expectToBe('the refresh response status', refreshResponse.status(), 200);
       const refreshed = (await refreshResponse.json()) as LoginTokenResponse;
       return { access: login.expires_in / 60, refreshed: refreshed.expires_in / 60 };
+    });
+  }
+
+  async login(email: string, password: string): Promise<APIResponse> {
+    return await allure.step('Log in through the API', async () => {
+      return await this.apiActions.post(this.login_serviceName, {
+        data: { email, password },
+      });
+    });
+  }
+
+  /**
+   * Logs in and returns the bearer token — shaped to serve as an ApiActions
+   * `bearerTokenProvider` for services that call authenticated endpoints. Never retry
+   * it on failure: this target locks an account after ONE failed login (defect #21).
+   */
+  async getAccessToken(email: string, password: string): Promise<string> {
+    return await allure.step('Get an API access token', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 200);
+      const { access_token: accessToken } = (await response.json()) as LoginTokenResponse;
+      expectToBeTruthy('the login access token', accessToken);
+      return accessToken;
+    });
+  }
+
+  ///// Validations
+
+  /** Registering an email that is already registered is refused with 409. */
+  async verifyRegisteringExistingEmailIsRejected(user: UserSeed) {
+    await allure.step('Verify registering an already registered email is rejected', async () => {
+      const response = await this.apiActions.post(this.register_serviceName, {
+        data: this.registerPayload(user),
+      });
+      expectToBe('the duplicate register response status', response.status(), 409);
+    });
+  }
+
+  /** A registered account can sign in through the API. One login only: this target locks an account after ONE failed login (defect #21). */
+  async verifyCanLogIn(email: string, password: string) {
+    await allure.step('Verify the account can sign in through the API', async () => {
+      const response = await this.login(email, password);
+      expectToBe('the login response status', response.status(), 200);
     });
   }
 
@@ -132,29 +157,6 @@ export class ApisUserAccount {
     await allure.step(`Verify the access and the refreshed token live at most ${maxMinutes} minutes`, async () => {
       expectToBeAtMost('the access token lifetime in minutes', lifetimes.access, maxMinutes);
       expectToBeAtMost('the refreshed token lifetime in minutes', lifetimes.refreshed, maxMinutes);
-    });
-  }
-
-  async login(email: string, password: string): Promise<APIResponse> {
-    return await allure.step('Log in through the API', async () => {
-      return await this.apiActions.post(this.login_serviceName, {
-        data: { email, password },
-      });
-    });
-  }
-
-  /**
-   * Logs in and returns the bearer token — shaped to serve as an ApiActions
-   * `bearerTokenProvider` for services that call authenticated endpoints. Never retry
-   * it on failure: this target locks an account after ONE failed login (defect #21).
-   */
-  async getAccessToken(email: string, password: string): Promise<string> {
-    return await allure.step('Get an API access token', async () => {
-      const response = await this.login(email, password);
-      expectToBe('the login response status', response.status(), 200);
-      const { access_token: accessToken } = (await response.json()) as LoginTokenResponse;
-      expectToBeTruthy('the login access token', accessToken);
-      return accessToken;
     });
   }
 

@@ -48,7 +48,7 @@ test.describe('Invoice API', () => {
     await allure.testCaseId('invoice-api-4');
 
     const { apisInvoices, created } = await apisOwnInvoices.createOwnInvoice(testData.invoiceApi4);
-    const listed = await apisInvoices.getInvoiceNumbers();
+    const { numbers: listed } = await apisInvoices.getInvoiceList();
     await apisInvoices.verifyInvoiceListed(listed, created.invoiceNumber);
   });
 

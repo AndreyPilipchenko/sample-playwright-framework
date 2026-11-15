@@ -60,14 +60,9 @@ export class HomePage {
     });
   }
 
-  /** The category filter checkbox labelled exactly `categoryName`. */
-  private category_checkbox(categoryName: string): Locator {
-    return this.page.getByLabel(categoryName, { exact: true });
-  }
-
-  /** The brand filter checkbox labelled exactly `brandName`. */
-  private brand_checkbox(brandName: string): Locator {
-    return this.page.getByLabel(brandName, { exact: true });
+  /** The category or brand filter checkbox labelled exactly `label`. */
+  private filter_checkbox(label: string): Locator {
+    return this.page.getByLabel(label, { exact: true });
   }
 
   /** The price on the card of `productName`; the original price once the product is discounted. */
@@ -141,13 +136,13 @@ export class HomePage {
 
   async filterByCategory(categoryName: string) {
     await step(`Filter the products by category: ${categoryName}`, async () => {
-      await this.category_checkbox(categoryName).check();
+      await this.filter_checkbox(categoryName).check();
     });
   }
 
   async filterByBrand(brandName: string) {
     await step(`Filter the products by brand: ${brandName}`, async () => {
-      await this.brand_checkbox(brandName).check();
+      await this.filter_checkbox(brandName).check();
     });
   }
 
@@ -253,13 +248,13 @@ export class HomePage {
 
   async verifyCategoryNotChecked(categoryName: string) {
     await step(`Verify the category filter is not checked: ${categoryName}`, async () => {
-      await expectNotToBeChecked(`the category filter ${categoryName}`, this.category_checkbox(categoryName));
+      await expectNotToBeChecked(`the category filter ${categoryName}`, this.filter_checkbox(categoryName));
     });
   }
 
   async verifyBrandNotChecked(brandName: string) {
     await step(`Verify the brand filter is not checked: ${brandName}`, async () => {
-      await expectNotToBeChecked(`the brand filter ${brandName}`, this.brand_checkbox(brandName));
+      await expectNotToBeChecked(`the brand filter ${brandName}`, this.filter_checkbox(brandName));
     });
   }
 
@@ -271,7 +266,7 @@ export class HomePage {
 
   async verifyCategoryChecked(categoryName: string) {
     await step(`Verify the category filter is checked: ${categoryName}`, async () => {
-      await expectToBeChecked(`the category filter ${categoryName}`, this.category_checkbox(categoryName));
+      await expectToBeChecked(`the category filter ${categoryName}`, this.filter_checkbox(categoryName));
     });
   }
 
