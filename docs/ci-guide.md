@@ -64,7 +64,7 @@ The steps the workflows share are composite actions in `.github/actions/`:
 | Action | What it does |
 |---|---|
 | `setup` | Node, `npm ci`, the requested Playwright browsers and their Ubuntu system packages (both cached, so a slow package mirror can't stall a job; chromium is always added, because the auth setup runs on it) |
-| `static-checks` | For `lint.yml`: conventions check, core boundary check, README count check, script tests, typecheck and lint |
+| `static-checks` | For `lint.yml`: conventions check, core boundary check, README count check, harness version check, script tests, typecheck and lint |
 | `start-local-app` | Brings the Docker stack up on the runner, with the arm64 emulation its images need |
 | `publish-app-logs` | Uploads the stack's container logs; call it with `if: failure()` |
 | `run-specs` | Runs Playwright headless (`node scripts/app.mjs test` with the job's `args`), publishes the HTML and Allure reports and failed tests' traces as `*-<report-name>` artifacts whatever the outcome, then fails if the specs failed. `shared-site: true` (hosted.yml) means 2 workers, no traces and no saved comparison results |
@@ -90,13 +90,20 @@ The steps the workflows share are composite actions in `.github/actions/`:
 
 ## Dependency updates
 
-Dependabot (`.github/dependabot.yml`) opens update pull requests once a month: npm packages in groups
-(`playwright`, `allure`, `static-checks`, the rest one by one) and the GitHub Actions the workflows and
-composite actions use. It leaves out `@types/node` majors, because Node is pinned to 24, and the vendored
-`playwright-pom-harness`, which the `harness-setup` skill updates.
+Dependabot (`.github/dependabot.yml`) opens update pull requests once a month: npm packages (the
+`static-checks` group, the rest one by one) and the GitHub Actions the workflows and composite actions use.
+It leaves out:
+
+- `@types/node` majors, because Node is pinned to 24;
+- the vendored `playwright-pom-harness`, which the `harness-setup` skill updates;
+- `playwright`, `@playwright/test`, `allure`, `allure-playwright` and `allure-js-commons`. The harness
+  accepts only the exact versions it was validated with (Playwright 1.63.0, Allure 3.19.1, the Allure
+  packages 3.13.0) and switches its Allure report and the verification of generated tests off for any other
+  (`npx --no pom-harness check`). They move together with a harness update that moves its pins. The static
+  check `check:harness-versions` fails a pull request that installs another version.
 
 Such a pull request runs only the static checks, never the suite. Before merging one that changes what runs
-the tests (Playwright, Allure, the reporters, `mysql2`, `dotenv`, an action), start a nightly on its branch:
+the tests (the reporters, `mysql2`, `dotenv`, an action), start a nightly on its branch:
 
 ```sh
 gh workflow run nightly.yml --ref <dependabot branch>
@@ -106,7 +113,6 @@ A nightly on a branch publishes nothing to GitHub Pages. It reads main's latest 
 and saves its own where only that branch sees them (GitHub scopes caches by branch), so each job's Summary
 page lists newly failing and fixed tests against main's last nightly, and main's results stay as they are.
 The same red tests mean the update changed nothing; a newly failing test is the update's to explain.
-A Playwright update also changes the browser builds, so read its release notes for behaviour changes.
 
 ## Red runs
 
