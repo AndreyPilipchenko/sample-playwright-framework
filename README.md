@@ -78,7 +78,7 @@ the two `.env` values, the admin and disabled-account specs fail.
 | **Some behaviour can't be reached through the UI or API** | Disabling an account goes through the database, a discount depends on the browser's position, and a contact message is checked in the local mail inbox | [`DbsUserAccount.ts`](src/dbs/DbsUserAccount.ts), [`BrowserGeolocation.ts`](src/utils/BrowserGeolocation.ts), [`ApisMailInbox.ts`](src/apis/ApisMailInbox.ts) |
 | **Security needs testing too** | API specs try another customer's record, forged invoice prices, deletes without a token and guarded GraphQL fields | [`tests/api/security/`](tests/api/security/) |
 | **Reports in a public repository can leak logins** | Allure masks typed passwords, the two places that type the admin password record no trace, and the HTML report is published only on request | [Report masking](docs/harness-change-requests/report-credential-masking.md) |
-| **A wrong report misleads as much as a wrong test** | The scripts behind the run summary, dashboard, secret check, boundary check and README count check have their own tests, run on every pull request | [`scripts/tests`](scripts/tests) |
+| **A wrong report misleads as much as a wrong test** | The scripts behind the run summary, dashboard, secret check, boundary check, README count check and harness version check have their own tests, run on every pull request | [`scripts/tests`](scripts/tests) |
 | **Code style slips when only a reviewer checks it** | Every pull request runs a mechanical conventions check, a core boundary check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
 
 ## How it's built
@@ -113,7 +113,7 @@ versions of the shop, and the public sites are tested by hand.
 
 ```mermaid
 flowchart LR
-    pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, README counts, script tests, typecheck, lint"]
+    pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, README counts, harness versions, script tests, typecheck, lint"]
     push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
     nightly["Nightly schedule or by hand"] --> api["api<br/>per version"]
     nightly --> smoke["smoke<br/>per version and browser"]
@@ -155,7 +155,7 @@ Run Playwright from the repository root: the Allure results and report (`reports
 evidence (`.harness/runs/`) land under the directory a run starts in. npm scripts, CI and the VS Code extension already run from the root.
 
 Run every static check CI runs on a pull request with `npm run check` (conventions, core boundary, README
-counts, script tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.
+counts, harness versions, script tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.
 
 ## Test documentation
 
@@ -313,7 +313,7 @@ same queue command, run natively on the API image, so mail leaves within seconds
 ## CI
 
 Three workflows run the tests. This repository is the test project, not the product, so
-**commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, README counts, script tests, type-check, lint).
+**commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, README counts, harness versions, script tests, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|

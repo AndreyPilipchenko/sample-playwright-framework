@@ -1,6 +1,7 @@
 # Monthly dependency updates as pull requests. A pull request here runs only the static checks (lint.yml),
 # never the suite, so before merging an update start a nightly on its branch and compare it with the last one:
 #   gh workflow run nightly.yml --ref <dependabot branch>
+# Check `npx --no pom-harness check` on the branch too: the harness pins some versions (see ignore below).
 # See docs/ci-guide.md, "Dependency updates".
 
 version: 2
@@ -13,12 +14,6 @@ updates:
     commit-message:
       prefix: "deps"
     groups:
-      # Runner and browsers move together; a new Playwright can change how specs behave.
-      playwright:
-        patterns: ["playwright", "@playwright/test"]
-      # Reporter, generator and the Playwright adapter share one report format.
-      allure:
-        patterns: ["allure", "allure-js-commons", "allure-playwright"]
       # Linting and type checking: caught by the static checks of the pull request itself.
       static-checks:
         patterns: ["oxlint", "oxlint-tsgolint", "eslint-plugin-playwright", "typescript", "@types/node"]
@@ -28,6 +23,15 @@ updates:
         update-types: ["version-update:semver-major"]
       # Vendored from .harness/vendor; updated through the harness-setup skill, not the registry.
       - dependency-name: "playwright-pom-harness"
+      # The harness validates exact versions of these and switches features off for any other
+      # (`npx --no pom-harness check`): Allure reporting needs allure 3.19.1 and allure-playwright /
+      # allure-js-commons 3.13.0, generation verification needs Playwright 1.63.0. They move only
+      # with a harness update that moves its pins.
+      - dependency-name: "playwright"
+      - dependency-name: "@playwright/test"
+      - dependency-name: "allure"
+      - dependency-name: "allure-playwright"
+      - dependency-name: "allure-js-commons"
 
   - package-ecosystem: github-actions
     # The workflows, and the composite actions they share, which pin actions of their own.
