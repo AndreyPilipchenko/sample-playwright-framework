@@ -147,7 +147,7 @@ src/config/   App settings: environment & target coordinates (reads .harness/tar
 src/fixtures/ Reusable core: the suite's `test` with the `role` option (signed-in sessions)
 tests/        Spec files, in ui/<category>/ and api/<category>/ — orchestrate business flows, carry Allure metadata only
 setup/        Setup project — signs each role in once per run
-resources/    testData/ (per-spec JSON files, plus *.fixed.json overlays for the newer app version), Queries/ and apisCollections/ (team libraries)
+resources/    testData/ (per-spec JSON files, plus *.fixed.json overlays for the newer app version), Queries/ and apisCollections/ (empty slots for team libraries)
 .harness/     Project config, targets and a vendored package
 ```
 

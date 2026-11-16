@@ -32,7 +32,8 @@ requests run no Playwright tests. When reviewing, flag these in particular:
 
 ## CI (.github/)
 - No `push` or `pull_request` triggers on the test workflows (only `lint.yml` runs on pull requests, static checks only): smoke runs on the product
-  repository's dispatch, the full suite nightly, both by hand.
+  repository's dispatch, the full suite nightly on both local builds (`nightly.yml`), the public
+  sites only by hand (`hosted.yml`); all can be started by hand.
 - Shared steps live in composite actions in `.github/actions/`. Workflow inputs reach scripts
   through `env`, never spliced into `run:` text.
 - This repository is public: jobs that sign in with shared credentials must not publish the
