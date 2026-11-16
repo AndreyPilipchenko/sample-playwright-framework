@@ -19,8 +19,9 @@
     "lint": "oxlint",
     "check:conventions": "pom-harness check-conventions",
     "check:boundary": "node scripts/check-core-boundary.mjs",
+    "check:readme": "node scripts/check-readme-counts.mjs",
     "test:scripts": "node --test \"scripts/tests/*.test.mjs\"",
-    "check": "npm run check:conventions && npm run check:boundary && npm run test:scripts && npm run typecheck && npm run lint"
+    "check": "npm run check:conventions && npm run check:boundary && npm run check:readme && npm run test:scripts && npm run typecheck && npm run lint"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
