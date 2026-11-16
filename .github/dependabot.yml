@@ -1,0 +1,41 @@
+# Monthly dependency updates as pull requests. A pull request here runs only the static checks (lint.yml),
+# never the suite, so before merging an update start a nightly on its branch and compare it with the last one:
+#   gh workflow run nightly.yml --ref <dependabot branch>
+# See docs/ci-guide.md, "Dependency updates".
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      # Runner and browsers move together; a new Playwright can change how specs behave.
+      playwright:
+        patterns: ["playwright", "@playwright/test"]
+      # Reporter, generator and the Playwright adapter share one report format.
+      allure:
+        patterns: ["allure", "allure-js-commons", "allure-playwright"]
+      # Linting and type checking: caught by the static checks of the pull request itself.
+      static-checks:
+        patterns: ["oxlint", "oxlint-tsgolint", "eslint-plugin-playwright", "typescript", "@types/node"]
+    ignore:
+      # Node is pinned to 24 (package.json engines); its types follow that major.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Vendored from .harness/vendor; updated through the harness-setup skill, not the registry.
+      - dependency-name: "playwright-pom-harness"
+
+  - package-ecosystem: github-actions
+    # The workflows, and the composite actions they share, which pin actions of their own.
+    directories: ["/", "/.github/actions/*"]
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
