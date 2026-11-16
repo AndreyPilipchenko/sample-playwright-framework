@@ -22,8 +22,8 @@ requests run no Playwright tests. When reviewing, flag these in particular:
 - Technical complexity (retries, try/catch, parsing) belongs in `src/utils/` only.
 
 ## Data and secrets
-- Test inputs live in `resources/testData/<Spec>JsonFile.json`, read root-relative
-  (`./resources/testData/...`); unique values come from `src/utils/UniqueData.ts`.
+- Test inputs live in `resources/testData/<Spec>JsonFile.json`, read through `loadTestData`
+  (`src/utils/TestData.ts`); unique values come from `src/utils/UniqueData.ts`.
 - Credentials come only from environment variables (`.env`, GitHub secrets). Flag any literal
   credential in code, and any credential, email or token interpolated into a step title, log
   or attachment.

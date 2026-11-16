@@ -1,6 +1,10 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { environmentName } from '../config/targets';
 import { environmentBuilds } from '../config/builds';
+
+/** Resolved from this file, so a run started outside the repository root finds the data too. */
+const TEST_DATA_DIR = path.resolve(__dirname, '../../resources/testData');
 
 /**
  * Reads a paired test-data JSON file from `resources/testData`; type it with `typeof import('<path>.json')`.
@@ -11,9 +15,9 @@ import { environmentBuilds } from '../config/builds';
  * to the values that really differ, each one recorded in docs/app-versions.md.
  */
 export function loadTestData<T>(fileName: string): T {
-  const base = JSON.parse(fs.readFileSync(`./resources/testData/${fileName}`, 'utf8')) as T;
+  const base = JSON.parse(fs.readFileSync(path.join(TEST_DATA_DIR, fileName), 'utf8')) as T;
   const build = environmentBuilds[environmentName];
-  const overlayFile = `./resources/testData/${fileName.replace(/\.json$/, '')}.${build}.json`;
+  const overlayFile = path.join(TEST_DATA_DIR, `${fileName.replace(/\.json$/, '')}.${build}.json`);
   if (!build || !fs.existsSync(overlayFile)) return base;
   return mergeOverlay(base, JSON.parse(fs.readFileSync(overlayFile, 'utf8'))) as T;
 }
