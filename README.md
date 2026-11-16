@@ -151,9 +151,8 @@ resources/    testData/ (per-spec JSON files, plus *.fixed.json overlays for the
 .harness/     Project config, targets and a vendored package
 ```
 
-Run Playwright from the repository root. Specs load their test data from
-repo-root-relative paths (`./resources/testData/...`), so launching from a subfolder with
-`-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
+Run Playwright from the repository root: the Allure results and report (`reports/`) and the harness's run
+evidence (`.harness/runs/`) land under the directory a run starts in. npm scripts, CI and the VS Code extension already run from the root.
 
 Run every static check CI runs on a pull request with `npm run check` (conventions, core boundary, README
 counts, script tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.

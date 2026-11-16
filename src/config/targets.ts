@@ -81,11 +81,23 @@ export const apiUrl = (name: string): string => {
   return required(process.env[override] || (id ? targets.api?.[id]?.baseUrl : undefined), `API target for "${name}"`, override).replace(/\/+$/, '');
 };
 
+/** The `{"user","password"}` JSON in `variable`; empty when unset. The error names the variable, never its value. */
+function credentialsFrom(variable: string): { user?: string; password?: string } {
+  try {
+    return JSON.parse(process.env[variable] || '{}');
+  } catch {
+    throw new Error(`${variable} is not valid JSON; it holds an object with user and password (see .env.example).`);
+  }
+}
+
 /** A database's coordinates from the environment's target, its credentials from the variable the target names. */
 export function databaseTarget(name: string): MySqlConnectionConfig {
   const id = environmentTargetId('databaseTargets', name);
-  const target = id ? targets.databases?.[id] : undefined, prefix = variablePrefix(name);
-  const credentials = target ? JSON.parse(process.env[target.connectionRef.slice('env:'.length)] || '{}') : { user: process.env.DB_USER, password: process.env.DB_PASSWORD };
+  const target = id ? targets.databases?.[id] : undefined;
+  const prefix = variablePrefix(name);
+  const credentials = target
+    ? credentialsFrom(target.connectionRef.slice('env:'.length))
+    : { user: process.env.DB_USER, password: process.env.DB_PASSWORD };
   return {
     name,
     server: process.env[`${prefix}_SERVER`] || target?.server || '',

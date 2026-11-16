@@ -9,7 +9,7 @@ import { allureConfig } from './src/config/reporting';
  * Runs once per run, outside any worker — no `test.step()`, `test.info()` or attachments here.
  * A failed clear would merge stale results into the new report, so the error is rethrown.
  */
-module.exports = async () => {
+export default async function globalSetup(): Promise<void> {
   const resultsDir = allureConfig.resultsDir;
   try {
     await fs.rm(resultsDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
@@ -19,4 +19,4 @@ module.exports = async () => {
     console.error(`Failed to clear the Allure results directory: ${resultsDir}`, error);
     throw error;
   }
-};
+}
