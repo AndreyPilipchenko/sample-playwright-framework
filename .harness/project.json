@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "defaultEnvironment": "hosted-with-bugs",
+  "defaultEnvironment": "local",
   "environments": {
     "hosted-with-bugs": {
       "environmentMode": "test",
