@@ -3,7 +3,7 @@ import { MySqlActions, type MySqlConnectionConfig } from '../utils/MySqlActions'
 import { expectToBe } from '../utils/Expects';
 
 /**
- * Customer accounts in the application's database. Only the `local` environment has one
+ * Customer accounts in the application's database. Only the local environments (`local`, `local-fixed`) have one
  * (`databases.appDb`, credentials in APP_DB_LOCAL); the with-bugs API offers no way to
  * disable an account (its user update drops `enabled`), so the database is the only route.
  */

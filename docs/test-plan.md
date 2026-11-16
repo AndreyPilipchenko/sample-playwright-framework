@@ -1,4 +1,4 @@
-# Test Plan — Toolshop (with-bugs)
+# Test Plan — Toolshop
 
 > Derived from Testsmith's documentation and not covered by this repository's MIT license; see [NOTICE](../NOTICE.md).
 
@@ -7,40 +7,42 @@ Compiled from the upstream
 ([source repo](https://github.com/testsmith-io/practice-software-testing)) and verified
 against the live target on 2026-11-02.
 
-Organised by **feature area**. Tests run against a private copy of the
-`with-bugs` build in Docker, because the public instance is too unstable to test against. Only the features actually present in that build are in scope.
+Organised by **feature area**. The suite runs against two builds of the application, the `with-bugs` build and
+the fixed build, each in a private Docker stack and on a public instance (§1). Scheduled runs use only the
+Docker stacks, because the public instances are too unstable. Scope is the features of the `with-bugs` build (§2).
 
 ---
 
 ## 1. Application under test
 
-| Component | URL |
-|---|---|
-| Application (local copy, what the tests use) | <http://localhost:4200> |
-| REST API (local) | <http://localhost:8091> |
-| Swagger (local) | <http://localhost:8091/api/documentation> |
-| Database and mail inbox (local only) | MariaDB on port `3306`, inbox on <http://localhost:1080> |
-| Application (public) | <https://with-bugs.practicesoftwaretesting.com> |
-| REST API (public) | <https://api-with-bugs.practicesoftwaretesting.com> |
-| Swagger (public) | <https://api-with-bugs.practicesoftwaretesting.com/api/documentation> |
-| GraphQL / GraphiQL | `/graphql` and `/graphiql` on the API host |
-
 "Toolshop" is an e-commerce demo store (Angular front end, Laravel REST + GraphQL API,
 MariaDB). The `with-bugs` build is a deliberately defective variant of the full-feature
 store, published for exploratory-testing and bug-reporting practice. It carries
-**90+ intentional defects** across UI, API/security and accessibility.
+**90+ intentional defects** across UI, API/security and accessibility. The fixed build is
+a newer release of the full-feature store without those defects.
+
+The suite selects one of four environments with `TEST_ENV`:
+
+| Environment | Build | Application | REST API |
+|---|---|---|---|
+| `local` | with-bugs | <http://localhost:4200> | <http://localhost:8091> |
+| `local-fixed` | fixed | <http://localhost:4200> | <http://localhost:8091> |
+| `hosted-with-bugs` | with-bugs | <https://with-bugs.practicesoftwaretesting.com> | <https://api-with-bugs.practicesoftwaretesting.com> |
+| `hosted` | fixed | <https://practicesoftwaretesting.com> | <https://api.practicesoftwaretesting.com> |
+
+Both local environments use the same ports, so one stack runs at a time (`scripts/app.mjs`). Only they have a
+database and a mail inbox: MariaDB on port `3306`, inbox on <http://localhost:1080>. Swagger is at
+`/api/documentation`, GraphQL and GraphiQL at `/graphql` and `/graphiql`, on each API host.
 
 ### 1.1 Routing — verified
 
-The build uses **hash-based routing**: `https://.../#/checkout`, `#/auth/login`,
-`#/contact`, and so on. Clean (non-hash) URLs such as `/checkout` return **HTTP 404**.
+The `with-bugs` build uses **hash-based routing**: `https://.../#/checkout`, `#/auth/login`,
+`#/contact`, and so on. Clean (non-hash) URLs such as `/checkout` return **HTTP 404** there.
+The fixed build uses path routes (`/checkout`). Page classes take routes from
+`applications.app.routes`, which picks the form for the build
+([app versions, B1](app-versions.md#b-real-changes-between-the-builds)).
 
-This was confirmed live: every clean path tested returned 404, while the `#/…`
-equivalents resolved. Note the upstream release notes claim "hash routing → clean
-URLs" — that upgrade is **not** in this build. Any navigation code or documentation
-assuming clean URLs will break here.
-
-Route guards were also confirmed working: `#/account`, `#/account/invoices`,
+Route guards were confirmed working on the `with-bugs` build: `#/account`, `#/account/invoices`,
 `#/account/favorites` and `#/admin/dashboard` all redirect to `#/auth/login` when
 unauthenticated.
 
@@ -59,7 +61,7 @@ Even though these are public, keep them out of committed code and step titles: p
 the admin in the git-ignored `.env` under `APP_ADMIN_*` (see `.env.example`; customers are registered per run), per
 this framework's secrets rule. The values above are documentation, not configuration.
 
-> **Shared-state warning.** The public instance is used concurrently by other
+> **Shared-state warning.** The public instances are used concurrently by other
 > learners, and these accounts are shared there. Account state (profile fields, password,
 > favorites, lock status) can be changed by anyone at any time. Tests must not depend
 > on a pre-existing account state they did not create themselves — see §4.3.
@@ -69,7 +71,8 @@ this framework's secrets rule. The values above are documentation, not configura
 ## 2. Scope
 
 Scope is taken from the upstream feature matrix (`docs/features.md`), filtered to the
-`with-bugs` column.
+`with-bugs` column. The same cases run on the fixed build; features only it has (such as
+two-factor authentication on `hosted`) are not covered.
 
 ### 2.1 In scope
 
@@ -101,13 +104,12 @@ Per the upstream feature matrix, these features exist in the full-feature store 
 - Product comparison and product specifications
 - Google Analytics
 
-> Caveat: the upstream release notes also list "cart" among the missing features,
-> yet the feature matrix lists the full checkout flow as present and the defect
-> register contains cart-specific bugs. The likely reading is that the *server-side
-> persistent cart API* (`/carts/…`) is absent while a client-side cart exists.
-> **Confirm by exploration before writing cart-API tests** — see Open Questions (§7).
+> The upstream release notes also list "cart" among the missing features. Exploration
+> settled it: the `with-bugs` build keeps the cart in the browser and has no server-side
+> cart API, while the fixed build has one (`POST /carts`;
+> [app versions, B7](app-versions.md#b-real-changes-between-the-builds)).
 
-### 2.3 Additional endpoint in this build
+### 2.3 Additional endpoint in the with-bugs build
 
 | Method | Endpoint | Note |
 |---|---|---|
@@ -178,7 +180,7 @@ reason. Prefer stable `data-test` attributes — the build exposes them widely
 
 ### 4.3 Test independence on shared, mutable data
 
-The public instance is shared and mutable, and data on a local stack lasts until its volumes are dropped, so the
+The public instances are shared and mutable, and data on a local stack lasts until its volumes are dropped, so the
 same rules apply everywhere:
 
 - Create the data a test needs; never rely on seeded records surviving.
@@ -188,7 +190,10 @@ same rules apply everywhere:
 - Account locking is destructive and defect #21 locks after **1** failed attempt
   instead of 3. A lock test run against a shared account can block other users and
   other tests. Use a throwaway registered account.
-- Clean up what you create where an endpoint allows it.
+- Give every record a per-run UUID and work only with your own. Records are left behind on
+  purpose, because deleting needs an admin token; only TC-ADM-2 and 7, which sign in as the
+  admin anyway, delete what they create. On a public instance these records are visible to
+  other users.
 
 ---
 
@@ -226,20 +231,22 @@ reported defect is listed in the run report; any other failure blocks exit.
 
 Carried deliberately rather than guessed:
 
-1. **Is the server-side cart API present?** Upstream docs contradict themselves (§2.2).
-   Resolve by exploration before writing cart-API tests.
-2. **Contact-form attachment rule.** The acceptance criterion states an attachment must
+1. **Contact-form attachment rule.** The acceptance criterion states an attachment must
    be *exactly 0 KB*, while defect #70 reports "file with 0KB can be uploaded" as a bug.
    These cannot both be right; the intended rule is unclear. Confirm actual behaviour
    before automating file-upload validation.
-3. **Privacy policy.** The feature matrix excludes it from `with-bugs`, but `#/privacy`
+2. **Privacy policy.** The feature matrix excludes it from `with-bugs`, but `#/privacy`
    did not 404. Because the app is a single-page application the shell responds to any
    hash route, so this proves nothing either way — confirm whether real content renders.
-4. **Does this build enforce 3-attempt locking at all?** Defect #21 says it locks after
-   1 attempt. The threshold needs confirming before a locking test can assert anything.
-   *Partly answered 2026-11-05:* the defect-free upstream source locks after 3 failures (HTTP 423);
-   the local with-bugs stack never locks at all. TC-LOGIN-7/8 assert the threshold of 3, see
-   [test cases §11](test-cases.md#11-user-login).
+
+Answered since, and kept here for the record:
+
+- **Is the server-side cart API present?** Not in the `with-bugs` build; the fixed build has one (§2.2).
+- **Does the build enforce 3-attempt locking?** The `with-bugs` build never locks an account.
+  The fixed build locks after 3 failures and answers HTTP 423; on `hosted` the login page
+  then shows the wrong message. TC-LOGIN-7/8 assert the threshold of 3, see
+  [test cases §11](test-cases.md#11-user-login) and
+  [app versions](app-versions.md#hosted-and-local).
 
 ---
 
@@ -247,3 +254,4 @@ Carried deliberately rather than guessed:
 
 - [Test cases](test-cases.md) — test conditions per feature area, traceable to acceptance criteria
 - [Known defects](known-defects.md) — the 90+ intentional defect register
+- [App versions](app-versions.md) — the four environments, the two builds and how they differ
