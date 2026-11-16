@@ -16,7 +16,7 @@ export interface CategoryRecord {
 }
 
 export class ApisCategories {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly categories_serviceName = `${applications.app.apiUrl}/categories`;
 

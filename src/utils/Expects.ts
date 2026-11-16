@@ -27,7 +27,9 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * the step, so nesting is identical to a bare expect; locator/page wrappers delegate
  * the `Locator`/`Page` straight to native `expect` (web-first auto-retry and options
  * untouched; the message itself carries the locator);
- * one wrapper per matcher actually used in the repo — extend by need (iron law 11).
+ * one wrapper per matcher actually used in the repo — extend by need (iron law 11). The two
+ * secret variants below are the exception: they stay without callers, because design-conventions
+ * (2026-09-08) names them as the only route for a secret-valued expectation and generated code calls them.
  * Which call sites MUST use these wrappers is validation-methods §13's territory.
  */
 

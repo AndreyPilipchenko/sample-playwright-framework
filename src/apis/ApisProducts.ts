@@ -53,7 +53,7 @@ export interface RentalListingEntry {
 }
 
 export class ApisProducts {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly products_serviceName = `${applications.app.apiUrl}/products`;
   readonly images_serviceName = `${applications.app.apiUrl}/images`;

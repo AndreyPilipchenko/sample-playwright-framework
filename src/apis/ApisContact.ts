@@ -25,7 +25,7 @@ export interface ContactMessageRecord {
 
 /** The contact messages the form sends (`POST /messages`) and a customer reads back (`GET /messages`). */
 export class ApisContact {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly messages_serviceName = `${applications.app.apiUrl}/messages`;
 

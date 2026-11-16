@@ -14,7 +14,7 @@ export interface BrandRecord {
 }
 
 export class ApisBrands {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly brands_serviceName = `${applications.app.apiUrl}/brands`;
 

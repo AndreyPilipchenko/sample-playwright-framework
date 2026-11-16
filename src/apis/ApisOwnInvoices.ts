@@ -13,6 +13,21 @@ export interface OwnInvoiceSeed {
   quantity: number;
 }
 
+/** A registered customer, with invoice calls that act as that customer. */
+export interface InvoiceOwner {
+  apisInvoices: ApisInvoices;
+  owner: UserSeed;
+  userId: number;
+  uuid: string;
+}
+
+/** An invoice created by a new customer, with what the checks compare it to. */
+export interface OwnInvoice extends Omit<InvoiceOwner, 'uuid'> {
+  created: CreatedInvoice;
+  lines: InvoiceLineSeed[];
+  productName: string;
+}
+
 /**
  * Invoice flows that span domains (account, catalog, invoice). Each call registers its own customer
  * (email carries a per-run UUID) and signs in through the API as that customer; never retried by the
@@ -29,7 +44,7 @@ export class ApisOwnInvoices {
   ///// Actions
 
   /** Registers a fresh customer and returns invoice calls that act as that customer. */
-  async registerInvoiceOwner(user: UserSeed, uuid = newUuid()) {
+  async registerInvoiceOwner(user: UserSeed, uuid = newUuid()): Promise<InvoiceOwner> {
     return await allure.step('Register a customer to own invoices', async () => {
       const apisUserAccount = new ApisUserAccount(this.request);
       const { user: owner, userId } = await apisUserAccount.registerNewCustomer(user, uuid);
@@ -39,7 +54,7 @@ export class ApisOwnInvoices {
   }
 
   /** Registers a customer, seeds one product and creates an invoice for it as that customer. */
-  async createOwnInvoice(seed: OwnInvoiceSeed) {
+  async createOwnInvoice(seed: OwnInvoiceSeed): Promise<OwnInvoice> {
     return await allure.step('Create an invoice for a new customer', async () => {
       const { apisInvoices, owner, userId, uuid } = await this.registerInvoiceOwner(seed.user);
       const catalog = await new ApisProductCatalog(this.request).seedCatalog(uuid, seed.catalog);
