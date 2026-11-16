@@ -34,7 +34,7 @@ unchanged on both, and the results show which failures went away because a defec
 
 | | |
 |---|---|
-| **Tests** | 147 across 30 spec files: 110 in the browser, 37 API, plus 2 sign-in setup tests. 20 are `@smoke` and also run on Firefox and WebKit |
+| **Tests** | 148 across 30 spec files: 111 in the browser, 37 API, plus 2 sign-in setup tests. 20 are `@smoke` and also run on Firefox and WebKit |
 | **Automated cases** | [116 test cases](docs/test-cases.md) from the test design |
 | **Defects** | 40 distinct defects linked to failing automated tests, and [16 written bug reports](docs/bug-reports/) tied to automated tests |
 | **Layers** | 25 page objects, 12 API modules, a database layer and shared technical utilities |
@@ -78,7 +78,7 @@ the two `.env` values, the admin and disabled-account specs fail ([details](#run
 | **Some behaviour can't be reached through the UI or API** | Disabling an account goes through the database, a discount depends on the browser's position, and a contact message is checked in the local mail inbox | [`DbsUserAccount.ts`](src/dbs/DbsUserAccount.ts), [`BrowserGeolocation.ts`](src/utils/BrowserGeolocation.ts), [`ApisMailInbox.ts`](src/apis/ApisMailInbox.ts) |
 | **Security needs testing too** | API specs try another customer's record, forged invoice prices, deletes without a token and guarded GraphQL fields | [`tests/api/security/`](tests/api/security/) |
 | **Reports in a public repository can leak logins** | Allure masks typed passwords, the two places that type the admin password record no trace, and the HTML report is published only on request | [Report masking](docs/harness-change-requests/report-credential-masking.md) |
-| **A wrong report misleads as much as a wrong test** | The scripts behind the run summary, dashboard, secret check and boundary check have their own tests, run on every pull request | [`scripts/tests`](scripts/tests) |
+| **A wrong report misleads as much as a wrong test** | The scripts behind the run summary, dashboard, secret check, boundary check and README count check have their own tests, run on every pull request | [`scripts/tests`](scripts/tests) |
 | **Code style slips when only a reviewer checks it** | Every pull request runs a mechanical conventions check, a core boundary check, typecheck and lint | [`lint.yml`](.github/workflows/lint.yml) |
 
 ## How it's built
@@ -155,8 +155,8 @@ Run Playwright from the repository root. Specs load their test data from
 repo-root-relative paths (`./resources/testData/...`), so launching from a subfolder with
 `-c` fails with `ENOENT`. npm scripts, CI and the VS Code extension already run from the root.
 
-Run every static check CI runs on a pull request with `npm run check` (conventions, core boundary, script
-tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.
+Run every static check CI runs on a pull request with `npm run check` (conventions, core boundary, README
+counts, script tests, type-check, lint), or one of them on its own, e.g. `npm run check:conventions`.
 
 ## Test documentation
 
@@ -310,7 +310,7 @@ same queue command, run natively on the API image, so mail leaves within seconds
 ## CI
 
 Three workflows run the tests. This repository is the test project, not the product, so
-**commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, script tests, type-check, lint).
+**commits and pull requests here run no Playwright tests**: a pull request runs only the static checks (`.github/workflows/lint.yml`: conventions, core boundary, README counts, script tests, type-check, lint).
 
 | Workflow | Runs | When |
 |---|---|---|
