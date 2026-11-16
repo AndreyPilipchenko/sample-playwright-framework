@@ -195,6 +195,21 @@ same rules apply everywhere:
   admin anyway, delete what they create. On a public instance these records are visible to
   other users.
 
+### 4.4 Tags
+
+Tests are `@smoke` (the critical path, also run on Firefox and WebKit) or `@regression`.
+Four tests are `@local` instead, because they need what only a local stack has: the database to
+disable an account (TC-LOGIN-10, TC-ADM-9, `customer-account-api-6`) or the mail inbox
+(TC-CONT-8). The nightly `regression` and `api` jobs run them with the `@regression` tests; a run
+against a public site leaves them out with `--grep-invert @local` (`hosted.yml`).
+
+The harness's tag vocabulary is closed to `@smoke` and `@regression`, so its conventions check
+prints one warning for each of the four. The warnings stay: the rule offers no reviewed
+exception, and its baseline is for violations to fix later, which these are not. A ruling that
+allows the tag is requested in
+[harness change requests](harness-change-requests/environment-tag.md). Any other tag warning is
+new and needs attention.
+
 ---
 
 ## 5. Risk areas
