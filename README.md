@@ -113,7 +113,7 @@ versions of the shop, and the public sites are tested by hand.
 
 ```mermaid
 flowchart LR
-    pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, script tests, typecheck, lint"]
+    pr["Pull request here"] --> lint["lint.yml<br/>conventions, boundary, README counts, script tests, typecheck, lint"]
     push["Commit to product main"] -->|repository_dispatch| commit["smoke-on-commit.yml<br/>@smoke on chromium"]
     nightly["Nightly schedule or by hand"] --> api["api<br/>per version"]
     nightly --> smoke["smoke<br/>per version and browser"]
@@ -323,7 +323,8 @@ Three workflows run the tests. This repository is the test project, not the prod
 
 Every job writes its results to the run's Summary page, with failures split into newly failing, fixed
 and still failing. The [CI guide](docs/ci-guide.md) covers the manual inputs and filters, the jobs, the shared
-composite actions, secrets and reports. The trigger the product repository needs is in
+composite actions, secrets, reports and the monthly Dependabot updates, which need a nightly on their branch
+before merging. The trigger the product repository needs is in
 [`docs/ci/`](docs/ci/README.md), kept under `docs/` so it never runs here.
 
 ## Using it on another app
