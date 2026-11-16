@@ -25,7 +25,7 @@ import type { MySqlConnectionConfig } from '../utils/MySqlActions';
  * process.env — the gitignored .env, loaded by dotenv in playwright.config.ts.
  */
 interface HarnessTargets {
-  databases?: Record<string, { connectionRef: string; server?: string; port?: number; database?: string; encrypt?: boolean; trustServerCertificate?: boolean }>;
+  databases?: Record<string, { connectionRef: string; server?: string; port?: number; database?: string }>;
   browser?: Record<string, { origins: string[] }>;
   api?: Record<string, { baseUrl: string; credentialRef?: string }>;
 }

@@ -21,12 +21,6 @@
   },
   "overrides": [
     {
-      "files": ["src/utils/UiControls.ts"],
-      "rules": {
-        "playwright/no-wait-for-timeout": "off"
-      }
-    },
-    {
       "files": ["scripts/tests/**"],
       "rules": {
         "typescript/no-floating-promises": "off"
