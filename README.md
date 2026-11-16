@@ -61,9 +61,9 @@ npm run app:up          # start the shop in Docker, freshly seeded
 npm run test:local      # run the suite against it; opens the Allure report after
 ```
 
-Expect red tests: see above. `npm test` runs against the shared public site instead of Docker, but
-the private stack is the better first run, because some specs need its database and mail inbox. Without
-the two `.env` values, the admin and disabled-account specs fail ([details](#running-the-app-locally)).
+Expect red tests: see above. A plain `npm test` targets the same Docker stack; the shared public sites
+are tested only when `TEST_ENV` names them ([details](#running-the-app-locally)). Without
+the two `.env` values, the admin and disabled-account specs fail.
 
 ## What's worth a look
 
@@ -244,7 +244,8 @@ fixes, the findings still red on the newer version, and the results of the four 
 This is how the suite is meant to run, and what CI does. The public instances are too unstable for
 scheduled runs: many people use them at once, and they sometimes break completely. A local copy in
 Docker gives every run a clean, freshly seeded dataset that nobody else touches, and works offline.
-A plain `npm test`, without `TEST_ENV=local`, still targets the public instance.
+A plain `npm test` without `TEST_ENV` targets the `local` stack too; a public site is only ever tested
+when `TEST_ENV` names it.
 
 Requires Docker and free ports `4200`, `8091`, `3306`, `1080`.
 
@@ -272,18 +273,21 @@ targets in `.harness/targets.json`:
 
 | Environment | Application | Build |
 |---|---|---|
-| `local` | Docker on `localhost:4200` | with the deliberate defects (the default for `app:up`, and what CI runs) |
+| `local` | Docker on `localhost:4200` | with the deliberate defects (the default for `app:up` and without `TEST_ENV`) |
 | `local-fixed` | Docker on `localhost:4200` | without them |
-| `hosted-with-bugs` | https://with-bugs.practicesoftwaretesting.com | with the deliberate defects (the default without `TEST_ENV`) |
+| `hosted-with-bugs` | https://with-bugs.practicesoftwaretesting.com | with the deliberate defects |
 | `hosted` | https://practicesoftwaretesting.com | a newer build without them |
 
 `TEST_ENV` selects the environment, and `src/config/targets.ts` resolves every address from it.
 The four environments run the two versions described in [Two versions of the shop](#two-versions-of-the-shop).
 The two local environments share ports, so one runs at a time; `app.mjs up` drops the other version's data
-volumes when it switches, and `app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it:
+volumes when it switches, and `app.mjs test` sets `TEST_ENV` to the running one. Any Playwright invocation honours it; without it a run
+assumes `local`, so set it when the `local-fixed` stack is up. A public site takes the settings `hosted.yml`
+uses, because it is shared:
 
 ```sh
-TEST_ENV=local npx playwright test
+TEST_ENV=local-fixed npx playwright test
+TEST_ENV=hosted npx playwright test --project=api --project=chromium --workers=2 --grep-invert @local
 ```
 
 The local stack also has a database (target `appDb-local`, or `appDb-local-fixed`). Specs that need it read its credentials
