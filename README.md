@@ -241,8 +241,8 @@ fixes, the findings still red on the newer version, and the results of the four 
 
 ## Running the app locally
 
-This is how the suite is meant to run, and what CI does. The public instance is too unstable to
-test against: many people use it at once, and it sometimes breaks completely. A local copy in
+This is how the suite is meant to run, and what CI does. The public instances are too unstable for
+scheduled runs: many people use them at once, and they sometimes break completely. A local copy in
 Docker gives every run a clean, freshly seeded dataset that nobody else touches, and works offline.
 A plain `npm test`, without `TEST_ENV=local`, still targets the public instance.
 
