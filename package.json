@@ -26,9 +26,9 @@
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "@types/node": "24.19.2",
-    "allure": "3.19.1",
-    "allure-js-commons": "3.13.0",
-    "allure-playwright": "3.13.0",
+    "allure": "3.33.0",
+    "allure-js-commons": "3.14.0",
+    "allure-playwright": "3.14.0",
     "dotenv": "18.0.10",
     "eslint-plugin-playwright": "2.12.2",
     "mysql2": "3.24.6",
