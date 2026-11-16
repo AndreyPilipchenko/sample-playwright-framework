@@ -1,5 +1,6 @@
-import { test, type APIRequestContext, type APIResponse, type TestInfo } from '@playwright/test';
+import { test, type APIRequestContext, type APIResponse } from '@playwright/test';
 import { REDACTED_HEADERS, REDACTED_KEYS } from './RedactedKeys';
+import { attachJson as attachJsonToStep, clip, currentTestInfo, safeStringify } from './ReportAttachments';
 
 type FetchOptions = NonNullable<Parameters<APIRequestContext['fetch']>[1]>;
 
@@ -109,7 +110,7 @@ export class ApiActions {
   private async dispatch(method: string, url: string, options?: FetchOptions): Promise<APIResponse> {
     const run = async (): Promise<APIResponse> => {
       const authedOptions = await this.withBearerToken(options);
-      const inTest = this.currentTestInfo() !== undefined;
+      const inTest = currentTestInfo() !== undefined;
       if (!inTest) return this.execute(method, url, authedOptions, false);
       return test.step(`${method} ${url}`, () => this.execute(method, url, authedOptions, true));
     };
@@ -218,13 +219,9 @@ export class ApiActions {
     }
   }
 
-  /** Attaches a payload as pretty-printed JSON to the current step (text/plain when truncated). */
+  /** Attaches a payload to the current step, clipped at this facade's maxBodyLength. */
   private async attachJson(name: string, payload: unknown): Promise<void> {
-    const { text, truncated } = this.clip(this.safeStringify(payload, 2));
-    await test.info().attach(name, {
-      body: text,
-      contentType: truncated ? 'text/plain' : 'application/json',
-    });
+    await attachJsonToStep(name, payload, this.maxBodyLength);
   }
 
   /**
@@ -277,33 +274,6 @@ export class ApiActions {
     );
   }
 
-  /** JSON.stringify that never throws — handles circular references, BigInt, and Buffers. */
-  private safeStringify(value: unknown, indent = 0): string {
-    const seen = new WeakSet<object>();
-    try {
-      return JSON.stringify(value, (_key, val) => {
-        if (typeof val === 'bigint') return val.toString();
-        if (Buffer.isBuffer(val)) return `<Buffer ${val.length} bytes>`;
-        if (typeof val === 'object' && val !== null) {
-          if (seen.has(val)) return '<circular>';
-          seen.add(val);
-        }
-        return val;
-      }, indent) ?? String(value);
-    } catch (err) {
-      return `<unserializable: ${err instanceof Error ? err.message : String(err)}>`;
-    }
-  }
-
-  /** Caps a string at maxBodyLength, appending a note with how much was cut. */
-  private clip(text: string): { text: string; truncated: boolean } {
-    if (text.length <= this.maxBodyLength) return { text, truncated: false };
-    return {
-      text: `${text.slice(0, this.maxBodyLength)}\n…[truncated ${text.length - this.maxBodyLength} of ${text.length} chars]`,
-      truncated: true,
-    };
-  }
-
   /** Resolves the console-echo flag: constructor option, then the API_CONSOLE_LOGS env var. */
   private shouldConsoleLog(): boolean {
     return this.options.consoleLogs ?? process.env.API_CONSOLE_LOGS === 'true';
@@ -313,18 +283,9 @@ export class ApiActions {
   private consoleLog(entry: ApiRequestLog): void {
     const outcome = entry.status !== null ? `${entry.status} ${entry.statusText ?? ''}`.trim() : `FAILED (${entry.error?.message})`;
     console.log(`\n[API] ${entry.method} ${entry.url} → ${outcome} (${entry.durationMs}ms)`);
-    console.log('→ Headers:', this.safeStringify(entry.requestHeaders));
-    if (entry.requestBody !== undefined) console.log('→ Body:', this.clip(this.safeStringify(entry.requestBody)).text);
-    console.log('← Headers:', this.safeStringify(entry.responseHeaders));
-    if (entry.responseBody !== undefined) console.log('← Body:', this.clip(this.safeStringify(entry.responseBody)).text.slice(0, 500));
-  }
-
-  /** Returns the active TestInfo, or undefined when not inside a running test (test.info() throws there). */
-  private currentTestInfo(): TestInfo | undefined {
-    try {
-      return test.info();
-    } catch {
-      return undefined;
-    }
+    console.log('→ Headers:', safeStringify(entry.requestHeaders));
+    if (entry.requestBody !== undefined) console.log('→ Body:', clip(safeStringify(entry.requestBody), this.maxBodyLength).text);
+    console.log('← Headers:', safeStringify(entry.responseHeaders));
+    if (entry.responseBody !== undefined) console.log('← Body:', clip(safeStringify(entry.responseBody), this.maxBodyLength).text.slice(0, 500));
   }
 }

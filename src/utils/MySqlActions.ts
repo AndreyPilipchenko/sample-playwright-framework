@@ -1,6 +1,7 @@
-import { test, type TestInfo } from '@playwright/test';
+import { test } from '@playwright/test';
 import { createPool, type Pool, type PoolOptions, type QueryOptions, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
 import { REDACTED_KEYS } from './RedactedKeys';
+import { attachJson as attachJsonToStep, clip, currentTestInfo, safeStringify } from './ReportAttachments';
 
 /** One bindable value, as the driver types it (string, number, Date, Buffer, null, ...). */
 type QueryValue = QueryOptions['values'];
@@ -141,7 +142,7 @@ export class MySqlActions {
 
   /** Routes an operation through a named `test.step` when inside a test; runs it plainly otherwise. */
   private async dispatch<R>(title: string, fn: (attach: boolean) => Promise<R>): Promise<R> {
-    const inTest = this.currentTestInfo() !== undefined;
+    const inTest = currentTestInfo() !== undefined;
     if (!inTest) return fn(false);
     return test.step(title, () => fn(true));
   }
@@ -298,13 +299,9 @@ export class MySqlActions {
     }
   }
 
-  /** Attaches a payload as pretty-printed JSON to the current step (text/plain when truncated). */
+  /** Attaches a payload to the current step, clipped at this facade's maxBodyLength. */
   private async attachJson(name: string, payload: unknown): Promise<void> {
-    const { text, truncated } = this.clip(this.safeStringify(payload, 2));
-    await test.info().attach(name, {
-      body: text,
-      contentType: truncated ? 'text/plain' : 'application/json',
-    });
+    await attachJsonToStep(name, payload, this.maxBodyLength);
   }
 
   /** Masks credential-like param names with `***`. */
@@ -334,38 +331,11 @@ export class MySqlActions {
     );
   }
 
-  /** JSON.stringify that never throws — handles circular references, BigInt, and Buffers. */
-  private safeStringify(value: unknown, indent = 0): string {
-    const seen = new WeakSet<object>();
-    try {
-      return JSON.stringify(value, (_key, val) => {
-        if (typeof val === 'bigint') return val.toString();
-        if (Buffer.isBuffer(val)) return `<Buffer ${val.length} bytes>`;
-        if (typeof val === 'object' && val !== null) {
-          if (seen.has(val)) return '<circular>';
-          seen.add(val);
-        }
-        return val;
-      }, indent) ?? String(value);
-    } catch (err) {
-      return `<unserializable: ${err instanceof Error ? err.message : String(err)}>`;
-    }
-  }
-
-  /** Caps a string at maxBodyLength, appending a note with how much was cut. */
-  private clip(text: string): { text: string; truncated: boolean } {
-    if (text.length <= this.maxBodyLength) return { text, truncated: false };
-    return {
-      text: `${text.slice(0, this.maxBodyLength)}\n…[truncated ${text.length - this.maxBodyLength} of ${text.length} chars]`,
-      truncated: true,
-    };
-  }
-
   /** Resolves the console-echo flag: constructor option, then DB_CONSOLE_LOGS env var, then project metadata. */
   private shouldConsoleLog(): boolean {
     if (this.options.consoleLogs !== undefined) return this.options.consoleLogs;
     if (process.env.DB_CONSOLE_LOGS) return process.env.DB_CONSOLE_LOGS === 'true';
-    return Boolean(this.currentTestInfo()?.project.metadata?.dbConsoleLogs);
+    return Boolean(currentTestInfo()?.project.metadata?.dbConsoleLogs);
   }
 
   /** Prints a compact, redacted summary of the operation to the console. */
@@ -375,9 +345,9 @@ export class MySqlActions {
       : entry.operation === 'QUERY' ? `${entry.rowCount} rows` : 'OK';
     const subject = entry.operation === 'QUERY' ? this.stepTitle(entry.sql ?? '') : `${entry.server}/${entry.database}`;
     console.log(`\n[DB] ${entry.operation} ${subject} → ${outcome} (${entry.durationMs}ms) [${entry.db}]`);
-    if (entry.params !== undefined) console.log('→ Params:', this.safeStringify(entry.params));
+    if (entry.params !== undefined) console.log('→ Params:', safeStringify(entry.params));
     if (entry.rowsAffected !== undefined) console.log('← RowsAffected:', entry.rowsAffected);
-    if (entry.rows !== undefined) console.log('← Rows:', this.clip(this.safeStringify(entry.rows)).text.slice(0, 500));
+    if (entry.rows !== undefined) console.log('← Rows:', clip(safeStringify(entry.rows), this.maxBodyLength).text.slice(0, 500));
   }
 
   /** Common fields shared by every log entry. */
@@ -416,14 +386,5 @@ export class MySqlActions {
   private stepTitle(queryText: string): string {
     const collapsed = queryText.replace(/\s+/g, ' ').trim();
     return collapsed.length > 80 ? `${collapsed.slice(0, 80)}…` : collapsed;
-  }
-
-  /** Returns the active TestInfo, or undefined when not inside a running test (test.info() throws there). */
-  private currentTestInfo(): TestInfo | undefined {
-    try {
-      return test.info();
-    } catch {
-      return undefined;
-    }
   }
 }
