@@ -59,7 +59,7 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* No baseURL — every page navigates to an absolute URL from src/config (e.g. LoginPage's `${applications.app.url}/#/auth/login`). */
+    /* No baseURL — every page navigates to an absolute URL from src/config (`applications.app.routes`). */
     ignoreHTTPSErrors: true,
     /* The app tags its controls with `data-test`, so page classes locate them with page.getByTestId('nav-home'). */
     testIdAttribute: 'data-test',
@@ -72,7 +72,6 @@ export default defineConfig({
      * and a policy that records only on a retry would leave their failures without one. */
     trace: process.env.CI ? 'retain-on-first-failure' : 'retain-on-failure',
     headless: true,
-    // viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
