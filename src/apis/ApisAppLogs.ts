@@ -6,7 +6,7 @@ import { expectToBeOneOf } from '../utils/Expects';
 
 /** The application log file as a web visitor sees it (`GET /logs/laravel.log`), with no sign-in. */
 export class ApisAppLogs {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly laravelLog_serviceName = `${applications.app.apiUrl}/logs/laravel.log`;
 

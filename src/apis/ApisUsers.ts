@@ -6,7 +6,7 @@ import { expectToBe, expectToBeOneOf, expectToEqual } from '../utils/Expects';
 
 /** User records read by id (`GET /users/{id}`), as the signed-in customer who owns the token. */
 export class ApisUsers {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly users_serviceName = `${applications.app.apiUrl}/users`;
 

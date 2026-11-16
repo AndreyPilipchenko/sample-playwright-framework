@@ -20,7 +20,7 @@ export class ApisMailInbox {
    */
   static readonly deliveryBudgetMs = byBuild({ fixed: QUEUED_MAIL_MS, default: EXPECT_DEFAULT_MS });
 
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly messages_serviceName = `${applications.mailInbox.apiUrl}/messages`;
 

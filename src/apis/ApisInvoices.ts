@@ -71,7 +71,7 @@ export interface ForgedInvoiceOutcome {
 }
 
 export class ApisInvoices {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly invoices_serviceName = `${applications.app.apiUrl}/invoices`;
   /** The fixed build only: an order is placed from a server-side cart (docs/app-versions.md, B7). */

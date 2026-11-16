@@ -18,7 +18,7 @@ export interface GraphqlResult {
  * is valid on both, so the same query reaches the guard on every build.
  */
 export class ApisGraphql {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly graphql_serviceName = `${applications.app.apiUrl}/graphql`;
 

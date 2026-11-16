@@ -32,7 +32,7 @@ export interface UserSeed {
 }
 
 export class ApisUserAccount {
-  readonly apiActions: ApiActions;
+  private readonly apiActions: ApiActions;
 
   readonly login_serviceName = `${applications.app.apiUrl}/users/login`;
   readonly register_serviceName = `${applications.app.apiUrl}/users/register`;
